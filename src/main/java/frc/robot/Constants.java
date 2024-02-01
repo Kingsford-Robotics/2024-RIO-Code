@@ -62,7 +62,7 @@ public final class Constants {
         public static final double closedLoopRamp = 0.0;
 
         /* Angle Motor PID Values */
-        public static final double angleKP = chosenModule.angleKP;
+        public static final double angleKP = chosenModule.angleKP; //TODO: Check value; it seems like it may be way off.
         public static final double angleKI = chosenModule.angleKI;
         public static final double angleKD = chosenModule.angleKD;
 
@@ -146,22 +146,20 @@ public final class Constants {
     }
 
     public static final class ElevatorConstants { //TODO: The below constants are used in the example elevator, and must be tuned to specific robot
-        public static final double elevatorMaxTravel = 60.0;
-        public static final double elevatorTravelEncoderTick = 4096.0;
-        public static final double elevatorCruiseVelocity = 1000.0;
-        public static final double safeZone = 2.0;
-        public static final int elevatorMotorID = 9;
+        public static final int elevatorMotorID = 9;  
     }
 
     public static final class IntakeConstants { //TODO: The below constants are used in the example intake, and must be tuned to specific robot
-        public static final double intakeSpeed = 0.5;
+        public static final int intakeMotorID = 10;
     }
 
     public static final class ShooterConstants { //TODO: The below constants are used in the example shooter, and must be tuned to specific robot
-        public static final double shooterSpeed = 0.5;
+        public static final int shooterLeftMotorID = 11;
+        public static final int shooterRightMotorID = 12;
     }
 
     public static final class PivotConstants { //TODO: The below constants are used in the example pivot, and must be tuned to specific robot
-        public static final double pivotSpeed = 0.5;
+        public static final int pivotLeftMotorID = 13;
+        public static final int pivotRightMotorID = 14;
     }
 }

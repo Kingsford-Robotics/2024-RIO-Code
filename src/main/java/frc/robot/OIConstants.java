@@ -25,8 +25,8 @@ public class OIConstants {
     public static final Supplier<Double> translationSupplier = () -> driveJoystickRight.getRawAxis(Joystick.kDefaultYChannel);
     public static final Supplier<Double> strafeSupplier = () -> driveJoystickRight.getRawAxis(Joystick.kDefaultXChannel);
     public static final Supplier<Double> rotationSupplier = () -> driveJoystickLeft.getRawAxis(Joystick.kDefaultXChannel);
-    public static final BooleanSupplier slowSpeed = () -> driveJoystickRight.getRawButton(LogitechJoystick.thumbButton);
-    public static final BooleanSupplier robotCentric = () -> driveJoystickRight.getRawButton(LogitechJoystick.trigger);
+    public static final BooleanSupplier slowSpeed = () -> driveJoystickRight.getRawButton(ThrustmasterJoystick.thumbButton);
+    public static final BooleanSupplier robotCentric = () -> driveJoystickRight.getRawButton(ThrustmasterJoystick.trigger);
 
     public static final double highTranslationSpeed = 1.0;
     public static final double lowTranslationSpeed = 0.15;
@@ -38,16 +38,16 @@ public class OIConstants {
     public static final double turnDeadBand = 0.1;
 
     //Drive Joysticks Buttons
-    public static final JoystickButton resetGyro = new JoystickButton(driveJoystickRight, LogitechJoystick.button3);    //Resets the gyro to 0 degrees.
-    public static final JoystickButton calibrateArm = new JoystickButton(driveJoystickRight, LogitechJoystick.button4); //Calibrates the arm encoder from CANCoder.
-    public static final JoystickButton alignPlace = new JoystickButton(driveJoystickRight, LogitechJoystick.button5);  //Aligns the robot to the target and places the cone or cube.
-    public static final JoystickButton toggleFront = new JoystickButton(driveJoystickRight, LogitechJoystick.button6);  //Toggles front from turntable to arm side of robot.
+    public static final JoystickButton resetGyro = new JoystickButton(driveJoystickRight, ThrustmasterJoystick.button3);    //Resets the gyro to 0 degrees.
+    public static final JoystickButton calibrateArm = new JoystickButton(driveJoystickRight, ThrustmasterJoystick.button4); //Calibrates the arm encoder from CANCoder.
+    public static final JoystickButton alignPlace = new JoystickButton(driveJoystickRight, ThrustmasterJoystick.button5);  //Aligns the robot to the target and places the cone or cube.
+    public static final JoystickButton toggleFront = new JoystickButton(driveJoystickRight, ThrustmasterJoystick.button6);  //Toggles front from turntable to arm side of robot.
 
     //Sets the center of the rotation to the selected wheel while held. Returns to center of robot when released.
-    private static final JoystickButton centerOfRotationFrontLeft = new JoystickButton(driveJoystickLeft, LogitechJoystick.button5);
-    private static final JoystickButton centerOfRotationFrontRight = new JoystickButton(driveJoystickLeft, LogitechJoystick.button6); 
-    private static final JoystickButton centerOfRotationBackLeft = new JoystickButton(driveJoystickLeft, LogitechJoystick.button3);
-    private static final JoystickButton centerOfRotationBackRight = new JoystickButton(driveJoystickLeft, LogitechJoystick.button4);
+    private static final JoystickButton centerOfRotationFrontLeft = new JoystickButton(driveJoystickLeft, ThrustmasterJoystick.button5);
+    private static final JoystickButton centerOfRotationFrontRight = new JoystickButton(driveJoystickLeft, ThrustmasterJoystick.button6); 
+    private static final JoystickButton centerOfRotationBackLeft = new JoystickButton(driveJoystickLeft, ThrustmasterJoystick.button3);
+    private static final JoystickButton centerOfRotationBackRight = new JoystickButton(driveJoystickLeft, ThrustmasterJoystick.button4);
 
     public static final IntSupplier centerOfRotation = () -> {
         if (OIConstants.centerOfRotationFrontLeft.getAsBoolean()) {

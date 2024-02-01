@@ -5,7 +5,7 @@
 package frc.robot;
 
 /** Add your docs here. */
-public class LogitechJoystick {
+public class ThrustmasterJoystick {
     public static final int button3 = 3;
     public static final int button4 = 4;
     public static final int button5 = 5;
