@@ -37,6 +37,9 @@ public class OIConstants {
     public static final double translationDeadBand = 0.1;
     public static final double turnDeadBand = 0.1;
 
+    public static final double translateRampTime = 0.5;
+    public static final double turnRampTime = 0.5;
+
     //Drive Joysticks Buttons
     public static final JoystickButton resetGyro = new JoystickButton(driveJoystickRight, ThrustmasterJoystick.button3);    //Resets the gyro to 0 degrees.
     public static final JoystickButton calibrateArm = new JoystickButton(driveJoystickRight, ThrustmasterJoystick.button4); //Calibrates the arm encoder from CANCoder.
