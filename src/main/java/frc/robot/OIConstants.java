@@ -18,15 +18,15 @@ import edu.wpi.first.wpilibj2.command.button.POVButton;
 public class OIConstants {
 
     /*Drive Joysticks Setup*/
-    public static final Joystick driveJoystickLeft = new Joystick(0);
-    public static final Joystick driveJoystickRight = new Joystick(1);
+    public static final IJoystick driveJoystickLeft = new Thrustmaster(0);
+    public static final IJoystick driveJoystickRight = new Thrustmaster(1);
 
     //Drive Joysticks Suppliers
-    public static final Supplier<Double> translationSupplier = () -> driveJoystickRight.getRawAxis(Joystick.kDefaultYChannel);
-    public static final Supplier<Double> strafeSupplier = () -> driveJoystickRight.getRawAxis(Joystick.kDefaultXChannel);
-    public static final Supplier<Double> rotationSupplier = () -> driveJoystickLeft.getRawAxis(Joystick.kDefaultXChannel);
-    public static final BooleanSupplier slowSpeed = () -> driveJoystickRight.getRawButton(ThrustmasterJoystick.thumbButton);
-    public static final BooleanSupplier robotCentric = () -> driveJoystickRight.getRawButton(ThrustmasterJoystick.trigger);
+    public static final Supplier<Double> translationSupplier = () -> driveJoystickRight.getYAxis();
+    public static final Supplier<Double> strafeSupplier = () -> driveJoystickRight.getXAxis();
+    public static final Supplier<Double> rotationSupplier = () -> driveJoystickLeft.getXAxis();
+    public static final BooleanSupplier slowSpeed = () -> driveJoystickLeft.getThumbButton();
+    public static final BooleanSupplier robotCentric = () -> driveJoystickRight.getTrigger();
 
     public static final double highTranslationSpeed = 1.0;
     public static final double lowTranslationSpeed = 0.15;

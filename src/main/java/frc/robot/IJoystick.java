@@ -1,3 +1,8 @@
+package frc.robot;
+
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.POVButton;
+
 public interface IJoystick{
     public double getXAxis();
     public double getYAxis();
@@ -5,27 +10,35 @@ public interface IJoystick{
     public double getThrottle();
     
     public boolean getTrigger();
-    public boolean getThumbButton();    //Not included on all joysticks.
 
-    public boolean getTopLeftButton();
-    public boolean getTopRightButton();
-    public boolean getBottomLeftButton();
-    public boolean getBottomRightButton();
+    /**
+     * Returns the state of the thumb button. Not all joysticks have a thumb button and will return false.
+     */
+    public JoystickButton getThumbButton();    //Not included on all joysticks.
+    public JoystickButton getTopLeftButton();
+    public JoystickButton getTopRightButton();
+    public JoystickButton getBottomLeftButton();
+    public JoystickButton getBottomRightButton();
 
-    public boolean getButton1();
-    public boolean getButton2();
-    public boolean getButton3();
-    public boolean getButton4();
-    public boolean getButton5();
-    public boolean getButton6();
-    public boolean getButton7();
-    public boolean getButton8();
-    public boolean getButton9();
-    public boolean getButton10();
-    public boolean getButton11();
-    public boolean getButton12();
+    public JoystickButton getButton1();
+    public JoystickButton getButton2();
+    public JoystickButton getButton3();
+    public JoystickButton getButton4();
+    public JoystickButton getButton5();
+    public JoystickButton getButton6();
+    public JoystickButton getButton7();
+    public JoystickButton getButton8();
+    public JoystickButton getButton9();
+    public JoystickButton getButton10();
+    public JoystickButton getButton11();
+    public JoystickButton getButton12();
 
-    public POVState getPOV();
+    public POVButton getUpPovButton();
+    public POVButton getDownPovButton();
+    public POVButton getLeftPovButton();
+    public POVButton getRightPovButton();
+
+    public POVState getPovState();
 
     public static enum POVState
     {
