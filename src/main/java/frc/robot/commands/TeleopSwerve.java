@@ -1,7 +1,7 @@
 package frc.robot.commands;
 
-import frc.robot.Constants;
-import frc.robot.OIConstants;
+import frc.robot.Constants.Constants;
+import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.Swerve;
 
 import java.util.function.BooleanSupplier;
@@ -19,11 +19,12 @@ public class TeleopSwerve extends Command {
     private DoubleSupplier strafeSup;
     private DoubleSupplier rotationSup;
     private BooleanSupplier robotCentricSup;
+    private BooleanSupplier slowModeSup;
 
     private SlewRateLimiter translationLimiter;
     private SlewRateLimiter rotationLimiter;
 
-    public TeleopSwerve(Swerve s_Swerve, DoubleSupplier translationSup, DoubleSupplier strafeSup, DoubleSupplier rotationSup, BooleanSupplier robotCentricSup) {
+    public TeleopSwerve(Swerve s_Swerve, DoubleSupplier translationSup, DoubleSupplier strafeSup, DoubleSupplier rotationSup, BooleanSupplier robotCentricSup, BooleanSupplier slowModeSup) {
         this.s_Swerve = s_Swerve;
         addRequirements(s_Swerve);
 
@@ -31,19 +32,26 @@ public class TeleopSwerve extends Command {
         this.strafeSup = strafeSup;
         this.rotationSup = rotationSup;
         this.robotCentricSup = robotCentricSup;
+        this.slowModeSup = slowModeSup;
 
-        //Instantiate slew rate limiter using translation and turn ramp times.
+        //Instantiates slew rate limiters using translation and turn ramp times.
         translationLimiter = new SlewRateLimiter(1/OIConstants.translateRampTime);
         rotationLimiter = new SlewRateLimiter(1/OIConstants.turnRampTime);
     }
 
     @Override
     public void execute() {
-        /* Get Values, Deadband*/
+        /* Slew rate limits the inputs and squares them to make the controls more sensitive at lower speeds. */
+        double translationVal = translationLimiter.calculate(Math.copySign(Math.pow(MathUtil.applyDeadband(translationSup.getAsDouble(), Constants.stickDeadband) ,2), MathUtil.applyDeadband(translationSup.getAsDouble(), Constants.stickDeadband)));
+        double strafeVal = translationLimiter.calculate(Math.copySign(Math.pow(MathUtil.applyDeadband(strafeSup.getAsDouble(), Constants.stickDeadband) ,2), MathUtil.applyDeadband(strafeSup.getAsDouble(), Constants.stickDeadband)));
+        double rotationVal = rotationLimiter.calculate(Math.copySign(Math.pow(MathUtil.applyDeadband(rotationSup.getAsDouble(), Constants.stickDeadband) ,2), MathUtil.applyDeadband(rotationSup.getAsDouble(), Constants.stickDeadband)));
 
-        double translationVal = MathUtil.applyDeadband(translationLimiter.calculate(translationSup.getAsDouble()), Constants.stickDeadband);
-        double strafeVal = MathUtil.applyDeadband(translationLimiter.calculate(strafeSup.getAsDouble()), Constants.stickDeadband);
-        double rotationVal = MathUtil.applyDeadband(rotationLimiter.calculate(rotationSup.getAsDouble()), Constants.stickDeadband);
+        /* Slow mode */
+        if(slowModeSup.getAsBoolean()) {
+            translationVal *= Constants.Swerve.slowModeMultiplier;
+            strafeVal *= Constants.Swerve.slowModeMultiplier;
+            rotationVal *= Constants.Swerve.slowModeMultiplier;
+        }
 
         /* Drive */
         s_Swerve.drive(

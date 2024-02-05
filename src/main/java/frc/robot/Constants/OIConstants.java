@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot;
+package frc.robot.Constants;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -13,38 +13,45 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
+import frc.robot.Controllers.IJoystick;
+import frc.robot.Controllers.Thrustmaster;
 
 /** Add your docs here. */
 public class OIConstants {
+    //Deadband for Joystick
+    public static final double stickDeadband = 0.05;
 
-    /*Drive Joysticks Setup*/
-    public static final IJoystick driveJoystickLeft = new Thrustmaster(0);
-    public static final IJoystick driveJoystickRight = new Thrustmaster(1);
-
-    //Drive Joysticks Suppliers
-    public static final Supplier<Double> translationSupplier = () -> driveJoystickRight.getYAxis();
-    public static final Supplier<Double> strafeSupplier = () -> driveJoystickRight.getXAxis();
-    public static final Supplier<Double> rotationSupplier = () -> driveJoystickLeft.getXAxis();
-    public static final BooleanSupplier slowSpeed = () -> driveJoystickLeft.getThumbButton();
-    public static final BooleanSupplier robotCentric = () -> driveJoystickRight.getTrigger();
-
+    //Drive Speeds
     public static final double highTranslationSpeed = 1.0;
     public static final double lowTranslationSpeed = 0.15;
 
     public static final double highRotationSpeed = 1.0;
     public static final double lowRotationSpeed = 0.15;
-
-    public static final double translationDeadBand = 0.1;
-    public static final double turnDeadBand = 0.1;
-
+    
     public static final double translateRampTime = 0.5;
     public static final double turnRampTime = 0.5;
 
+
+    /*Drive Joysticks Setup*/
+    public static final IJoystick driveJoystickLeft = new Thrustmaster(0);
+    public static final IJoystick driveJoystickRight = new Thrustmaster(1);
+
+    /*Controller*/
+    public static final XboxController coDriverController = new XboxController(2);
+
+    //Drive Joysticks Suppliers
+    public static final Supplier<Double> translationSupplier = () -> 0.0;
+    public static final Supplier<Double> strafeSupplier = () -> 0.0;
+    public static final Supplier<Double> rotationSupplier = () -> 0.0;
+    public static final BooleanSupplier slowSpeed = () -> false;
+    public static final BooleanSupplier robotCentric = () -> false;
+
+
     //Drive Joysticks Buttons
-    public static final JoystickButton resetGyro = new JoystickButton(driveJoystickRight, ThrustmasterJoystick.button3);    //Resets the gyro to 0 degrees.
-    public static final JoystickButton calibrateArm = new JoystickButton(driveJoystickRight, ThrustmasterJoystick.button4); //Calibrates the arm encoder from CANCoder.
-    public static final JoystickButton alignPlace = new JoystickButton(driveJoystickRight, ThrustmasterJoystick.button5);  //Aligns the robot to the target and places the cone or cube.
-    public static final JoystickButton toggleFront = new JoystickButton(driveJoystickRight, ThrustmasterJoystick.button6);  //Toggles front from turntable to arm side of robot.
+    public static final JoystickButton resetGyro = new JoystickButton(driveJoystickRight, Thrustmaster.button3);    //Resets the gyro to 0 degrees.
+    public static final JoystickButton calibrateArm = new JoystickButton(driveJoystickRight, Thrustmaster.button4); //Calibrates the arm encoder from CANCoder.
+    public static final JoystickButton alignPlace = new JoystickButton(driveJoystickRight, Thrustmaster.button5);  //Aligns the robot to the target and places the cone or cube.
+    public static final JoystickButton toggleFront = new JoystickButton(driveJoystickRight, Thrustmaster.button6);  //Toggles front from turntable to arm side of robot.
 
     //Sets the center of the rotation to the selected wheel while held. Returns to center of robot when released.
     private static final JoystickButton centerOfRotationFrontLeft = new JoystickButton(driveJoystickLeft, ThrustmasterJoystick.button5);
@@ -65,9 +72,6 @@ public class OIConstants {
             return -1;
         }
     };
-
-    /*Operator Joystick Setup*/
-    public static final XboxController coDriverController = new XboxController(2);
 
     //Handheld Controller
     public static final JoystickButton openClaw = new JoystickButton(coDriverController, XboxController.Button.kLeftBumper.value);
