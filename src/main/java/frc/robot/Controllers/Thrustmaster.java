@@ -9,121 +9,94 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 
 /** Add your docs here. */
-public class Thrustmaster implements IJoystick {
-   
+public class Thrustmaster{
     private Joystick joystick;
 
     public Thrustmaster(int port) {
         joystick = new Joystick(port);
     }
 
-    @Override
     public double getXAxis() {
         return joystick.getRawAxis(Joystick.kDefaultXChannel);
     }
 
-    @Override
     public double getYAxis() {
         return joystick.getRawAxis(Joystick.kDefaultYChannel);
     }
-
-    @Override
+    
     public double getTwistAxis() {
         return joystick.getRawAxis(Joystick.kDefaultZChannel);
     }
 
-    @Override
     public double getThrottle() {
         return joystick.getRawAxis(Joystick.kDefaultThrottleChannel);
     }
-
-    @Override
-    public boolean getTrigger() {
-        return joystick.getRawButton(1);
+ 
+    public JoystickButton getTrigger() {
+        return new JoystickButton(joystick, 0);
     }
 
-    @Override
-    public JoystickButton getThumbButton() {
-        return null;
-    }
-
-    @Override
     public JoystickButton getTopLeftButton() {
         return new JoystickButton(joystick, 0);
     }
 
-    @Override
     public JoystickButton getTopRightButton() {
         return new JoystickButton(joystick, 1);
     }
 
-    @Override
     public JoystickButton getBottomLeftButton() {
         return new JoystickButton(joystick, 2);
     }
 
-    @Override
     public JoystickButton getBottomRightButton() {
         return new JoystickButton(joystick, 3);
     }
 
-    @Override
-    public JoystickButton getButton1() {
+    public JoystickButton getButtonLeftTop1() {
         return new JoystickButton(joystick, 4);
     }
 
-    @Override
-    public JoystickButton getButton2() {
+    public JoystickButton getButtonLeftBottom1() {
         return new JoystickButton(joystick, 5);
     }
 
-    @Override
-    public JoystickButton getButton3() {
+    public JoystickButton getButtonLeftTop2() {
         return new JoystickButton(joystick, 6);
     }
 
-    @Override
-    public JoystickButton getButton4() {
+    public JoystickButton getButtonLeftBottom2() {
         return new JoystickButton(joystick, 7);
     }
 
-    @Override
-    public JoystickButton getButton5() {
+    public JoystickButton getButtonLeftTop3() {
         return new JoystickButton(joystick, 8);
     }
 
-    @Override
-    public JoystickButton getButton6() {
+    public JoystickButton getButtonLeftBottom3() {
         return new JoystickButton(joystick, 9);
     }
 
-    @Override
-    public JoystickButton getButton7() {
+    public JoystickButton getButtonRightTop1() {
         return new JoystickButton(joystick, 10);
     }
 
-    @Override
-    public JoystickButton getButton8() {
+    public JoystickButton getButtonRightBottom1() {
         return new JoystickButton(joystick, 11);
     }
-    
-    @Override
-    public JoystickButton getButton9() {
+
+    public JoystickButton getButtonRightTop2() {
         return new JoystickButton(joystick, 12);
     }
 
-    @Override
-    public JoystickButton getButton10() {
+    public JoystickButton getButtonRightBottom2() {
         return new JoystickButton(joystick, 13);
     }
 
-    @Override
-    public JoystickButton getButton11() {
+    public JoystickButton getButtonRightTop3() {
         return new JoystickButton(joystick, 14);
     }
 
-    @Override
-    public JoystickButton getButton12() {
+    public JoystickButton getButtonRightBottom3() {
         return new JoystickButton(joystick, 15);
     }
 
@@ -141,22 +114,5 @@ public class Thrustmaster implements IJoystick {
 
     public POVButton getLeftPovButton() {
         return new POVButton(joystick, 270);
-    }
-
-    @Override
-    public POVState getPovState() {
-        int pov = joystick.getPOV();
-        switch(pov) {
-            case 0:
-                return POVState.UP;
-            case 90:
-                return POVState.RIGHT;
-            case 180:
-                return POVState.DOWN;
-            case 270:
-                return POVState.LEFT;
-            default:
-                return POVState.CENTER;
-        }
     }
 }

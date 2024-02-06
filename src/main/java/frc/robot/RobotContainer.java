@@ -1,12 +1,9 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-
+import frc.robot.Constants.OIConstants;
 import frc.robot.autos.*;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
@@ -19,13 +16,26 @@ import frc.robot.subsystems.*;
  */
 public class RobotContainer {
     /* Subsystems */
+    private final Elevator s_Elevator = new Elevator(0.0);
+    private final Intake s_Intake = new Intake();
+    private final Jetson s_Jetson = new Jetson();
+    private final LedDriver s_LedDriver = new LedDriver();
+    private final Limelight s_Limelight = new Limelight();
+    private final Pivot s_Pivot = new Pivot();
+    private final Shooter s_Shooter = new Shooter();
     private final Swerve s_Swerve = new Swerve();
-
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
         s_Swerve.setDefaultCommand(
-            new InstantCommand() //Change to TeleopSwerve when OI constants fixed.
+            new TeleopSwerve(
+                s_Swerve, 
+                () -> -OIConstants.translationSupplier.get(),
+                () -> -OIConstants.strafeSupplier.get(),
+                () -> -OIConstants.rotationSupplier.get(),
+                () -> OIConstants.robotCentric.getAsBoolean(),
+                () -> OIConstants.slowSpeed.getAsBoolean()
+            )
         );
 
         // Configure the button bindings

@@ -42,15 +42,21 @@ public class TeleopSwerve extends Command {
     @Override
     public void execute() {
         /* Slew rate limits the inputs and squares them to make the controls more sensitive at lower speeds. */
-        double translationVal = translationLimiter.calculate(Math.copySign(Math.pow(MathUtil.applyDeadband(translationSup.getAsDouble(), Constants.stickDeadband) ,2), MathUtil.applyDeadband(translationSup.getAsDouble(), Constants.stickDeadband)));
-        double strafeVal = translationLimiter.calculate(Math.copySign(Math.pow(MathUtil.applyDeadband(strafeSup.getAsDouble(), Constants.stickDeadband) ,2), MathUtil.applyDeadband(strafeSup.getAsDouble(), Constants.stickDeadband)));
-        double rotationVal = rotationLimiter.calculate(Math.copySign(Math.pow(MathUtil.applyDeadband(rotationSup.getAsDouble(), Constants.stickDeadband) ,2), MathUtil.applyDeadband(rotationSup.getAsDouble(), Constants.stickDeadband)));
+        double translationVal = translationLimiter.calculate(Math.copySign(Math.pow(MathUtil.applyDeadband(translationSup.getAsDouble(), OIConstants.stickDeadband) ,2), MathUtil.applyDeadband(translationSup.getAsDouble(), OIConstants.stickDeadband)));
+        double strafeVal = translationLimiter.calculate(Math.copySign(Math.pow(MathUtil.applyDeadband(strafeSup.getAsDouble(), OIConstants.stickDeadband) ,2), MathUtil.applyDeadband(strafeSup.getAsDouble(), OIConstants.stickDeadband)));
+        double rotationVal = rotationLimiter.calculate(Math.copySign(Math.pow(MathUtil.applyDeadband(rotationSup.getAsDouble(), OIConstants.stickDeadband) ,2), MathUtil.applyDeadband(rotationSup.getAsDouble(), OIConstants.stickDeadband)));
 
         /* Slow mode */
         if(slowModeSup.getAsBoolean()) {
-            translationVal *= Constants.Swerve.slowModeMultiplier;
-            strafeVal *= Constants.Swerve.slowModeMultiplier;
-            rotationVal *= Constants.Swerve.slowModeMultiplier;
+            translationVal *= OIConstants.lowTranslationSpeed;
+            strafeVal *= OIConstants.lowTranslationSpeed;
+            rotationVal *= OIConstants.lowRotationSpeed;
+        }
+
+        else{
+            translationVal *= OIConstants.highTranslationSpeed;
+            strafeVal *= OIConstants.highTranslationSpeed;
+            rotationVal *= OIConstants.highRotationSpeed;
         }
 
         /* Drive */
