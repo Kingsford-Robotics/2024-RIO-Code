@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
+import frc.robot.Controllers.Logitech;
 import frc.robot.Controllers.Thrustmaster;
 
 /** Add your docs here. */
@@ -38,8 +39,8 @@ public class OIConstants {
     public static final Supplier<Double> translationSupplier = () -> driveLeft.getYAxis();
     public static final Supplier<Double> strafeSupplier = () -> driveLeft.getXAxis();
     public static final Supplier<Double> rotationSupplier = () -> driveRight.getXAxis();
-    public static final BooleanSupplier slowSpeed = () -> driveLeft.getTopRightButton().getAsBoolean();
-    public static final BooleanSupplier robotCentric = () -> driveRight.getTopLeftButton().getAsBoolean();
+    public static final BooleanSupplier slowSpeed = () -> driveLeft.getStickRightButton().getAsBoolean();
+    public static final BooleanSupplier robotCentric = () -> driveRight.getStickLeftButton().getAsBoolean();
 
     //Drive Joystick Buttons
     public static final JoystickButton deployIntake = driveLeft.getTrigger();

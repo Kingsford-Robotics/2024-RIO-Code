@@ -9,10 +9,10 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 
 /** Add your docs here. */
-public class Thrustmaster{
+public class Logitech{
     private Joystick joystick;
 
-    public Thrustmaster(int port) {
+    public Logitech(int port) {
         joystick = new Joystick(port);
     }
 
@@ -36,64 +36,48 @@ public class Thrustmaster{
         return new JoystickButton(joystick, 1);
     }
 
-    public JoystickButton getStickLeftButton() {
-        return new JoystickButton(joystick, 3);
-    }
-
-    public JoystickButton getStickRightButton() {
-        return new JoystickButton(joystick, 4);
-    }
-
-    public JoystickButton getStickCenterButton() {
+    public JoystickButton getSideButton() {
         return new JoystickButton(joystick, 2);
     }
 
-    public JoystickButton getFingerLeftTop1() {
+    public JoystickButton getButton3() {
+        return new JoystickButton(joystick, 3);
+    }
+
+    public JoystickButton getButton4() {
+        return new JoystickButton(joystick, 4);
+    }
+
+    public JoystickButton getButton5() {
         return new JoystickButton(joystick, 5);
     }
 
-    public JoystickButton getFingerLeftBottom1() {
-        return new JoystickButton(joystick, 10);
-    }
-
-    public JoystickButton getFingerLeftTop2() {
+    public JoystickButton getButton6() {
         return new JoystickButton(joystick, 6);
     }
 
-    public JoystickButton getFingerLeftBottom2() {
-        return new JoystickButton(joystick, 9);
-    }
-
-    public JoystickButton getFingerLeftTop3() {
+    public JoystickButton getButton7() {
         return new JoystickButton(joystick, 7);
     }
 
-    public JoystickButton getFingerLeftBottom3() {
+    public JoystickButton getButton8() {
         return new JoystickButton(joystick, 8);
     }
 
-    public JoystickButton getFingerRightTop1() {
-        return new JoystickButton(joystick, 13);
+    public JoystickButton getButton9() {
+        return new JoystickButton(joystick, 9);
     }
 
-    public JoystickButton getFingerRightBottom1() {
-        return new JoystickButton(joystick, 14);
+    public JoystickButton getButton10() {
+        return new JoystickButton(joystick, 10);
     }
 
-    public JoystickButton getFingerRightTop2() {
-        return new JoystickButton(joystick, 12);
-    }
-
-    public JoystickButton getFingerRightBottom2() {
-        return new JoystickButton(joystick, 15);
-    }
-
-    public JoystickButton getFingerRightTop3() {
+    public JoystickButton getButton11() {
         return new JoystickButton(joystick, 11);
     }
 
-    public JoystickButton getFingerRightBottom3() {
-        return new JoystickButton(joystick, 16);
+    public JoystickButton getButton12() {
+        return new JoystickButton(joystick, 12);
     }
 
     public POVButton getUpPovButton() {
