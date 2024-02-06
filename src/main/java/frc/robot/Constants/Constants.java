@@ -143,7 +143,8 @@ public final class Constants {
     }
 
     public static final class ElevatorConstants {
-        public static final int elevatorMotorID = 9;  
+        public static final int elevatorMotorID = 9;
+        public static final double elevatorMaxTravel = Units.inchesToMeters(12);
     }
 
     public static final class IntakeConstants {
