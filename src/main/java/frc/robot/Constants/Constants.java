@@ -67,7 +67,6 @@ public final class Constants {
         public static final double driveKP = 0.12;
         public static final double driveKI = 0.0;
         public static final double driveKD = 0.0;
-        public static final double driveKF = 0.0;
 
         /* Drive Motor Characterization Values From SYSID */
         public static final double driveKS = 0.32;
@@ -149,11 +148,18 @@ public final class Constants {
 
     public static final class IntakeConstants {
         public static final int intakeMotorID = 10;
+        public static final int beamBreakID = 0;
     }
 
     public static final class ShooterConstants {
         public static final int shooterLeftMotorID = 11;
         public static final int shooterRightMotorID = 12;
+
+        //PID Values
+        public static final double shooterKP = 0;
+        public static final double shooterKI = 0;
+        public static final double shooterKD = 0;
+        public static final double shooterKF = 0;
     }
 
     public static final class PivotConstants {

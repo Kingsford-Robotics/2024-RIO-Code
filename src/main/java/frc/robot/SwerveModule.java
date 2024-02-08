@@ -1,6 +1,7 @@
 package frc.robot;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -103,5 +104,13 @@ public class SwerveModule {
     public void setDefaultCurrentLimits(){
         mDriveMotor.getConfigurator().apply(Robot.ctreConfigs.swerveDriveFXConfig);
         mAngleMotor.getConfigurator().apply(Robot.ctreConfigs.swerveAngleFXConfig);
+    }
+
+    public void setDrivePIDConstants(double kP, double kI, double kD){
+        mDriveMotor.getConfigurator().apply(new Slot0Configs().withKP(kP).withKI(kI).withKD(kD));
+    }
+
+    public void setAnglePIDConstants(double kP, double kI, double kD){
+        mAngleMotor.getConfigurator().apply(new Slot0Configs().withKP(kP).withKI(kI).withKD(kD));
     }
 }
