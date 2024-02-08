@@ -160,6 +160,7 @@ public final class Constants {
         public static final double shooterKI = 0;
         public static final double shooterKD = 0;
         public static final double shooterKF = 0;
+        public static final double shooterRampRate = 0;
     }
 
     public static final class PivotConstants {
