@@ -4,9 +4,6 @@
 
 package frc.robot.subsystems;
 
-import java.util.ResourceBundle.Control;
-
-import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
@@ -45,7 +42,7 @@ public class Pivot extends SubsystemBase {
 
   //TODO: Use smart motion profile to control angle. Remember to use cosine gravity compensation.
   public void setPivotAngle(double angle){
-    
+
   }
 
   @Override
