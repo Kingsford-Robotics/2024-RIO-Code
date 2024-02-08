@@ -25,8 +25,8 @@ public class Shooter extends SubsystemBase {
     shooterLeftMotor.configFactoryDefault();
     shooterRightMotor.configFactoryDefault();
 
-    shooterLeftMotor.setInverted(true);
-    shooterLeftMotor.follow(shooterRightMotor);
+    shooterRightMotor.setInverted(true);
+    shooterRightMotor.follow(shooterLeftMotor);
 
     shooterLeftMotor.configSelectedFeedbackSensor(TalonSRXFeedbackDevice.CTRE_MagEncoder_Relative,0,0);
     shooterLeftMotor.config_kP(0, ShooterConstants.shooterKP);
