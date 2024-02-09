@@ -8,7 +8,6 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.TalonSRXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Constants.ShooterConstants;
 
@@ -25,18 +24,39 @@ public class Shooter extends SubsystemBase {
     shooterLeftMotor.configFactoryDefault();
     shooterRightMotor.configFactoryDefault();
 
-    shooterLeftMotor.setInverted(true);
-    shooterLeftMotor.follow(shooterRightMotor);
+    shooterRightMotor.setInverted(true);
+    shooterRightMotor.follow(shooterLeftMotor);
 
     shooterLeftMotor.configSelectedFeedbackSensor(TalonSRXFeedbackDevice.CTRE_MagEncoder_Relative,0,0);
     shooterLeftMotor.config_kP(0, ShooterConstants.shooterKP);
     shooterLeftMotor.config_kI(0, ShooterConstants.shooterKI);
     shooterLeftMotor.config_kD(0, ShooterConstants.shooterKD);
     shooterLeftMotor.config_kF(0, ShooterConstants.shooterKF);
+
+    shooterLeftMotor.configClosedloopRamp(ShooterConstants.shooterRampRate);
+    shooterRightMotor.configClosedloopRamp(ShooterConstants.shooterRampRate);
+
+    shooterLeftMotor.configVoltageCompSaturation(12);
+    shooterLeftMotor.enableVoltageCompensation(true);
+    shooterRightMotor.configVoltageCompSaturation(12);
+    shooterRightMotor.enableVoltageCompensation(true);
   }
 
   public void setShooterSpeed(double speed) {
     shooterLeftMotor.set(ControlMode.Velocity, speed);
+  }
+
+  public double getShooterSpeed() {
+    return shooterLeftMotor.getSelectedSensorVelocity();
+  }
+
+  public double getShooterError() {
+    return shooterLeftMotor.getClosedLoopError();
+  }
+
+  //TODO: Switch to variable.
+  public boolean atSetpoint() {
+    return Math.abs(getShooterError()) < 100;
   }
 
   /*
