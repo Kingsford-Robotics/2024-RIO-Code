@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Constants.OIConstants;
 import frc.robot.autos.*;
 import frc.robot.commands.*;
@@ -16,7 +17,7 @@ import frc.robot.subsystems.*;
  */
 public class RobotContainer {
     /* Subsystems */
-    private final Elevator s_Elevator = new Elevator(0.0);
+    private final Elevator s_Elevator = new Elevator();
     private final Intake s_Intake = new Intake();
     private final Jetson s_Jetson = new Jetson();
     private final LedDriver s_LedDriver = new LedDriver();
@@ -38,6 +39,10 @@ public class RobotContainer {
             )
         );
 
+        s_Pivot.setDefaultCommand(
+            new InstantCommand(() -> s_Pivot.setPivotSpeed(OIConstants.pivotSpeed.getAsDouble()), s_Pivot)
+        );
+
         // Configure the button bindings
         configureButtonBindings();
     }
@@ -50,6 +55,12 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         /* Driver Buttons */
+
+        /* Co-Driver Buttons */
+
+        //Reverse Intake
+        OIConstants.reverseIntake.onTrue(new InstantCommand(() -> s_Intake.setSpeed(-0.5), s_Intake)).
+            onFalse(new InstantCommand(() -> s_Intake.setSpeed(0.0), s_Intake));
     }
 
     /**

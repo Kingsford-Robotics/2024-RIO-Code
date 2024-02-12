@@ -49,15 +49,14 @@ public class OIConstants {
     public static final DoubleSupplier elevatorSpeed = () -> coDriverController.getLeftY();
     public static final DoubleSupplier pivotSpeed = () -> coDriverController.getRightY();
 
-    public static final JoystickButton openClaw = new JoystickButton(coDriverController, XboxController.Button.kLeftBumper.value);
-    public static final JoystickButton closeClaw = new JoystickButton(coDriverController, XboxController.Button.kRightBumper.value);
-
     public static final JoystickButton speakerTarget = new JoystickButton(coDriverController, XboxController.Button.kY.value);
     public static final JoystickButton ampTarget = new JoystickButton(coDriverController, XboxController.Button.kA.value);
     public static final JoystickButton passTarget = new JoystickButton(coDriverController, XboxController.Button.kB.value);
 
     public static final JoystickButton climbDeploy = new JoystickButton(coDriverController, XboxController.Button.kLeftBumper.value);
     public static final JoystickButton climbRetract = new JoystickButton(coDriverController, XboxController.Button.kRightBumper.value);
+
+    public static final JoystickButton reverseIntake = new JoystickButton(coDriverController, XboxController.Button.kBack.value);
 
     public static final POVButton snapFront = new POVButton(coDriverController, 0);
     public static final POVButton snapBack = new POVButton(coDriverController, 180);

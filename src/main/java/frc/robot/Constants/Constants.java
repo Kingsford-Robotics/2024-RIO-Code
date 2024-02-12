@@ -143,7 +143,17 @@ public final class Constants {
 
     public static final class ElevatorConstants {
         public static final int elevatorMotorID = 9;
+
+        public static final int topLimitSwitchID = 0;
+        public static final int bottomLimitSwitchID = 0;
+
         public static final double elevatorMaxTravel = Units.inchesToMeters(12);
+
+        public static final double sensorToMechRatio = 35 / (Units.inchesToMeters(1.625) * Math.PI);
+
+        public static final double errorThreshold = Units.inchesToMeters(0.125); //0.125 tolerance for positions.
+
+        public static final double softLimit = Units.inchesToMeters(0.125); //Slows speed down when close to limit.
     }
 
     public static final class IntakeConstants {
@@ -169,6 +179,17 @@ public final class Constants {
         public static final int pivotCurrentLimit = 30;
         public static final double openLoopRamp = 0.2;
         public static final double closedLoopRamp = 0.2;
+        public static final int pivotDownLimitSwitchID = 0;
+        public static final int pivotUpLimitSwitchID = 0;
+        public static final int pivotAbsoluteEncoderID = 0;
+
+        //PID Values
+        public static final double pivotKP = 0;
+        public static final double pivotKI = 0;
+        public static final double pivotKD = 0;
+        public static final double pivotKF = 0;
+
+        public static final double pivotGearRatio = 35 * 5.0;
     }
 
     public static final class LedConstants {

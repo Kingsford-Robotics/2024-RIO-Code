@@ -5,193 +5,94 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.hardware.*;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.Constants;
+import frc.robot.Constants.Constants.ElevatorConstants;
 
 public class Elevator extends SubsystemBase {
+  /** Creates a new Elevator. */
   private TalonFX elevatorMotor;
-  
-  //Wired normally closed (false = pressed)
+
   private DigitalInput topLimitSwitch;
   private DigitalInput bottomLimitSwitch;
 
-  /*Shuffleboard Setup*/
-  private ShuffleboardTab elevatorTab;
+  private MotionMagicVoltage elevatorMotionMagicVoltage;
   
-  private GenericEntry elevatorHeight;
-  private GenericEntry elevatorEncoder;
-  private GenericEntry elevatorSpeed;
+  public Elevator() {
+    elevatorMotor = new TalonFX(ElevatorConstants.elevatorMotorID);
+    topLimitSwitch = new DigitalInput(ElevatorConstants.topLimitSwitchID);
+    bottomLimitSwitch = new DigitalInput(ElevatorConstants.bottomLimitSwitchID);
 
-  private GenericEntry elevatorTopLimitSwitch;
-  private GenericEntry elevatorBottomLimitSwitch;
+    TalonFXConfiguration elevatorConfig = new TalonFXConfiguration();
+    elevatorConfig.Slot0.
+      withGravityType(GravityTypeValue.Elevator_Static).
+      withKP(0.1).
+      withKI(0.0).
+      withKD(0.0).
+      withKS(0).
+      withKV(0.0).
+      withKA(0.0).
+      withKG(0.0);
 
-  private GenericEntry isToPosition;
-  private GenericEntry targetEncoderPosition;
+    elevatorConfig.Feedback.SensorToMechanismRatio = ElevatorConstants.sensorToMechRatio;
 
-  public Elevator(double initialPosition) {
-  //   elevatorMotor = new TalonFX(Constants.ElevatorConstants.elevatorMotorID);
-    
-  //   //Configure motor
-  //   elevatorMotor.getConfigurator().apply(new TalonFXConfiguration());
-  //   elevatorMotor.setNeutralMode(NeutralModeValue.Brake);
-  //   elevatorMotor.setInverted(true);
+    elevatorMotor.getConfigurator().apply(elevatorConfig);
 
-  //   //Work on constants and configuration
+    elevatorMotor.setNeutralMode(NeutralModeValue.Brake);
 
-  //   //Set motor PID constants
-  //   elevatorMotor.config_kP(0, RobotConstants.ElevatorConstants.elevatorKp);
-  //   elevatorMotor.config_kI(0, RobotConstants.ElevatorConstants.elevatorKi);
-  //   elevatorMotor.config_kD(0, RobotConstants.ElevatorConstants.elevatorKd);
-  //   elevatorMotor.config_kF(0, RobotConstants.ElevatorConstants.elevatorKF);
+    elevatorMotionMagicVoltage = new MotionMagicVoltage(0);
 
-  //   elevatorMotor.configAllowableClosedloopError(0, 0.15 / RobotConstants.ElevatorConstants.elevatorTravelEncoderTick);
-  //   //Configure Motion Magic
-  //   elevatorMotor.configMotionCruiseVelocity(RobotConstants.ElevatorConstants.elevatorCruiseVelocity);
-  //   elevatorMotor.configMotionAcceleration(RobotConstants.ElevatorConstants.elevatorMaxAcceleration);
-    
-  //   //Acceleration smoothing
-  //   elevatorMotor.configMotionSCurveStrength(RobotConstants.ElevatorConstants.elevatorSCurveStrength);
+  }
 
-  //   topLimitSwitch = new DigitalInput(RobotConstants.ElevatorConstants.elevatorTopLimitSwitchID);
-  //   bottomLimitSwitch = new DigitalInput(RobotConstants.ElevatorConstants.elevatorBottomLimitSwitchID);
+  public void setSpeed(double speed) {
+    //Stops the elevator if it hits the top or bottom limit switch.
+    if(getTopLimitSwitch() && speed > 0) {
+      speed = 0;
+    }
 
-  //   calibrateElevator(initialPosition);
+    else if(getBottomLimitSwitch() && speed < 0) {
+      speed = 0;
+    }
+    elevatorMotor.set(speed);
+  }
 
-  //   /*Shuffleboard Setup*/
-  //   elevatorTab = Shuffleboard.getTab("Elevator");
+  public void setHeight(double height){
+    if(height >= 0 && height <= ElevatorConstants.elevatorMaxTravel) {
+      elevatorMotor.setControl(elevatorMotionMagicVoltage.withPosition(height));
+    }
+  }
 
-  //   elevatorHeight = elevatorTab.add("Elevator Height", 0.0).getEntry();
-  //   elevatorEncoder = elevatorTab.add("Elevator Encoder", 0.0).getEntry();
-  //   elevatorSpeed = elevatorTab.add("Elevator Speed", 0.0).getEntry();
+  public boolean isAtHeight(){
+    return elevatorMotor.getClosedLoopError().getValue() < ElevatorConstants.errorThreshold;
+  }
 
-  //   elevatorTopLimitSwitch = elevatorTab.add("Top Limit Switch", false).getEntry();
-  //   elevatorBottomLimitSwitch = elevatorTab.add("Bottom Limit Switch", false).getEntry();
+  public boolean getTopLimitSwitch() {
+    return topLimitSwitch.get();
+  }
 
-  //   isToPosition = elevatorTab.add("Is To Position", false).getEntry();
-  //   targetEncoderPosition = elevatorTab.add("Target Encoder Position", 0.0).getEntry();
-  // }
+  public boolean getBottomLimitSwitch() {
+    return bottomLimitSwitch.get();
+  }
 
-  // /**
-  //  * {@summary} Use this function to calibrate the elevator position when it is at a known height relative to the lowest position.
-  //  * @param currentHeight The height to set the elevator encoder at.s
-  //  */
-  // public void calibrateElevator(double currentHeight)
-  // {
-  //   double encoderPosition = currentHeight / RobotConstants.ElevatorConstants.elevatorTravelEncoderTick;
-  //   elevatorMotor.setSelectedSensorPosition(encoderPosition);
-  // }
+  public double getHeight() {
+    return elevatorMotor.getPosition().getValue();
+  }
 
-  // /**
-  //  * {@summary} Sets the elevator motor percent output.
-  //  * @param speed Elevator motor percent speed. -1.0 to 1.0.
-  //  */
-  // public void setElevatorSpeed(double speed){
-  //   //Set speed to 0 if touching limit switch and moving towards it.
-  //   if((getTopLimitSwitch() || getElevatorPosition() > RobotConstants.ElevatorConstants.elevatorMaxTravel - RobotConstants.ElevatorConstants.safeZone) && speed > 0)
-  //   {
-  //     speed = 0;
-  //   }
-  //   else if(getBottomLimitSwitch() && speed < 0)
-  //   {
-  //     speed = 0;
-  //   }
+  @Override
+  public void periodic() {
+    // This method will be called once per scheduler run
 
-  //   elevatorMotor.set(ControlMode.PercentOutput, speed);
-  // }
+    if(getTopLimitSwitch() && elevatorMotor.getVelocity().getValue() > 0) {
+      setSpeed(0);
+    }
 
-  // /**
-  //  * {@summary} Sets the elevator to the height specified using a S motion curve.
-  //  * @param height Height, in inches, above the lowest elevator position.
-  //  */
-  // public void setElevatorHeight(double height, double percentSpeed){
-  //   elevatorMotor.configMotionCruiseVelocity(RobotConstants.ElevatorConstants.elevatorCruiseVelocity * percentSpeed);
-
-  //   if(height > RobotConstants.ElevatorConstants.elevatorMaxTravel - RobotConstants.ElevatorConstants.safeZone)
-  //   {
-  //     height = RobotConstants.ElevatorConstants.elevatorMaxTravel - RobotConstants.ElevatorConstants.safeZone;
-  //   }
-  //   else if(height < RobotConstants.ElevatorConstants.safeZone)
-  //   {
-  //     height = RobotConstants.ElevatorConstants.safeZone;
-  //   }
-
-  //   double encoderPosition = height / RobotConstants.ElevatorConstants.elevatorTravelEncoderTick;
-
-  //   targetEncoderPosition.setDouble(encoderPosition);
-
-  //   elevatorMotor.set(ControlMode.MotionMagic, encoderPosition);
-  // }
-
-  // public void setElevatorHeight(double height){
-  //   setElevatorHeight(height, 1.0);
-  // }
-
-  // public boolean isElevatorToPosition() {
-  //   if(Math.abs(targetEncoderPosition.getDouble(0) - elevatorMotor.getSelectedSensorPosition()) < 0.15 / RobotConstants.ElevatorConstants.elevatorTravelEncoderTick)
-  //   {
-  //     return true;
-  //   }
-
-  //   return false;
-  // }
-
-  // public boolean getTopLimitSwitch(){
-  //   return topLimitSwitch.get();
-  // }
-
-  // public boolean getBottomLimitSwitch(){
-  //   return bottomLimitSwitch.get();
-  // }
-
-  // //Returns elevator height in meters relative to lowest position.
-  // public double getElevatorPosition(){
-  //   return elevatorMotor.getSelectedSensorPosition() * RobotConstants.ElevatorConstants.elevatorTravelEncoderTick;
-  // } 
-
-  // public double getElevatorEncoder()
-  // {
-  //   return elevatorMotor.getSelectedSensorPosition();
-  // }
-
-  // @Override
-  // public void periodic() {
-  //   if(getTopLimitSwitch())
-  //   {
-  //     if(elevatorMotor.getMotorOutputPercent() > 0)
-  //     {
-  //       elevatorMotor.set(ControlMode.PercentOutput, 0);
-  //     }
-  //   }
-
-  //   if(getBottomLimitSwitch())
-  //   {
-  //     calibrateElevator(0.0);
-
-  //     if(elevatorMotor.getMotorOutputPercent() < 0)
-  //     {
-  //       elevatorMotor.set(ControlMode.PercentOutput, 0);
-  //     }
-  //   }
-
-  //   elevatorHeight.setDouble(getElevatorPosition());
-  //   elevatorEncoder.setDouble(getElevatorEncoder());
-  //   elevatorSpeed.setDouble(elevatorMotor.getMotorOutputPercent());
-
-  //   elevatorTopLimitSwitch.setBoolean(getTopLimitSwitch());
-  //   elevatorBottomLimitSwitch.setBoolean(getBottomLimitSwitch());
-
-  //   isToPosition.setBoolean(isElevatorToPosition());
-  // }
-
-  // @Override
-  // public void periodic() {
-  //   // This method will be called once per scheduler run
+    else if(getBottomLimitSwitch() && elevatorMotor.getVelocity().getValue() < 0) {
+      setSpeed(0);
+    }
   }
 }
