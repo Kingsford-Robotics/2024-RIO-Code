@@ -86,6 +86,11 @@ public class Elevator extends SubsystemBase {
     }
   }
 
+  public void resetPosition(double position)
+  {
+    elevatorMotor.setPosition(position);
+  }
+
   public void stop() {
     elevatorMotor.set(0);
   }
@@ -120,12 +125,23 @@ public class Elevator extends SubsystemBase {
   public void periodic() {
 
     //Apply hard limits. Stop the elevator if it hits the top or bottom limit switch.
-    if(getTopLimitSwitch() && elevatorMotor.getVelocity().getValue() > 0) {
-      setSpeed(0);
+    if(getTopLimitSwitch())
+    {
+      resetPosition(ElevatorConstants.elevatorMaxTravel);
+
+      if(elevatorMotor.getVelocity().getValue() > 0.0)
+      {
+        setSpeed(0);
+      }
     }
 
-    else if(getBottomLimitSwitch() && elevatorMotor.getVelocity().getValue() < 0) {
-      setSpeed(0);
+     else if(getBottomLimitSwitch()) {
+      resetPosition(0.0);
+
+      if(elevatorMotor.getVelocity().getValue() < 0.0)
+      {
+        setSpeed(0);
+      }
     }
   }
 }

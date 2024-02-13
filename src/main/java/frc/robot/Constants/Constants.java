@@ -192,6 +192,7 @@ public final class Constants {
         public static final double shooterKD = 0;
         public static final double shooterKF = 0;
         public static final double shooterRampRate = 0;
+        public static final double shooterTolerance = 0;
     }
 
     public static final class PivotConstants {
@@ -211,6 +212,13 @@ public final class Constants {
         public static final double pivotKF = 0;
 
         public static final double pivotGearRatio = 35 * 5.0;
+        public static final Rotation2d pivotAbsoluteOffset = Rotation2d.fromDegrees(0);
+        
+        public static final double pivotIZone = 0;
+        public static final double pivotIMaxAccum = 0;
+        public static final double pivotMaxVelocity = 0;
+        public static final double pivotMaxAccel = 0;
+        public static final double pivotAllowedError = 0;
     }
 
     public static final class LedConstants {

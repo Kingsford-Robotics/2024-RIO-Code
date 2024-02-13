@@ -40,6 +40,8 @@ public class Shooter extends SubsystemBase {
     shooterLeftMotor.enableVoltageCompensation(true);
     shooterRightMotor.configVoltageCompSaturation(12);
     shooterRightMotor.enableVoltageCompensation(true);
+
+    shooterLeftMotor.configAllowableClosedloopError(0, ShooterConstants.shooterTolerance);
   }
 
   public void setShooterSpeed(double speed) {
@@ -54,9 +56,8 @@ public class Shooter extends SubsystemBase {
     return shooterLeftMotor.getClosedLoopError();
   }
 
-  //TODO: Switch to variable.
   public boolean atSetpoint() {
-    return Math.abs(getShooterError()) < 100;
+    return Math.abs(shooterLeftMotor.getClosedLoopError()) < ShooterConstants.shooterTolerance;
   }
 
   /*
@@ -67,10 +68,5 @@ public class Shooter extends SubsystemBase {
     shooterLeftMotor.config_kI(0, ShooterConstants.shooterKI);
     shooterLeftMotor.config_kD(0, ShooterConstants.shooterKD);
     shooterLeftMotor.config_kF(0, ShooterConstants.shooterKF);
-  }
-
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
   }
 }

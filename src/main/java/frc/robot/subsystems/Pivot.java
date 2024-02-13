@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
@@ -40,11 +41,11 @@ public class Pivot extends SubsystemBase {
     pivotMotorEncoder.setPositionConversionFactor(360.0 / PivotConstants.pivotGearRatio);
 
     pivotAbsoluteEncoder = new CANcoder(PivotConstants.pivotAbsoluteEncoderID);
+    pivotAbsoluteEncoder.getConfigurator().apply(new CANcoderConfiguration());
 
     pivotDownLimitSwitch = new DigitalInput(PivotConstants.pivotDownLimitSwitchID);
     pivotUpLimitSwitch = new DigitalInput(PivotConstants.pivotUpLimitSwitchID);
     
-
     pivotLeftMotor.restoreFactoryDefaults();
     pivotRightMotor.restoreFactoryDefaults();
 
@@ -64,6 +65,16 @@ public class Pivot extends SubsystemBase {
     pivotLeftMotor.setIdleMode(IdleMode.kBrake);
     pivotRightMotor.setIdleMode(IdleMode.kBrake);
 
+    pivotPIDController.setP(PivotConstants.pivotKP);
+    pivotPIDController.setI(PivotConstants.pivotKI);
+    pivotPIDController.setD(PivotConstants.pivotKD);
+    pivotPIDController.setFF(PivotConstants.pivotKF);
+    pivotPIDController.setIZone(PivotConstants.pivotIZone);
+    pivotPIDController.setIMaxAccum(PivotConstants.pivotIMaxAccum, 0);
+    pivotPIDController.setSmartMotionMaxVelocity(PivotConstants.pivotMaxVelocity, 0);
+    pivotPIDController.setSmartMotionMaxAccel(PivotConstants.pivotMaxAccel, 0);
+    pivotPIDController.setSmartMotionAllowedClosedLoopError(PivotConstants.pivotAllowedError, 0);
+
     pivotLeftMotor.burnFlash();
     pivotRightMotor.burnFlash();
   }
@@ -80,17 +91,21 @@ public class Pivot extends SubsystemBase {
     return Rotation2d.fromDegrees(pivotMotorEncoder.getPosition());
   }
 
-  //TODO: Match logic from Swerve Module.
-  public void resetPivotEncoder(){
-    pivotMotorEncoder.setPosition(pivotAbsoluteEncoder.getAbsolutePosition().getValue() / PivotConstants.pivotGearRatio);
+  public Rotation2d getCANcoder(){
+    return Rotation2d.fromRotations(pivotAbsoluteEncoder.getAbsolutePosition().getValue());
+  }
+
+  public void resetToAbsolute(){
+    double absolutePosition = getCANcoder().getRotations() - PivotConstants.pivotAbsoluteOffset.getRotations();
+    pivotMotorEncoder.setPosition(absolutePosition);
   }
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
-
+  
     //Update the kF value for the pivot motor based on the angle cosine.
     //TODO: Check logic. Do not change value if calculation is the same.
+    
     pivotPIDController.setFF(PivotConstants.pivotKF / Math.cos(getPivotAngle().getRadians()));
   }
 }

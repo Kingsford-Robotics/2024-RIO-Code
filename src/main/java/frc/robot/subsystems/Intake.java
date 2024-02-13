@@ -6,8 +6,8 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.can.VictorSPX;
-import com.ctre.phoenix.motorcontrol.can.VictorSPXConfiguration;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -16,12 +16,12 @@ import frc.robot.Constants.Constants;
 public class Intake extends SubsystemBase {
   /** Creates a new Intake. */
 
-  private VictorSPX intakeMotor;
+  private TalonSRX intakeMotor;
   private DigitalInput beamBreak;
 
   public Intake() {
-    intakeMotor = new VictorSPX(Constants.IntakeConstants.intakeMotorID);
-    intakeMotor.configAllSettings(new VictorSPXConfiguration());
+    intakeMotor = new TalonSRX(Constants.IntakeConstants.intakeMotorID);
+    intakeMotor.configAllSettings(new TalonSRXConfiguration());
 
     beamBreak = new DigitalInput(Constants.IntakeConstants.beamBreakID);
 
