@@ -142,18 +142,39 @@ public final class Constants {
     }
 
     public static final class ElevatorConstants {
+        //CAN and Port IDs
         public static final int elevatorMotorID = 9;
-
         public static final int topLimitSwitchID = 0;
         public static final int bottomLimitSwitchID = 0;
 
+        //Elevator Travel Constants
         public static final double elevatorMaxTravel = Units.inchesToMeters(12);
-
-        public static final double sensorToMechRatio = 35 / (Units.inchesToMeters(1.625) * Math.PI);
-
+        public static final double softLimit = Units.inchesToMeters(0.125); //Slows speed down when close to limit.
         public static final double errorThreshold = Units.inchesToMeters(0.125); //0.125 tolerance for positions.
 
-        public static final double softLimit = Units.inchesToMeters(0.125); //Slows speed down when close to limit.
+        //Sensor to Mechanism Ratio
+        private static final double gearRatio = 35.0;
+        private static final double sprocketDiameter = Units.inchesToMeters(1.625);
+        public static final double sensorToMechRatio = gearRatio / (sprocketDiameter * Math.PI);
+
+        //PID Values
+        public static final double kP = 0.0;
+        public static final double kI = 0.0;
+        public static final double kD = 0.0;
+
+        //Feedforward Values
+        public static final double kS = 0.0;
+        public static final double kV = 0.0;
+        public static final double kA = 0.0;
+        public static final double kG = 0.0;
+
+        //Motion Magic Values
+        public static final int cruiseVelocity = 80;
+        public static final int acceleration = 160;
+        public static final int jerk = 1600;
+
+        //Current Limiting
+        public static final int currentLimit = 40;
     }
 
     public static final class IntakeConstants {

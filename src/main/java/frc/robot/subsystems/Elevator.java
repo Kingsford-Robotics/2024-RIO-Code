@@ -4,10 +4,11 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.*;
-import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -28,25 +29,33 @@ public class Elevator extends SubsystemBase {
     topLimitSwitch = new DigitalInput(ElevatorConstants.topLimitSwitchID);
     bottomLimitSwitch = new DigitalInput(ElevatorConstants.bottomLimitSwitchID);
 
-    TalonFXConfiguration elevatorConfig = new TalonFXConfiguration();
-    elevatorConfig.Slot0.
-      withGravityType(GravityTypeValue.Elevator_Static).
-      withKP(0.1).
-      withKI(0.0).
-      withKD(0.0).
-      withKS(0).
-      withKV(0.0).
-      withKA(0.0).
-      withKG(0.0);
+    TalonFXConfiguration talonFXConfigs = new TalonFXConfiguration();
+    
+    talonFXConfigs.Feedback.SensorToMechanismRatio = ElevatorConstants.sensorToMechRatio;
+    talonFXConfigs.CurrentLimits.SupplyCurrentLimit = ElevatorConstants.currentLimit;
 
-    elevatorConfig.Feedback.SensorToMechanismRatio = ElevatorConstants.sensorToMechRatio;
+    Slot0Configs slot0Configs = talonFXConfigs.Slot0;
 
-    elevatorMotor.getConfigurator().apply(elevatorConfig);
+    slot0Configs.kS = ElevatorConstants.kS;
+    slot0Configs.kV = ElevatorConstants.kV;
+    slot0Configs.kA = ElevatorConstants.kA;
+    slot0Configs.kG = ElevatorConstants.kG;
 
+    slot0Configs.kP = ElevatorConstants.kP;
+    slot0Configs.kI = ElevatorConstants.kI;
+    slot0Configs.kD = ElevatorConstants.kD;
+
+    // set Motion Magic settings
+    MotionMagicConfigs motionMagicConfigs = talonFXConfigs.MotionMagic;
+    motionMagicConfigs.MotionMagicCruiseVelocity = ElevatorConstants.cruiseVelocity;
+    motionMagicConfigs.MotionMagicAcceleration = ElevatorConstants.acceleration;
+    motionMagicConfigs.MotionMagicJerk = ElevatorConstants.jerk;
+
+    elevatorMotor.getConfigurator().apply(talonFXConfigs, 0.050);
     elevatorMotor.setNeutralMode(NeutralModeValue.Brake);
 
     elevatorMotionMagicVoltage = new MotionMagicVoltage(0);
-
+    elevatorMotionMagicVoltage.Slot = 0;
   }
 
   public void setSpeed(double speed) {
@@ -58,6 +67,16 @@ public class Elevator extends SubsystemBase {
     else if(getBottomLimitSwitch() && speed < 0) {
       speed = 0;
     }
+
+    //Apply soft limits. Limit speed if within soft limit range.
+    if(getHeight() >= ElevatorConstants.elevatorMaxTravel - ElevatorConstants.softLimit && speed > 0) {
+      speed = Math.min(speed, 0.1);
+    }
+
+    else if(getHeight() <= 0 + ElevatorConstants.softLimit && speed < 0) {
+      speed = Math.max(speed, -0.1);
+    }
+
     elevatorMotor.set(speed);
   }
 
@@ -67,8 +86,12 @@ public class Elevator extends SubsystemBase {
     }
   }
 
-  public boolean isAtHeight(){
-    return elevatorMotor.getClosedLoopError().getValue() < ElevatorConstants.errorThreshold;
+  public void stop() {
+    elevatorMotor.set(0);
+  }
+
+  public boolean reachedSetpoint(){
+    return Math.abs(elevatorMotor.getClosedLoopError().getValue()) < ElevatorConstants.errorThreshold;
   }
 
   public boolean getTopLimitSwitch() {
@@ -79,14 +102,24 @@ public class Elevator extends SubsystemBase {
     return bottomLimitSwitch.get();
   }
 
+  /**
+   * @return the height of the elevator in meters
+   */
   public double getHeight() {
     return elevatorMotor.getPosition().getValue();
   }
 
+  /**
+   * @return velocity in meters per second
+   */
+  public double getVelocity() {
+    return elevatorMotor.getVelocity().getValue();
+  }
+
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
 
+    //Apply hard limits. Stop the elevator if it hits the top or bottom limit switch.
     if(getTopLimitSwitch() && elevatorMotor.getVelocity().getValue() > 0) {
       setSpeed(0);
     }

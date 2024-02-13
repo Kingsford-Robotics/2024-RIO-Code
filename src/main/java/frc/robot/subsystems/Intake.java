@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPXConfiguration;
 
@@ -23,6 +24,8 @@ public class Intake extends SubsystemBase {
     intakeMotor.configAllSettings(new VictorSPXConfiguration());
 
     beamBreak = new DigitalInput(Constants.IntakeConstants.beamBreakID);
+
+    intakeMotor.setNeutralMode(NeutralMode.Coast);
   }
 
   /**
@@ -39,9 +42,5 @@ public class Intake extends SubsystemBase {
    */
   public boolean getBeamBreak() {
     return beamBreak.get();
-  }
-
-  @Override
-  public void periodic() {
   }
 }
