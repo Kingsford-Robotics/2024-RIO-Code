@@ -105,12 +105,4 @@ public class SwerveModule {
         mDriveMotor.getConfigurator().apply(Robot.ctreConfigs.swerveDriveFXConfig);
         mAngleMotor.getConfigurator().apply(Robot.ctreConfigs.swerveAngleFXConfig);
     }
-
-    public void setDrivePIDConstants(double kP, double kI, double kD){
-        mDriveMotor.getConfigurator().apply(new Slot0Configs().withKP(kP).withKI(kI).withKD(kD));
-    }
-
-    public void setAnglePIDConstants(double kP, double kI, double kD){
-        mAngleMotor.getConfigurator().apply(new Slot0Configs().withKP(kP).withKI(kI).withKD(kD));
-    }
 }

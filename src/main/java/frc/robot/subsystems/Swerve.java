@@ -15,9 +15,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -27,13 +27,46 @@ public class Swerve extends SubsystemBase {
     public Pigeon2 gyro;
 
     private ShuffleboardTab tab; 
-    private GenericEntry matchTimeEntry;
+    private GenericEntry frontLeftAngle;
+    private GenericEntry frontLeftSpeed;
+    private GenericEntry frontLeftOffset;
+
+    private GenericEntry frontRightAngle;
+    private GenericEntry frontRightSpeed;
+    private GenericEntry frontRightOffset;
+
+    private GenericEntry backLeftAngle;
+    private GenericEntry backLeftSpeed;
+    private GenericEntry backLeftOffset;
+
+    private GenericEntry backRightAngle;
+    private GenericEntry backRightSpeed;
+    private GenericEntry backRightOffset;
+
+    //Odometry Output
+    private Field2d field;
 
     public Swerve() {
-        tab = Shuffleboard.getTab("Competition");
-        matchTimeEntry = tab.add("Match Time", 0.0).getEntry();
-
+        tab = Shuffleboard.getTab("Swerve");
+        frontLeftAngle = tab.add("Front Left Angle", 0).getEntry();
+        frontLeftSpeed = tab.add("Front Left Speed", 0).getEntry();
+        frontLeftOffset = tab.add("Front Left Offset", 0).getEntry();
         
+        frontRightAngle = tab.add("Front Right Angle", 0).getEntry();
+        frontRightSpeed = tab.add("Front Right Speed", 0).getEntry();
+        frontRightOffset = tab.add("Front Right Offset", 0).getEntry();
+
+        backLeftAngle = tab.add("Back Left Angle", 0).getEntry();
+        backLeftSpeed = tab.add("Back Left Speed", 0).getEntry();
+        backLeftOffset = tab.add("Back Left Offset", 0).getEntry();
+
+        backRightAngle = tab.add("Back Right Angle", 0).getEntry();
+        backRightSpeed = tab.add("Back Right Speed", 0).getEntry();
+        backRightOffset = tab.add("Back Right Offset", 0).getEntry();
+
+        field = new Field2d();
+        tab.add("Field", field);
+
         gyro = new Pigeon2(Constants.Swerve.pigeonID);
         gyro.getConfigurator().apply(new Pigeon2Configuration());
         gyro.setYaw(0);
@@ -143,24 +176,6 @@ public class Swerve extends SubsystemBase {
         }
     }
 
-    /*
-     * This method updates the Drive PID values for the swerve modules from the Constants class.
-     */
-    public void updateDrivePIDConstants(){
-        for(SwerveModule mod : mSwerveMods){
-            mod.setDrivePIDConstants(Constants.Swerve.driveKP, Constants.Swerve.driveKI, Constants.Swerve.driveKD);
-        }
-    }
-    
-    /*
-     * This method updates the Angle PID values for the swerve modules from the Constants class.
-     */
-    public void updateAnglePIDConstants(){
-        for(SwerveModule mod : mSwerveMods){
-            mod.setAnglePIDConstants(Constants.Swerve.angleKP, Constants.Swerve.angleKI, Constants.Swerve.angleKD);
-        }
-    }
-
     public void updateOdometryFromVision(Pose2d pose, double timestamp){
         swervePoseEstimator.addVisionMeasurement(pose, timestamp);
     }
@@ -169,12 +184,23 @@ public class Swerve extends SubsystemBase {
     public void periodic(){
         swervePoseEstimator.update(getGyroYaw(), getModulePositions());
 
-        for(SwerveModule mod : mSwerveMods){
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " CANcoder", mod.getCANcoder().getDegrees());
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Angle", mod.getPosition().angle.getDegrees());
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);    
-        }
+        //Update Shuffleboard values
+        frontLeftAngle.setDouble(mSwerveMods[0].getState().angle.getDegrees());
+        frontLeftSpeed.setDouble(mSwerveMods[0].getState().speedMetersPerSecond);
+        frontLeftOffset.setDouble(Constants.Swerve.Mod0.angleOffset.getDegrees());
 
-        matchTimeEntry.setDouble(DriverStation.getMatchTime());
+        frontRightAngle.setDouble(mSwerveMods[1].getState().angle.getDegrees());
+        frontRightSpeed.setDouble(mSwerveMods[1].getState().speedMetersPerSecond);
+        frontRightOffset.setDouble(Constants.Swerve.Mod1.angleOffset.getDegrees());
+
+        backLeftAngle.setDouble(mSwerveMods[2].getState().angle.getDegrees());
+        backLeftSpeed.setDouble(mSwerveMods[2].getState().speedMetersPerSecond);
+        backLeftOffset.setDouble(Constants.Swerve.Mod2.angleOffset.getDegrees());
+
+        backRightAngle.setDouble(mSwerveMods[3].getState().angle.getDegrees());
+        backRightSpeed.setDouble(mSwerveMods[3].getState().speedMetersPerSecond);
+        backRightOffset.setDouble(Constants.Swerve.Mod3.angleOffset.getDegrees());
+
+        field.setRobotPose(getPose());
     }
 }
