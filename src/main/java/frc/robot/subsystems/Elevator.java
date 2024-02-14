@@ -74,6 +74,8 @@ public class Elevator extends SubsystemBase {
 
     elevatorMotionMagicVoltage = new MotionMagicVoltage(0);
     elevatorMotionMagicVoltage.Slot = 0;
+
+    elevatorMotor.setInverted(false);
   }
 
   public void setSpeed(double speed) {

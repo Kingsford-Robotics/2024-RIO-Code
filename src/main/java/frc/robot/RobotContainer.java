@@ -40,7 +40,15 @@ public class RobotContainer {
         );
 
         s_Pivot.setDefaultCommand(
-            new InstantCommand(() -> s_Pivot.setPivotSpeed(OIConstants.pivotSpeed.getAsDouble()), s_Pivot)
+            new InstantCommand(() -> s_Pivot.setPivotSpeed(-OIConstants.pivotSpeed.getAsDouble() *0.1), s_Pivot)
+        );
+
+        s_Elevator.setDefaultCommand(
+            new InstantCommand(() -> s_Elevator.setSpeed(-OIConstants.elevatorSpeed.getAsDouble() * 0.1), s_Elevator)
+        );
+
+        s_Shooter.setDefaultCommand(
+            new InstantCommand(() -> s_Shooter.setShooterSpeed(OIConstants.shooterSpeed.getAsDouble()), s_Shooter)
         );
 
         // Configure the button bindings

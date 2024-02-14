@@ -9,6 +9,7 @@ import com.ctre.phoenix.motorcontrol.TalonSRXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Constants.ShooterConstants;
@@ -26,6 +27,11 @@ public class Shooter extends SubsystemBase {
   private TalonSRX shooterRightMotor;
 
   public Shooter() {
+    tab = Shuffleboard.getTab("Shooter");
+    speedEntry = tab.add("Shooter Speed", 0).getEntry();
+    errorEntry = tab.add("Shooter Error", 0).getEntry();
+    atSetpointEntry = tab.add("At Setpoint", false).getEntry();
+
     shooterLeftMotor = new TalonSRX(ShooterConstants.shooterLeftMotorID);
     shooterRightMotor = new TalonSRX(ShooterConstants.shooterRightMotorID);
 

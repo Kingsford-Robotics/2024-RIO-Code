@@ -14,7 +14,7 @@ import frc.lib.util.SwerveModuleConstants;
 
 public final class Constants {
     public static final class Swerve {
-        public static final int pigeonID = 1;
+        public static final int pigeonID = 35;
 
         public static final COTSTalonFXSwerveConstants chosenModule = COTSTalonFXSwerveConstants.SDS.MK4i.Falcon500(COTSTalonFXSwerveConstants.SDS.MK4i.driveRatios.L2);
 
@@ -178,13 +178,13 @@ public final class Constants {
     }
 
     public static final class IntakeConstants {
-        public static final int intakeMotorID = 10;
+        public static final int intakeMotorID = 17;
         public static final int beamBreakID = 4;
     }
 
     public static final class ShooterConstants {
-        public static final int shooterLeftMotorID = 11;
-        public static final int shooterRightMotorID = 12;
+        public static final int shooterLeftMotorID = 15;
+        public static final int shooterRightMotorID = 14;
 
         //PID Values
         public static final double shooterKP = 0;
@@ -196,8 +196,8 @@ public final class Constants {
     }
 
     public static final class PivotConstants {
-        public static final int pivotLeftMotorID = 13;
-        public static final int pivotRightMotorID = 14;
+        public static final int pivotLeftMotorID = 21;
+        public static final int pivotRightMotorID = 20;
         public static final int pivotCurrentLimit = 30;
         public static final double openLoopRamp = 0.2;
         public static final double closedLoopRamp = 0.2;

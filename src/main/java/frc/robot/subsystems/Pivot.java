@@ -32,6 +32,7 @@ public class Pivot extends SubsystemBase {
   private GenericEntry pivotAngleSetpointEntry;
   private GenericEntry downLimitSwitchEntry;
   private GenericEntry upLimitSwitchEntry;
+  private GenericEntry pivotSpeed;
 
   private CANSparkMax pivotLeftMotor;
   private CANSparkMax pivotRightMotor;
@@ -70,7 +71,9 @@ public class Pivot extends SubsystemBase {
     pivotLeftMotor.restoreFactoryDefaults();
     pivotRightMotor.restoreFactoryDefaults();
 
+    pivotLeftMotor.setInverted(false);
     pivotRightMotor.setInverted(true);
+
     pivotRightMotor.follow(pivotLeftMotor, true);
 
     pivotLeftMotor.setSmartCurrentLimit(PivotConstants.pivotCurrentLimit);
@@ -106,6 +109,14 @@ public class Pivot extends SubsystemBase {
   }
 
   public void setPivotSpeed(double speed){
+    if(getPivotUpLimitSwitch() && speed > 0){
+      speed = 0;
+    }
+
+    else if(getPivotDownLimitSwitch() && speed < 0){
+      speed = 0;
+    }
+
     pivotLeftMotor.set(speed);
   }
 
@@ -117,20 +128,44 @@ public class Pivot extends SubsystemBase {
     return Rotation2d.fromRotations(pivotAbsoluteEncoder.getAbsolutePosition().getValue());
   }
 
+  //*Returns a value from -1 to 1 */
+  public double getPivotSpeed(){
+    return pivotLeftMotor.get();
+  }
+
   public void resetToAbsolute(){
     double absolutePosition = getCANcoder().getRotations() - PivotConstants.pivotAbsoluteOffset.getRotations();
     pivotMotorEncoder.setPosition(absolutePosition);
+  }
+
+  public boolean getPivotUpLimitSwitch(){
+    return pivotUpLimitSwitch.get();
+  }
+
+  public boolean getPivotDownLimitSwitch(){
+    return pivotDownLimitSwitch.get();
   }
 
   @Override
   public void periodic() {
     absoluteAngelEntry.setDouble(getCANcoder().getDegrees());
     relativeAngleEntry.setDouble(getPivotAngle().getDegrees());
-    pivotSpeedEntry.setDouble(pivotLeftMotor.get());
+    pivotSpeedEntry.setDouble(getPivotSpeed());
     downLimitSwitchEntry.setBoolean(pivotDownLimitSwitch.get());
     upLimitSwitchEntry.setBoolean(pivotUpLimitSwitch.get());
 
     //Update the kF value for the pivot motor based on the angle cosine.
     pivotPIDController.setFF(PivotConstants.pivotKF / Math.cos(getPivotAngle().getRadians()));
+
+    //Limit Switch Hard Stops
+    
+    if(getPivotUpLimitSwitch() && getPivotSpeed() > 0.0)
+    {
+      setPivotSpeed(0.0);
+    }
+
+    else if(getPivotDownLimitSwitch() && getPivotSpeed() < 0.0){
+      setPivotSpeed(0.0);
+    }
   }
 }
