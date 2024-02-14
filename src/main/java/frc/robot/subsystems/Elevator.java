@@ -11,12 +11,23 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.*;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Constants.ElevatorConstants;
 
 public class Elevator extends SubsystemBase {
   /** Creates a new Elevator. */
+  
+  //Shuffleboard Setup
+  ShuffleboardTab tab;
+  GenericEntry elevatorHeightEntry;
+  GenericEntry elevatorSpeedEntry;
+  GenericEntry topLimitSwitchEntry;
+  GenericEntry bottomLimitSwitchEntry;
+  
   private TalonFX elevatorMotor;
 
   private DigitalInput topLimitSwitch;
@@ -25,6 +36,13 @@ public class Elevator extends SubsystemBase {
   private MotionMagicVoltage elevatorMotionMagicVoltage;
   
   public Elevator() {
+    tab = Shuffleboard.getTab("Elevator");
+    elevatorHeightEntry = tab.add("Elevator Height", 0.0).getEntry();
+    elevatorSpeedEntry = tab.add("Elevator Speed", 0.0).getEntry();
+    topLimitSwitchEntry = tab.add("Top Limit Switch", false).getEntry();
+    bottomLimitSwitchEntry = tab.add("Bottom Limit Switch", false).getEntry();
+    
+    
     elevatorMotor = new TalonFX(ElevatorConstants.elevatorMotorID);
     topLimitSwitch = new DigitalInput(ElevatorConstants.topLimitSwitchID);
     bottomLimitSwitch = new DigitalInput(ElevatorConstants.bottomLimitSwitchID);
@@ -123,6 +141,10 @@ public class Elevator extends SubsystemBase {
 
   @Override
   public void periodic() {
+    elevatorHeightEntry.setDouble(getHeight());
+    elevatorSpeedEntry.setDouble(getVelocity());
+    topLimitSwitchEntry.setBoolean(getTopLimitSwitch());
+    bottomLimitSwitchEntry.setBoolean(getBottomLimitSwitch());
 
     //Apply hard limits. Stop the elevator if it hits the top or bottom limit switch.
     if(getTopLimitSwitch())

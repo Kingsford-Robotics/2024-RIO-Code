@@ -145,7 +145,7 @@ public final class Constants {
         //CAN and Port IDs
         public static final int elevatorMotorID = 9;
         public static final int topLimitSwitchID = 0;
-        public static final int bottomLimitSwitchID = 0;
+        public static final int bottomLimitSwitchID = 1;
 
         //Elevator Travel Constants
         public static final double elevatorMaxTravel = Units.inchesToMeters(12);
@@ -179,7 +179,7 @@ public final class Constants {
 
     public static final class IntakeConstants {
         public static final int intakeMotorID = 10;
-        public static final int beamBreakID = 0;
+        public static final int beamBreakID = 4;
     }
 
     public static final class ShooterConstants {
@@ -201,8 +201,10 @@ public final class Constants {
         public static final int pivotCurrentLimit = 30;
         public static final double openLoopRamp = 0.2;
         public static final double closedLoopRamp = 0.2;
-        public static final int pivotDownLimitSwitchID = 0;
-        public static final int pivotUpLimitSwitchID = 0;
+
+        public static final int pivotDownLimitSwitchID = 2;
+        public static final int pivotUpLimitSwitchID = 3;
+
         public static final int pivotAbsoluteEncoderID = 0;
 
         //PID Values
