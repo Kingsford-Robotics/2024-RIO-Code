@@ -91,7 +91,6 @@ public class Pivot extends SubsystemBase {
 
     pivotPIDController.setP(PivotConstants.pivotKP);
     pivotPIDController.setI(PivotConstants.pivotKI);
-    pivotPIDController.setD(PivotConstants.pivotKD);
     pivotPIDController.setFF(PivotConstants.pivotKF);
     pivotPIDController.setIZone(PivotConstants.pivotIZone);
     pivotPIDController.setIMaxAccum(PivotConstants.pivotIMaxAccum, 0);
