@@ -58,10 +58,6 @@ public class RobotContainer {
 
         // Configure the button bindings
         configureButtonBindings();
-
-        
-
-
     }
 
     /**
@@ -74,11 +70,6 @@ public class RobotContainer {
         /* Driver Buttons */
 
         /* Co-Driver Buttons */
-
-        //Reverse Intake
-        //OIConstants.reverseIntake.onTrue(new InstantCommand(() -> s_Intake.setSpeed(-0.5), s_Intake)).
-        //    onFalse(new InstantCommand(() -> s_Intake.setSpeed(0.0), s_Intake));
-
         OIConstants.climbDeploy.onTrue(s_Elevator.setHeight(Units.inchesToMeters(6), s_Elevator)).
             onFalse(new InstantCommand(() -> s_Elevator.stop(), s_Elevator)); 
     }
