@@ -49,6 +49,7 @@ public class OIConstants {
     public static final DoubleSupplier elevatorSpeed = () -> coDriverController.getLeftY();
     public static final DoubleSupplier pivotSpeed = () -> coDriverController.getRightY();
     public static final DoubleSupplier shooterSpeed = () -> coDriverController.getLeftTriggerAxis();
+    public static final DoubleSupplier intakeSpeed = () -> coDriverController.getRightTriggerAxis();
 
     public static final JoystickButton speakerTarget = new JoystickButton(coDriverController, XboxController.Button.kY.value);
     public static final JoystickButton ampTarget = new JoystickButton(coDriverController, XboxController.Button.kA.value);

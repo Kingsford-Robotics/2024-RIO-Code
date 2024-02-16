@@ -28,8 +28,8 @@ public class Shooter extends SubsystemBase {
 
   public Shooter() {
     tab = Shuffleboard.getTab("Shooter");
-    speedEntry = tab.add("Shooter Speed", 0).getEntry();
-    errorEntry = tab.add("Shooter Error", 0).getEntry();
+    speedEntry = tab.add("Shooter Speed (RPM)", 0).getEntry();
+    errorEntry = tab.add("Shooter Error (RPM)", 0).getEntry();
     atSetpointEntry = tab.add("At Setpoint", false).getEntry();
 
     shooterLeftMotor = new TalonSRX(ShooterConstants.shooterLeftMotorID);
@@ -55,23 +55,45 @@ public class Shooter extends SubsystemBase {
     shooterRightMotor.configVoltageCompSaturation(12);
     shooterRightMotor.enableVoltageCompensation(true);
 
-    shooterLeftMotor.configAllowableClosedloopError(0, ShooterConstants.shooterTolerance);
+    //Converts the tolerance from RPM to encoder units and divides by 2 to ensure that the error is within the tolerance.
+    shooterLeftMotor.configAllowableClosedloopError(0, ShooterConstants.shooterToleranceRPM * 4096 / 600 / 2);
   }
 
-  public void setShooterSpeed(double speed) {
-    shooterLeftMotor.set(ControlMode.Velocity, speed);
+  /**
+   * Sets the shooter speed in RPM.
+   */
+  public void setShooterRPM(double speed) {
+    shooterLeftMotor.set(ControlMode.Velocity, speed * 4096 / 600);
   }
 
-  public double getShooterSpeed() {
-    return shooterLeftMotor.getSelectedSensorVelocity();
+  /*
+   * Sets the shooter speed in percent output.
+   */
+  public void setShooterPercent(double percent){
+    shooterLeftMotor.set(ControlMode.PercentOutput, percent);
   }
 
-  public double getShooterError() {
-    return shooterLeftMotor.getClosedLoopError();
+  /**
+   * Returns the shooter speed.
+   * @return The shooter speed in RPM.
+   */
+  public double getShooterRPM() {
+    return shooterLeftMotor.getSelectedSensorVelocity() / 4096 * 600;
   }
 
+  /**
+   * Returns the shooter error.
+   * @return The shooter speed error in RPM.
+   */
+  public double getShooterErrorRPM() {
+    return shooterLeftMotor.getClosedLoopError() / 4096 * 600;
+  }
+
+  /**
+   * Returns whether the shooter is at the setpoint based on the RPM tolerance.
+   */
   public boolean atSetpoint() {
-    return Math.abs(shooterLeftMotor.getClosedLoopError()) < ShooterConstants.shooterTolerance;
+    return Math.abs(getShooterErrorRPM()) < ShooterConstants.shooterToleranceRPM;
   }
 
   @Override
@@ -79,8 +101,8 @@ public class Shooter extends SubsystemBase {
     // This method will be called once per scheduler run
 
     // Update the Shuffleboard values
-    speedEntry.setDouble(getShooterSpeed());
-    errorEntry.setDouble(getShooterError());
+    speedEntry.setDouble(getShooterRPM());
+    errorEntry.setDouble(getShooterErrorRPM());
     atSetpointEntry.setBoolean(atSetpoint());
   }
 }
