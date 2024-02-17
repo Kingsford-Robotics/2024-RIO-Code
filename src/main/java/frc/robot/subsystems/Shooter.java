@@ -22,7 +22,6 @@ public class Shooter extends SubsystemBase {
   GenericEntry errorEntry;
   GenericEntry atSetpointEntry;
 
-
   private TalonSRX shooterLeftMotor;
   private TalonSRX shooterRightMotor;
 
@@ -44,7 +43,6 @@ public class Shooter extends SubsystemBase {
     shooterLeftMotor.configSelectedFeedbackSensor(TalonSRXFeedbackDevice.CTRE_MagEncoder_Relative,0,0);
     shooterLeftMotor.config_kP(0, ShooterConstants.shooterKP);
     shooterLeftMotor.config_kI(0, ShooterConstants.shooterKI);
-    shooterLeftMotor.config_kD(0, ShooterConstants.shooterKD);
     shooterLeftMotor.config_kF(0, ShooterConstants.shooterKF);
 
     shooterLeftMotor.configClosedloopRamp(ShooterConstants.shooterRampRate);

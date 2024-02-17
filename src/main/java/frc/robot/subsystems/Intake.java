@@ -59,6 +59,6 @@ public class Intake extends SubsystemBase {
   @Override
   public void periodic() {
     intakeSpeedEntry.setDouble(intakeMotor.getMotorOutputPercent());
-    beamBreakStateEntry.setBoolean(beamBreak.get());
+    beamBreakStateEntry.setBoolean(getBeamBreak());
   }
 }

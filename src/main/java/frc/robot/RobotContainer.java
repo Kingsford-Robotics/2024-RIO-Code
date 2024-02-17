@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -19,12 +20,12 @@ import frc.robot.subsystems.*;
 public class RobotContainer {
     /* Subsystems */
     private final Elevator s_Elevator = new Elevator();
-    //private final Intake s_Intake = new Intake();
+    private final Intake s_Intake = new Intake();
     private final Jetson s_Jetson = new Jetson();
     private final LedDriver s_LedDriver = new LedDriver();
     private final Limelight s_Limelight = new Limelight();
     private final Pivot s_Pivot = new Pivot();
-    //private final Shooter s_Shooter = new Shooter();
+    private final Shooter s_Shooter = new Shooter();
     private final Swerve s_Swerve = new Swerve();
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -48,13 +49,13 @@ public class RobotContainer {
             new InstantCommand(() -> s_Elevator.setSpeed(-OIConstants.elevatorSpeed.getAsDouble() * 0.2), s_Elevator)
         );
 
-        //s_Shooter.setDefaultCommand(
-        //    new InstantCommand(() -> s_Shooter.setShooterPercent(OIConstants.shooterSpeed.getAsDouble() * 0.2), s_Shooter)
-        //);
+        s_Shooter.setDefaultCommand(
+            new InstantCommand(() -> s_Shooter.setShooterPercent(-OIConstants.shooterSpeed.getAsDouble() * 0.5), s_Shooter)
+        );
 
-        //s_Intake.setDefaultCommand(
-        //    new InstantCommand(() -> s_Intake.setSpeed(OIConstants.intakeSpeed.getAsDouble()), s_Intake)
-        //);
+        s_Intake.setDefaultCommand(
+            new InstantCommand(() -> s_Intake.setSpeed(OIConstants.intakeSpeed.getAsDouble()), s_Intake)
+        );
 
         // Configure the button bindings
         configureButtonBindings();
@@ -71,7 +72,11 @@ public class RobotContainer {
 
         /* Co-Driver Buttons */
         OIConstants.climbDeploy.onTrue(s_Elevator.setHeight(Units.inchesToMeters(6), s_Elevator)).
-            onFalse(new InstantCommand(() -> s_Elevator.stop(), s_Elevator)); 
+            onFalse(new InstantCommand(() -> s_Elevator.stop(), s_Elevator));
+
+        OIConstants.climbRetract.onTrue(s_Pivot.setPivotAngle(Rotation2d.fromDegrees(40))).onFalse(
+            new InstantCommand(() -> s_Pivot.setPivotSpeed(0), s_Pivot)
+        );
     }
 
     /**
