@@ -1,5 +1,7 @@
 package frc.robot;
 
+import org.ietf.jgss.Oid;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -21,12 +23,25 @@ public class RobotContainer {
     /* Subsystems */
     private final Elevator s_Elevator = new Elevator();
     private final Intake s_Intake = new Intake();
-    private final Jetson s_Jetson = new Jetson();
-    private final LedDriver s_LedDriver = new LedDriver();
-    private final Limelight s_Limelight = new Limelight();
+    //private final Jetson s_Jetson = new Jetson();
+    //private final LedDriver s_LedDriver = new LedDriver();
+    //private final Limelight s_Limelight = new Limelight();
     private final Pivot s_Pivot = new Pivot();
     private final Shooter s_Shooter = new Shooter();
     private final Swerve s_Swerve = new Swerve();
+
+    private final Command m_ElevatorTeleopCommand = s_Elevator.GetElevatorTeleop(() -> -OIConstants.elevatorSpeed.getAsDouble() * 0.2);
+    private final Command m_PivotTeleopCommand = s_Pivot.GetPivotTeleop(() -> -OIConstants.pivotSpeed.getAsDouble() * 0.2);
+    private final Command m_homePosition = new HomePosition(s_Elevator, s_Pivot);
+    private final Command m_deployIntake = new DeployIntake(s_Elevator, s_Pivot, s_Intake);
+
+    private enum targetMode {
+        kSpeaker,
+        kAmp,
+        kPass
+    }
+
+    private targetMode m_TargetMode = targetMode.kSpeaker;
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
@@ -42,15 +57,15 @@ public class RobotContainer {
         );
 
         s_Pivot.setDefaultCommand(
-            new InstantCommand(() -> s_Pivot.setPivotSpeed(-OIConstants.pivotSpeed.getAsDouble() * 0.1), s_Pivot)
+            m_PivotTeleopCommand
         );
 
         s_Elevator.setDefaultCommand(
-            new InstantCommand(() -> s_Elevator.setSpeed(-OIConstants.elevatorSpeed.getAsDouble() * 0.2), s_Elevator)
+            m_ElevatorTeleopCommand
         );
 
         s_Shooter.setDefaultCommand(
-            new InstantCommand(() -> s_Shooter.setShooterPercent(-OIConstants.shooterSpeed.getAsDouble() * 0.5), s_Shooter)
+            new InstantCommand(() -> s_Shooter.setShooterPercent(-OIConstants.shooterSpeed.getAsDouble() * 1.0), s_Shooter)
         );
 
         s_Intake.setDefaultCommand(
@@ -69,14 +84,25 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         /* Driver Buttons */
+        OIConstants.homeButton.onTrue(m_homePosition);
+        OIConstants.deployIntake.onTrue(m_deployIntake);
 
         /* Co-Driver Buttons */
-        OIConstants.climbDeploy.onTrue(s_Elevator.setHeight(Units.inchesToMeters(6), s_Elevator)).
-            onFalse(new InstantCommand(() -> s_Elevator.stop(), s_Elevator));
 
-        OIConstants.climbRetract.onTrue(s_Pivot.setPivotAngle(Rotation2d.fromDegrees(40))).onFalse(
-            new InstantCommand(() -> s_Pivot.setPivotSpeed(0), s_Pivot)
-        );
+        //Reverse Intake
+        OIConstants.reverseIntake.onTrue(new InstantCommand(() -> s_Intake.setSpeed(-0.5), s_Intake))
+            .onFalse(new InstantCommand(() -> s_Intake.setSpeed(0.0), s_Intake));
+        
+        //Speaker Mode
+        OIConstants.speakerTarget.onTrue(new InstantCommand(() -> m_TargetMode = targetMode.kSpeaker));
+
+        //Amp Mode
+        OIConstants.ampTarget.onTrue(new InstantCommand(() -> m_TargetMode = targetMode.kAmp));
+
+        //Pass Mode
+        OIConstants.passTarget.onTrue(new InstantCommand(() -> m_TargetMode = targetMode.kPass));
+        
+        //TODO: Add climb commands.
     }
 
     /**

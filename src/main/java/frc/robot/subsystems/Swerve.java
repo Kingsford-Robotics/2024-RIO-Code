@@ -47,9 +47,6 @@ public class Swerve extends SubsystemBase {
     //Odometry Output
     private Field2d field;
 
-    //Rev Power Distribution Panel Output
-    private PowerDistribution pdp;
-
     public Swerve() {
         tab = Shuffleboard.getTab("Swerve");
         frontLeftAngle = tab.add("Front Left Angle", 0).getEntry();
@@ -74,10 +71,6 @@ public class Swerve extends SubsystemBase {
         gyro = new Pigeon2(Constants.Swerve.pigeonID);
         gyro.getConfigurator().apply(new Pigeon2Configuration());
         gyro.setYaw(0);
-
-        pdp = new PowerDistribution(36, ModuleType.kRev);
-
-        tab.add("PDP", pdp);
 
         mSwerveMods = new SwerveModule[] {
             new SwerveModule(0, Constants.Swerve.Mod0.constants),

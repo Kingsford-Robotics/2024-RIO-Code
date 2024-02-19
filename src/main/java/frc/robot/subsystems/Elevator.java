@@ -4,16 +4,20 @@
 
 package frc.robot.subsystems;
 
+import java.util.function.DoubleSupplier;
+
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.*;
+import com.ctre.phoenix6.signals.ControlModeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -36,6 +40,8 @@ public class Elevator extends SubsystemBase {
   private DigitalInput bottomLimitSwitch;
 
   private MotionMagicVoltage elevatorMotionMagicVoltage;
+
+  private double position;
   
   public Elevator() {
     tab = Shuffleboard.getTab("Elevator");
@@ -75,6 +81,8 @@ public class Elevator extends SubsystemBase {
     elevatorMotionMagicVoltage.Slot = 0;
 
     elevatorMotor.setInverted(false);
+
+    position = getHeight();
   }
 
   public void setSpeed(double speed) {
@@ -99,15 +107,16 @@ public class Elevator extends SubsystemBase {
     elevatorMotor.set(speed);
   }
 
-  public Command setHeight(double height, SubsystemBase elevatorSubsystem) {
+  public Command setHeight(double height) {
     return new Command() {
       {
-        addRequirements(elevatorSubsystem);
+        addRequirements(Elevator.this);
       }  
         @Override
         public void initialize() {
             if(height >= 0 && height <= ElevatorConstants.elevatorMaxTravel) {
-                elevatorMotor.setControl(elevatorMotionMagicVoltage.withPosition(height));
+                position = height;
+                elevatorMotor.setControl(elevatorMotionMagicVoltage.withPosition(position));
             }
         }
 
@@ -115,13 +124,41 @@ public class Elevator extends SubsystemBase {
         public boolean isFinished() {
           return Math.abs(height - getHeight()) < ElevatorConstants.errorThreshold;
         }
-
-        @Override
-        public void end(boolean interrupted) {
-            stop();
-        }
     };
 }
+
+  public Command GetElevatorTeleop(DoubleSupplier speed){
+    return new Command(){
+      {
+        addRequirements(Elevator.this);
+      }
+
+      double endManualTime;
+
+      @Override
+      public void initialize(){
+        endManualTime = Timer.getFPGATimestamp();
+      }
+
+      @Override
+      public void execute(){
+        if(Math.abs(speed.getAsDouble()) > 0.05){
+          setSpeed(speed.getAsDouble());
+          position = getHeight();
+          endManualTime = Timer.getFPGATimestamp();
+        }
+
+        else if(Timer.getFPGATimestamp() - endManualTime < 0.250){
+          position = getHeight();
+          setSpeed(0.0);
+        }
+
+        else if (elevatorMotor.getControlMode().getValue() != ControlModeValue.MotionMagicVoltage){
+          elevatorMotor.setControl(elevatorMotionMagicVoltage.withPosition(position));
+        }
+      }
+    };
+  }
 
   public void resetPosition(double position)
   {
@@ -163,7 +200,6 @@ public class Elevator extends SubsystemBase {
 
     //Apply hard limits. Stop the elevator if it hits the top or bottom limit switch.
 
-    //TODO: Consider adding soft stop as well. If limit switch is unreliable, use encoder as well.
     if(getTopLimitSwitch())
     {
       if(elevatorMotor.getVelocity().getValue() > 0.0)

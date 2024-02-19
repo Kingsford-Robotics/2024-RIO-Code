@@ -4,12 +4,15 @@
 
 package frc.robot.subsystems;
 
+import java.util.function.DoubleSupplier;
+
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoderConfiguration;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
+import com.ctre.phoenix6.signals.ControlModeValue;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
@@ -24,6 +27,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -35,9 +39,9 @@ public class Pivot extends SubsystemBase {
   
   //Shuffleboard Data
   private ShuffleboardTab tab; 
-  private GenericEntry absoluteAngelEntry;
+  private GenericEntry absoluteAngleEntry;
+  private GenericEntry positionError;
   private GenericEntry pivotSpeedEntry;
-  private GenericEntry pivotAngleSetpointEntry;
   private GenericEntry downLimitSwitchEntry;
   private GenericEntry upLimitSwitchEntry;
 
@@ -51,14 +55,16 @@ public class Pivot extends SubsystemBase {
   private DigitalInput pivotDownLimitSwitch;
   private DigitalInput pivotUpLimitSwitch;
 
+  private Rotation2d angleSetpoint;
+
   public Pivot() {
     //Shuffleboard Setup
     tab = Shuffleboard.getTab("Pivot");
-    absoluteAngelEntry = tab.add("Absolute Angle", 0.0).getEntry();
+    absoluteAngleEntry = tab.add("Absolute Angle", 0.0).getEntry();
     pivotSpeedEntry = tab.add("Pivot Speed", 0.0).getEntry();
-    pivotAngleSetpointEntry = tab.add("Pivot Angle Setpoint", 0.0).getEntry();
     downLimitSwitchEntry = tab.add("Down Limit Switch", false).getEntry();
     upLimitSwitchEntry = tab.add("Up Limit Switch", false).getEntry();
+    positionError = tab.add("Position Error", 0.0).getEntry();
     
     pivotLeftMotor = new CANSparkMax(PivotConstants.pivotLeftMotorID, MotorType.kBrushless);
     pivotRightMotor = new CANSparkMax(PivotConstants.pivotRightMotorID, MotorType.kBrushless);
@@ -67,14 +73,15 @@ public class Pivot extends SubsystemBase {
     pivotAbsoluteEncoder = new CANcoder(PivotConstants.pivotAbsoluteEncoderID);
 
     CANcoderConfiguration canConfig = new CANcoderConfiguration();
+    
     //Put sensor 0 to 360 degrees absolute.
     canConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
     pivotAbsoluteEncoder.getConfigurator().apply(canConfig);
 
     pivotFeedforward = new ArmFeedforward(PivotConstants.pivotKS, PivotConstants.pivotKG, PivotConstants.pivotKV);
 
-    //TODO: Add velocity and acceleration constraints in constants.
-    pidController = new ProfiledPIDController(PivotConstants.pivotKP, PivotConstants.pivotKI, 0.0, new Constraints(Units.degreesToRadians(20), Units.degreesToRadians(40)));
+
+    pidController = new ProfiledPIDController(PivotConstants.pivotKP, PivotConstants.pivotKI, PivotConstants.pivotKD, new Constraints(Units.degreesToRadians(180), Units.degreesToRadians(250)));
 
     pivotDownLimitSwitch = new DigitalInput(PivotConstants.pivotDownLimitSwitchID);
     pivotUpLimitSwitch = new DigitalInput(PivotConstants.pivotUpLimitSwitchID);
@@ -90,20 +97,9 @@ public class Pivot extends SubsystemBase {
     pivotLeftMotor.setSmartCurrentLimit(PivotConstants.pivotCurrentLimit);
     pivotRightMotor.setSmartCurrentLimit(PivotConstants.pivotCurrentLimit);
 
-    pivotLeftMotor.setOpenLoopRampRate(PivotConstants.openLoopRamp);
-    pivotRightMotor.setOpenLoopRampRate(PivotConstants.openLoopRamp);
-
-    //pivotLeftMotor.setClosedLoopRampRate(PivotConstants.closedLoopRamp);
-    //pivotRightMotor.setClosedLoopRampRate(PivotConstants.closedLoopRamp);
-
     //Set motor to brake mode
     pivotLeftMotor.setIdleMode(IdleMode.kBrake);
     pivotRightMotor.setIdleMode(IdleMode.kBrake);
-
-    //pivotPIDController.setP(PivotConstants.pivotKP);
-    //pivotPIDController.setI(PivotConstants.pivotKI);
-    //pivotPIDController.setIZone(PivotConstants.pivotIZone);
-    //pivotPIDController.setIMaxAccum(PivotConstants.pivotIMaxAccum, 0);
 
     pivotLeftMotor.burnFlash();
     pivotRightMotor.burnFlash();
@@ -115,33 +111,36 @@ public class Pivot extends SubsystemBase {
         addRequirements(Pivot.this);
       }
     
-      @Override
+      @Override 
       public void initialize() {
         pidController.reset(getCANcoder().getRadians());
+        pidController.setGoal(angle.getRadians());
       }
 
       @Override
-    public void execute() {
-      pidController.setGoal(angle.getRadians());
-      double output = pidController.calculate(getCANcoder().getRadians()); //+ pivotFeedforward.calculate(getCANcoder().getRadians(), pidController.getSetpoint().velocity) * 0.5;
-      double constrainedOutput = Math.max(-0.2, Math.min(0.2, output));
-      pivotLeftMotor.set(constrainedOutput);
-      pivotAngleSetpointEntry.setDouble(output);
-    }
+      public void execute() {
+        double output = pidController.calculate(getCANcoder().getRadians()) + pivotFeedforward.calculate(pidController.getSetpoint().position, pidController.getSetpoint().velocity);
+        pivotLeftMotor.set(output / 12.0);
+        positionError.setDouble(Units.radiansToDegrees(pidController.getPositionError()));
+      }
 
-    @Override
-    public boolean isFinished() {
-      return pidController.atGoal();
-    }
+      @Override
+      public boolean isFinished() {
+        return Math.abs(getCANcoder().minus(angle).getDegrees()) < 2.0;
+      }
+    }; 
+  }
 
-    @Override
-    public void end(boolean interrupted) {
-      setPivotSpeed(0.0);
-    }
-  }; 
-}
+  public void holdPosition(Rotation2d position)
+  {
+    pidController.reset(getCANcoder().getRadians());
+    pidController.setGoal(position.getRadians());
+    double output = pivotFeedforward.calculate(pidController.getSetpoint().position, pidController.getSetpoint().velocity);
+    output += Math.abs(getCANcoder().minus(position).getDegrees()) < 0.5? pidController.calculate(getCANcoder().getRadians()) : 0;
+    pivotLeftMotor.set(output / 12.0);
+  }
 
-  public void setPivotSpeed(double speed){
+  public void setSpeed(double speed){
     if(getPivotUpLimitSwitch() && speed > 0){
       speed = 0;
     }
@@ -151,6 +150,40 @@ public class Pivot extends SubsystemBase {
     }
 
     pivotLeftMotor.set(speed);
+  }
+
+  public Command GetPivotTeleop(DoubleSupplier speed){
+    return new Command(){
+      {
+        addRequirements(Pivot.this);
+      }
+
+      double endManualTime;
+
+      @Override
+      public void initialize(){
+        endManualTime = Timer.getFPGATimestamp();
+
+      }
+
+      @Override
+      public void execute(){
+        if(Math.abs(speed.getAsDouble()) > 0.05){
+          setSpeed(speed.getAsDouble());
+          angleSetpoint = getCANcoder();
+          endManualTime = Timer.getFPGATimestamp();
+        }
+
+        else if(Timer.getFPGATimestamp() - endManualTime < 0.250){
+          angleSetpoint = getCANcoder();
+          setSpeed(0.0);
+        }
+
+        else{
+          holdPosition(angleSetpoint);
+        }
+      }
+    };
   }
 
   public Rotation2d getCANcoder(){
@@ -174,7 +207,7 @@ public class Pivot extends SubsystemBase {
 
   @Override
   public void periodic() {
-    absoluteAngelEntry.setDouble(getCANcoder().getDegrees());
+    absoluteAngleEntry.setDouble(getCANcoder().getDegrees());
     pivotSpeedEntry.setDouble(getPivotSpeed().getDegrees());
     downLimitSwitchEntry.setBoolean(pivotDownLimitSwitch.get());
     upLimitSwitchEntry.setBoolean(pivotUpLimitSwitch.get());
@@ -183,11 +216,11 @@ public class Pivot extends SubsystemBase {
     
     if(getPivotUpLimitSwitch() && getPivotSpeed().getDegrees() > 0.0)
     {
-      setPivotSpeed(0.0);
+      setSpeed(0.0);
     }
 
     else if(getPivotDownLimitSwitch() && getPivotSpeed().getDegrees() < 0.0){
-      setPivotSpeed(0.0);
+      setSpeed(0.0);
     }
   }
 }

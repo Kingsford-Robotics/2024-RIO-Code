@@ -44,6 +44,8 @@ public class OIConstants {
 
     //Drive Joystick Buttons
     public static final JoystickButton deployIntake = driveLeft.getTrigger();
+    public static final JoystickButton shoot = driveRight.getTrigger();
+    public static final JoystickButton homeButton = driveLeft.getStickCenterButton();
 
     //Handheld Controller Suppliers
     public static final DoubleSupplier elevatorSpeed = () -> coDriverController.getLeftY();

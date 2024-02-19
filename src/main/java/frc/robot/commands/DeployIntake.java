@@ -5,11 +5,15 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Pivot;
 
 public class DeployIntake extends Command {
   /** Creates a new DeployIntake. */
-  public DeployIntake() {
+  public DeployIntake(Elevator m_elevator, Pivot m_pivot, Intake m_intake) {
     // Use addRequirements() here to declare subsystem dependencies.
+
   }
 
   // Called when the command is initially scheduled.

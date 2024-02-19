@@ -167,7 +167,7 @@ public final class Constants {
         public static final double kG = 0.24;
 
         //Motion Magic Values
-        public static final double cruiseVelocity = Units.inchesToMeters(12);
+        public static final double cruiseVelocity = Units.inchesToMeters(14);
         public static final double acceleration = Units.inchesToMeters(48);
         public static final double jerk = Units.inchesToMeters(192);
 
@@ -208,8 +208,9 @@ public final class Constants {
         //PID Values
         public static final double pivotKP = 3;
         public static final double pivotKI = 0;
+        public static final double pivotKD = 0.5;
 
-        public static final double pivotKG = 0.35;
+        public static final double pivotKG = 0.19;
         public static final double pivotKV = 3.41;
         public static final double pivotKA = 0.01;
         public static final double pivotKS = 0.0;
