@@ -126,7 +126,7 @@ public class Pivot extends SubsystemBase {
 
       @Override
       public boolean isFinished() {
-        return Math.abs(getCANcoder().minus(angle).getDegrees()) < 2.0;
+        return Math.abs(getCANcoder().getDegrees() - angle.getDegrees()) < 2.0;
       }
     }; 
   }
