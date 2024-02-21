@@ -130,6 +130,11 @@ public class Elevator extends SubsystemBase {
         public boolean isFinished() {
           return Math.abs(height - getHeight()) < ElevatorConstants.errorThreshold;
         }
+
+        @Override
+        public void end(boolean interrupted) {
+          elevatorMotor.set(0);
+        }
     };
 }
 
@@ -225,7 +230,7 @@ public class Elevator extends SubsystemBase {
     }
 
      else if(getBottomLimitSwitch()) {
-      resetPosition(0.0);
+      //resetPosition(0.0);
 
       if(velocity < 0.0)
       {

@@ -22,17 +22,17 @@ import frc.robot.subsystems.*;
 public class RobotContainer {
     /* Subsystems */
     private final Elevator s_Elevator = new Elevator();
-    private final Intake s_Intake = new Intake();
+    //private final Intake s_Intake = new Intake();
     //private final Jetson s_Jetson = new Jetson();
     //private final LedDriver s_LedDriver = new LedDriver();
     //private final Limelight s_Limelight = new Limelight();
     private final Pivot s_Pivot = new Pivot();
-    private final Shooter s_Shooter = new Shooter();
+    //private final Shooter s_Shooter = new Shooter();
     private final Swerve s_Swerve = new Swerve();
 
     private final Command m_ElevatorTeleopCommand = s_Elevator.GetElevatorTeleop(() -> -OIConstants.elevatorSpeed.getAsDouble() * 0.2);
     private final Command m_PivotTeleopCommand = s_Pivot.GetPivotTeleop(() -> -OIConstants.pivotSpeed.getAsDouble() * 0.2);
-    private final Command m_deployIntake = new DeployIntake(s_Elevator, s_Pivot, s_Intake);
+    //private final Command m_deployIntake = new DeployIntake(s_Elevator, s_Pivot, s_Intake);
 
     private enum targetMode {
         kSpeaker,
@@ -63,6 +63,7 @@ public class RobotContainer {
             m_ElevatorTeleopCommand
         );
 
+        /*
         s_Shooter.setDefaultCommand(
             new InstantCommand(() -> s_Shooter.setShooterPercent(-OIConstants.shooterSpeed.getAsDouble() * 1.0), s_Shooter)
         );
@@ -70,7 +71,7 @@ public class RobotContainer {
         s_Intake.setDefaultCommand(
             new InstantCommand(() -> s_Intake.setSpeed(OIConstants.intakeSpeed.getAsDouble()), s_Intake)
         );
-
+*/
         // Configure the button bindings
         configureButtonBindings();
     }
@@ -85,17 +86,16 @@ public class RobotContainer {
         /* Driver Buttons */
         OIConstants.homeButton.whileTrue(
             new SequentialCommandGroup(
-                s_Pivot.setPivotAngle(Rotation2d.fromDegrees(30)),
                 s_Elevator.setHeight(Units.inchesToMeters(12))
             )
         );
 
-        OIConstants.deployIntake.onTrue(m_deployIntake);
+        //OIConstants.deployIntake.onTrue(m_deployIntake);
 
         /* Co-Driver Buttons */
 
         //Reverse Intake
-        OIConstants.reverseIntake.onTrue(new InstantCommand(() -> s_Intake.setSpeed(-0.5), s_Intake))
+        /*OIConstants.reverseIntake.onTrue(new InstantCommand(() -> s_Intake.setSpeed(-0.5), s_Intake))
             .onFalse(new InstantCommand(() -> s_Intake.setSpeed(0.0), s_Intake));
         
         //Speaker Mode
@@ -107,7 +107,7 @@ public class RobotContainer {
         //Pass Mode
         OIConstants.passTarget.onTrue(new InstantCommand(() -> m_TargetMode = targetMode.kPass));
         
-        //TODO: Add climb commands.
+        //TODO: Add climb commands.*/
     }
 
     /**

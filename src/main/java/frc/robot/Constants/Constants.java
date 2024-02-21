@@ -207,9 +207,9 @@ public final class Constants {
         public static final Rotation2d pivotAngleOffset = Rotation2d.fromDegrees(130);
 
         //PID Values
-        public static final double pivotKP = 3;
+        public static final double pivotKP = 5;
         public static final double pivotKI = 0;
-        public static final double pivotKD = 0.5;
+        public static final double pivotKD = 0;
 
         public static final double pivotKG = 0.19;
         public static final double pivotKV = 3.41;
