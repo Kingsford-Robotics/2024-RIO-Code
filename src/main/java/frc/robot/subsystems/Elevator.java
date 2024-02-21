@@ -6,12 +6,12 @@ package frc.robot.subsystems;
 
 import java.util.function.DoubleSupplier;
 
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.*;
-import com.ctre.phoenix6.signals.ControlModeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.util.Units;
@@ -42,6 +42,9 @@ public class Elevator extends SubsystemBase {
   private MotionMagicVoltage elevatorMotionMagicVoltage;
 
   private double position;
+
+  private StatusSignal<Double> elevatorMotorVelocity;
+  private StatusSignal<Double> elevatorMotorHeight;
   
   public Elevator() {
     tab = Shuffleboard.getTab("Elevator");
@@ -57,7 +60,7 @@ public class Elevator extends SubsystemBase {
     TalonFXConfiguration talonFXConfigs = new TalonFXConfiguration();
     
     talonFXConfigs.Feedback.SensorToMechanismRatio = ElevatorConstants.sensorToMechRatio;
-    talonFXConfigs.CurrentLimits.SupplyCurrentLimit = ElevatorConstants.currentLimit;
+    //talonFXConfigs.CurrentLimits.SupplyCurrentLimit = ElevatorConstants.currentLimit;
 
     Slot0Configs slot0Configs = talonFXConfigs.Slot0;
 
@@ -81,6 +84,9 @@ public class Elevator extends SubsystemBase {
     elevatorMotionMagicVoltage.Slot = 0;
 
     elevatorMotor.setInverted(false);
+
+    elevatorMotorVelocity = elevatorMotor.getVelocity();
+    elevatorMotorHeight = elevatorMotor.getPosition();
 
     position = getHeight();
   }
@@ -134,6 +140,7 @@ public class Elevator extends SubsystemBase {
       }
 
       double endManualTime;
+      boolean isHoldingPosition = false;
 
       @Override
       public void initialize(){
@@ -143,18 +150,23 @@ public class Elevator extends SubsystemBase {
       @Override
       public void execute(){
         if(Math.abs(speed.getAsDouble()) > 0.05){
+          isHoldingPosition = false;
+
           setSpeed(speed.getAsDouble());
           position = getHeight();
           endManualTime = Timer.getFPGATimestamp();
         }
 
         else if(Timer.getFPGATimestamp() - endManualTime < 0.250){
+          isHoldingPosition = false;
+
           position = getHeight();
           setSpeed(0.0);
         }
 
-        else if (elevatorMotor.getControlMode().getValue() != ControlModeValue.MotionMagicVoltage){
+        else if(!isHoldingPosition){
           elevatorMotor.setControl(elevatorMotionMagicVoltage.withPosition(position));
+          isHoldingPosition = true;
         }
       }
     };
@@ -181,20 +193,24 @@ public class Elevator extends SubsystemBase {
    * @return the height of the elevator in meters
    */
   public double getHeight() {
-    return elevatorMotor.getPosition().getValue();
+    elevatorMotorHeight.refresh();
+    return elevatorMotorHeight.getValueAsDouble();
   }
 
   /**
    * @return velocity in meters per second
    */
   public double getVelocity() {
-    return elevatorMotor.getVelocity().getValue();
+    elevatorMotorVelocity.refresh();
+    return elevatorMotorVelocity.getValueAsDouble();
   }
 
   @Override
   public void periodic() {
-    elevatorHeightEntry.setDouble(Units.metersToInches(getHeight()));
-    elevatorSpeedEntry.setDouble(Units.metersToInches(getVelocity()));
+    double velocity = getVelocity();
+    double height = getHeight();
+    elevatorHeightEntry.setDouble(Units.metersToInches(height));
+    elevatorSpeedEntry.setDouble(Units.metersToInches(velocity));
     topLimitSwitchEntry.setBoolean(getTopLimitSwitch());
     bottomLimitSwitchEntry.setBoolean(getBottomLimitSwitch());
 
@@ -202,7 +218,7 @@ public class Elevator extends SubsystemBase {
 
     if(getTopLimitSwitch())
     {
-      if(elevatorMotor.getVelocity().getValue() > 0.0)
+      if(velocity > 0.0)
       {
         setSpeed(0);
       }
@@ -211,7 +227,7 @@ public class Elevator extends SubsystemBase {
      else if(getBottomLimitSwitch()) {
       resetPosition(0.0);
 
-      if(elevatorMotor.getVelocity().getValue() < 0.0)
+      if(velocity < 0.0)
       {
         setSpeed(0);
       }

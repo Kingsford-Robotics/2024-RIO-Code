@@ -15,8 +15,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.wpilibj.PowerDistribution;
-import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -186,7 +184,7 @@ public class Swerve extends SubsystemBase {
         swervePoseEstimator.update(getGyroYaw(), getModulePositions());
 
         //Update Shuffleboard values
-        frontLeftAngle.setDouble(mSwerveMods[0].getState().angle.getDegrees());
+        /*frontLeftAngle.setDouble(mSwerveMods[0].getState().angle.getDegrees());
         frontLeftSpeed.setDouble(mSwerveMods[0].getState().speedMetersPerSecond);
         frontLeftOffset.setDouble(Constants.Swerve.Mod0.angleOffset.getDegrees());
 
@@ -202,6 +200,6 @@ public class Swerve extends SubsystemBase {
         backRightSpeed.setDouble(mSwerveMods[3].getState().speedMetersPerSecond);
         backRightOffset.setDouble(Constants.Swerve.Mod3.angleOffset.getDegrees());
 
-        field.setRobotPose(getPose());
+        field.setRobotPose(getPose());*/
     }
 }

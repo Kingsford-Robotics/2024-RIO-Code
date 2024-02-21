@@ -204,6 +204,7 @@ public final class Constants {
         public static final int pivotUpLimitSwitchID = 3;
 
         public static final int pivotAbsoluteEncoderID = 30;
+        public static final Rotation2d pivotAngleOffset = Rotation2d.fromDegrees(130);
 
         //PID Values
         public static final double pivotKP = 3;

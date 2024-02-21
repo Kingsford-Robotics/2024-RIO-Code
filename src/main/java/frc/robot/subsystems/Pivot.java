@@ -6,17 +6,10 @@ package frc.robot.subsystems;
 
 import java.util.function.DoubleSupplier;
 
-import com.ctre.phoenix.sensors.AbsoluteSensorRange;
-import com.ctre.phoenix.sensors.CANCoderConfiguration;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
-import com.ctre.phoenix6.signals.ControlModeValue;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkPIDController;
-import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
@@ -81,7 +74,7 @@ public class Pivot extends SubsystemBase {
     pivotFeedforward = new ArmFeedforward(PivotConstants.pivotKS, PivotConstants.pivotKG, PivotConstants.pivotKV);
 
 
-    pidController = new ProfiledPIDController(PivotConstants.pivotKP, PivotConstants.pivotKI, PivotConstants.pivotKD, new Constraints(Units.degreesToRadians(180), Units.degreesToRadians(250)));
+    pidController = new ProfiledPIDController(PivotConstants.pivotKP, PivotConstants.pivotKI, PivotConstants.pivotKD, new Constraints(Units.degreesToRadians(90), Units.degreesToRadians(140)));
 
     pivotDownLimitSwitch = new DigitalInput(PivotConstants.pivotDownLimitSwitchID);
     pivotUpLimitSwitch = new DigitalInput(PivotConstants.pivotUpLimitSwitchID);
@@ -115,6 +108,7 @@ public class Pivot extends SubsystemBase {
       public void initialize() {
         pidController.reset(getCANcoder().getRadians());
         pidController.setGoal(angle.getRadians());
+        angleSetpoint = angle;
       }
 
       @Override
@@ -128,18 +122,14 @@ public class Pivot extends SubsystemBase {
       public boolean isFinished() {
         return Math.abs(getCANcoder().getDegrees() - angle.getDegrees()) < 2.0;
       }
+
+      @Override
+      public void end(boolean interrupted){
+        setSpeed(0.0);
+      }
     }; 
   }
-
-  public void holdPosition(Rotation2d position)
-  {
-    pidController.reset(getCANcoder().getRadians());
-    pidController.setGoal(position.getRadians());
-    double output = pivotFeedforward.calculate(pidController.getSetpoint().position, pidController.getSetpoint().velocity);
-    output += Math.abs(getCANcoder().minus(position).getDegrees()) < 0.5? pidController.calculate(getCANcoder().getRadians()) : 0;
-    pivotLeftMotor.set(output / 12.0);
-  }
-
+ 
   public void setSpeed(double speed){
     if(getPivotUpLimitSwitch() && speed > 0){
       speed = 0;
@@ -159,37 +149,48 @@ public class Pivot extends SubsystemBase {
       }
 
       double endManualTime;
+      boolean isHoldingPosition = false;
 
       @Override
       public void initialize(){
         endManualTime = Timer.getFPGATimestamp();
-
       }
 
       @Override
-      public void execute(){
-        if(Math.abs(speed.getAsDouble()) > 0.05){
+      public void execute() {
+        if(Math.abs(speed.getAsDouble()) > 0.05) {
+          isHoldingPosition = false;
+  
           setSpeed(speed.getAsDouble());
           angleSetpoint = getCANcoder();
           endManualTime = Timer.getFPGATimestamp();
         }
+        
+        else if(Timer.getFPGATimestamp() - endManualTime < 0.250) {
+          isHoldingPosition = false;
 
-        else if(Timer.getFPGATimestamp() - endManualTime < 0.250){
           angleSetpoint = getCANcoder();
           setSpeed(0.0);
-        }
+        } 
+        
+        else 
+        {
+          if(!isHoldingPosition) {
+            pidController.reset(getCANcoder().getRadians());
+            pidController.setGoal(angleSetpoint.getRadians());
+            isHoldingPosition = true;
+          }
 
-        else{
-          holdPosition(angleSetpoint);
-        }
+          double output = pivotFeedforward.calculate(pidController.getSetpoint().position, pidController.getSetpoint().velocity);
+          output += Math.abs(getCANcoder().minus(angleSetpoint).getDegrees()) < 0.5? pidController.calculate(getCANcoder().getRadians()) : 0;
+          pivotLeftMotor.set(output / 12.0);
+        };
       }
     };
   }
 
   public Rotation2d getCANcoder(){
-
-    //TODO: Adjust offset to pull from constant.
-    return Rotation2d.fromRotations(pivotAbsoluteEncoder.getAbsolutePosition().getValue()).minus(Rotation2d.fromDegrees(130.0));
+    return Rotation2d.fromRotations(pivotAbsoluteEncoder.getAbsolutePosition().getValue()).minus(PivotConstants.pivotAngleOffset);
   }
 
   //*Returns a value from -1 to 1 */
