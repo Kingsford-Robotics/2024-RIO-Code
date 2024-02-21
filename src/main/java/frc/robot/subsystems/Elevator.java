@@ -43,6 +43,9 @@ public class Elevator extends SubsystemBase {
 
   private double position;
 
+  private boolean isManual = true;
+  private double manualSpeed = 0.0;
+
   private StatusSignal<Double> elevatorMotorVelocity;
   private StatusSignal<Double> elevatorMotorHeight;
   
@@ -111,6 +114,8 @@ public class Elevator extends SubsystemBase {
     }
 
     elevatorMotor.set(speed);
+    isManual = true;
+    manualSpeed = speed;
   }
 
   public Command setHeight(double height) {
@@ -120,10 +125,12 @@ public class Elevator extends SubsystemBase {
       }  
         @Override
         public void initialize() {
-            if(height >= 0 && height <= ElevatorConstants.elevatorMaxTravel) {
+          
+          isManual = false;  
+          if(height >= 0 && height <= ElevatorConstants.elevatorMaxTravel) {
                 position = height;
                 elevatorMotor.setControl(elevatorMotionMagicVoltage.withPosition(position));
-            }
+            } 
         }
 
         @Override
@@ -214,6 +221,7 @@ public class Elevator extends SubsystemBase {
   public void periodic() {
     double velocity = getVelocity();
     double height = getHeight();
+
     elevatorHeightEntry.setDouble(Units.metersToInches(height));
     elevatorSpeedEntry.setDouble(Units.metersToInches(velocity));
     topLimitSwitchEntry.setBoolean(getTopLimitSwitch());
@@ -221,18 +229,27 @@ public class Elevator extends SubsystemBase {
 
     //Apply hard limits. Stop the elevator if it hits the top or bottom limit switch.
 
+    //TODO: Fix limit switch logic.
     if(getTopLimitSwitch())
     {
-      if(velocity > 0.0)
+      if(isManual && manualSpeed > 0.01){
+        setSpeed(0.0);
+      }
+
+      else if(!isManual && velocity > 0.3)
       {
         setSpeed(0);
       }
     }
 
      else if(getBottomLimitSwitch()) {
-      //resetPosition(0.0);
+      resetPosition(0.0);
 
-      if(velocity < 0.0)
+      if(isManual && manualSpeed < 0.01){
+        setSpeed(0.0);
+      }
+
+      else if(!isManual && velocity < -0.3)
       {
         setSpeed(0);
       }

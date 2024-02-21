@@ -84,7 +84,7 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         /* Driver Buttons */
-        OIConstants.homeButton.whileTrue(
+        OIConstants.speakerTarget.whileTrue(
             new SequentialCommandGroup(
                 s_Elevator.setHeight(Units.inchesToMeters(12))
             )
