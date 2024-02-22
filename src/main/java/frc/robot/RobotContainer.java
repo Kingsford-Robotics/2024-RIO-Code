@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.OIConstants;
 import frc.robot.autos.*;
@@ -22,17 +23,13 @@ import frc.robot.subsystems.*;
 public class RobotContainer {
     /* Subsystems */
     private final Elevator s_Elevator = new Elevator();
-    //private final Intake s_Intake = new Intake();
+    private final Intake s_Intake = new Intake();
     //private final Jetson s_Jetson = new Jetson();
     //private final LedDriver s_LedDriver = new LedDriver();
     //private final Limelight s_Limelight = new Limelight();
     private final Pivot s_Pivot = new Pivot();
-    //private final Shooter s_Shooter = new Shooter();
+    private final Shooter s_Shooter = new Shooter();
     private final Swerve s_Swerve = new Swerve();
-
-    private final Command m_ElevatorTeleopCommand = s_Elevator.GetElevatorTeleop(() -> -OIConstants.elevatorSpeed.getAsDouble() * 0.2);
-    private final Command m_PivotTeleopCommand = s_Pivot.GetPivotTeleop(() -> -OIConstants.pivotSpeed.getAsDouble() * 0.2);
-    //private final Command m_deployIntake = new DeployIntake(s_Elevator, s_Pivot, s_Intake);
 
     private enum targetMode {
         kSpeaker,
@@ -55,15 +52,7 @@ public class RobotContainer {
             )
         );
 
-        s_Pivot.setDefaultCommand(
-            m_PivotTeleopCommand
-        );
-
-        s_Elevator.setDefaultCommand(
-            m_ElevatorTeleopCommand
-        );
-
-        /*
+        
         s_Shooter.setDefaultCommand(
             new InstantCommand(() -> s_Shooter.setShooterPercent(-OIConstants.shooterSpeed.getAsDouble() * 1.0), s_Shooter)
         );
@@ -71,7 +60,7 @@ public class RobotContainer {
         s_Intake.setDefaultCommand(
             new InstantCommand(() -> s_Intake.setSpeed(OIConstants.intakeSpeed.getAsDouble()), s_Intake)
         );
-*/
+
         // Configure the button bindings
         configureButtonBindings();
     }
@@ -86,8 +75,15 @@ public class RobotContainer {
         /* Driver Buttons */
         OIConstants.speakerTarget.whileTrue(
             new SequentialCommandGroup(
-                s_Pivot.setPivotAngle(Rotation2d.fromDegrees(45.0), m_PivotTeleopCommand),
-                s_Elevator.setHeight(Units.inchesToMeters(12))
+                s_Pivot.setPivotAngle(Rotation2d.fromDegrees(45.0)),
+                s_Elevator.setHeight(Units.inchesToMeters(10.0))
+            )
+        );
+
+        OIConstants.climbDeploy.whileTrue(
+            new ParallelCommandGroup(
+                s_Pivot.manualControl(() -> -OIConstants.pivotSpeed.getAsDouble() * 0.2),
+                s_Elevator.manualControl(() -> -OIConstants.elevatorSpeed.getAsDouble() * 0.2)
             )
         );
 

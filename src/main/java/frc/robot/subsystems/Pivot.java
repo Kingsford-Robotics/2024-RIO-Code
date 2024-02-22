@@ -50,6 +50,9 @@ public class Pivot extends SubsystemBase {
 
   private Rotation2d angleSetpoint;
 
+  private boolean isCommandRunning = false;
+  private boolean isHoldingPosition = false;
+
   public Pivot() {
     //Shuffleboard Setup
     tab = Shuffleboard.getTab("Pivot");
@@ -75,8 +78,9 @@ public class Pivot extends SubsystemBase {
 
     pivotFeedforward = new ArmFeedforward(PivotConstants.pivotKS, PivotConstants.pivotKG, PivotConstants.pivotKV);
 
-
     pidController = new ProfiledPIDController(PivotConstants.pivotKP, PivotConstants.pivotKI, PivotConstants.pivotKD, new Constraints(Units.degreesToRadians(90), Units.degreesToRadians(140)));
+
+    pidController.setTolerance(0);
 
     pivotDownLimitSwitch = new DigitalInput(PivotConstants.pivotDownLimitSwitchID);
     pivotUpLimitSwitch = new DigitalInput(PivotConstants.pivotUpLimitSwitchID);
@@ -98,9 +102,11 @@ public class Pivot extends SubsystemBase {
 
     pivotLeftMotor.burnFlash();
     pivotRightMotor.burnFlash();
+
+    angleSetpoint = getCANcoder();
   }
 
-  public Command setPivotAngle(Rotation2d angle, Command defaultCommand){
+  public Command setPivotAngle(Rotation2d angle){
     return new Command() {
       {
         addRequirements(Pivot.this);
@@ -111,10 +117,14 @@ public class Pivot extends SubsystemBase {
         pidController.reset(getCANcoder().getRadians());
         pidController.setGoal(angle.getRadians());
         angleSetpoint = angle;
+        isCommandRunning = true;
+        isHoldingPosition = false;
       }
 
       @Override
       public void execute() {
+        isCommandRunning = true;
+        isHoldingPosition = false;
         double output = pidController.calculate(getCANcoder().getRadians()) + pivotFeedforward.calculate(pidController.getSetpoint().position, pidController.getSetpoint().velocity);
         pivotLeftMotor.set(output / 12.0);
         positionError.setDouble(Units.radiansToDegrees(pidController.getPositionError()));
@@ -122,12 +132,14 @@ public class Pivot extends SubsystemBase {
 
       @Override
       public boolean isFinished() {
-        return Math.abs(getCANcoder().getDegrees() - angle.getDegrees()) < 2.0;
+        double error = Math.abs(getCANcoder().getDegrees() - angle.getDegrees());
+        return error < 4.0;
       }
 
       @Override
       public void end(boolean interrupted) {
-        setSpeed(0.0);
+        isCommandRunning = false;
+        isHoldingPosition = false;
       }
     }; 
   }
@@ -144,49 +156,50 @@ public class Pivot extends SubsystemBase {
     pivotLeftMotor.set(speed);
   }
 
-  public Command GetPivotTeleop(DoubleSupplier speed){
+  public Command manualControl(DoubleSupplier speed){
     return new Command(){
       {
         addRequirements(Pivot.this);
       }
 
       double endManualTime;
-      boolean isHoldingPosition = false;
 
       @Override
       public void initialize(){
         endManualTime = Timer.getFPGATimestamp();
+        isCommandRunning = true;
+        isHoldingPosition = false;
       }
 
       @Override
-      public void execute() {
-        if(Math.abs(speed.getAsDouble()) > 0.05) {
+      public void execute(){
+        if(Math.abs(speed.getAsDouble()) > 0.05){
           isHoldingPosition = false;
-  
+          isCommandRunning = true;
+
           setSpeed(speed.getAsDouble());
           angleSetpoint = getCANcoder();
           endManualTime = Timer.getFPGATimestamp();
         }
-        
-        else if(Timer.getFPGATimestamp() - endManualTime < 0.250) {
+
+        else if(Timer.getFPGATimestamp() - endManualTime < 0.250){
           isHoldingPosition = false;
+          isCommandRunning = true;
 
           angleSetpoint = getCANcoder();
           setSpeed(0.0);
-        } 
-        
-        else 
-        {
-          if(!isHoldingPosition) {
-            pidController.reset(getCANcoder().getRadians());
-            pidController.setGoal(angleSetpoint.getRadians());
-            isHoldingPosition = true;
-          }
+        }
 
-          double output = pivotFeedforward.calculate(pidController.getSetpoint().position, pidController.getSetpoint().velocity);
-          output += Math.abs(getCANcoder().minus(angleSetpoint).getDegrees()) < 0.5? pidController.calculate(getCANcoder().getRadians()) : 0;
-          pivotLeftMotor.set(output / 12.0);
-        };
+        else{
+          isCommandRunning = false;
+        }
+      }
+
+      @Override
+      public void end(boolean interrupted){
+        setSpeed(0.0);
+        isCommandRunning = false;
+        isHoldingPosition = false;
       }
     };
   }
@@ -215,8 +228,19 @@ public class Pivot extends SubsystemBase {
     downLimitSwitchEntry.setBoolean(pivotDownLimitSwitch.get());
     upLimitSwitchEntry.setBoolean(pivotUpLimitSwitch.get());
 
+    if(!isHoldingPosition && !isCommandRunning) {
+      pidController.reset(getCANcoder().getRadians());
+      pidController.setGoal(angleSetpoint.getRadians());
+      isHoldingPosition = true;
+    }
+
+    if(!isCommandRunning){
+      double output = pivotFeedforward.calculate(pidController.getSetpoint().position, pidController.getSetpoint().velocity);
+      output += Math.abs(getCANcoder().minus(angleSetpoint).getDegrees()) < 0.5? pidController.calculate(getCANcoder().getRadians()) : 0;
+      pivotLeftMotor.set(output / 12.0);
+    }
+
     //Limit Switch Hard Stops
-    
     if(getPivotUpLimitSwitch() && getPivotSpeed().getDegrees() > 0.0)
     {
       setSpeed(0.0);

@@ -140,45 +140,49 @@ public class Elevator extends SubsystemBase {
     };
 }
 
-  public Command GetElevatorTeleop(DoubleSupplier speed){
-    return new Command(){
+  public Command manualControl(DoubleSupplier speed) {
+    return new Command() {
       {
         addRequirements(Elevator.this);
       }
 
       double endManualTime;
-      boolean isHoldingPosition = false;
+      boolean isHoldingPosition;
 
       @Override
-      public void initialize(){
+      public void initialize() {
         endManualTime = Timer.getFPGATimestamp();
+        position = getHeight();
+        isHoldingPosition = false;
       }
 
       @Override
-      public void execute(){
+      public void execute() {
         if(Math.abs(speed.getAsDouble()) > 0.05){
-          isHoldingPosition = false;
-
           setSpeed(speed.getAsDouble());
-          position = getHeight();
           endManualTime = Timer.getFPGATimestamp();
+          isHoldingPosition = false;
         }
 
         else if(Timer.getFPGATimestamp() - endManualTime < 0.250){
-          isHoldingPosition = false;
-
-          position = getHeight();
           setSpeed(0.0);
+          isHoldingPosition = false;
         }
 
         else if(!isHoldingPosition){
+          position = getHeight();
           elevatorMotor.setControl(elevatorMotionMagicVoltage.withPosition(position));
           isHoldingPosition = true;
         }
       }
+
+      @Override
+      public void end(boolean interrupted) {
+        position = getHeight();
+        elevatorMotor.setControl(elevatorMotionMagicVoltage.withPosition(position));
+      }
     };
   }
-
   public void resetPosition(double position)
   {
     elevatorMotor.setPosition(position);
@@ -224,16 +228,16 @@ public class Elevator extends SubsystemBase {
     bottomLimitSwitchEntry.setBoolean(getBottomLimitSwitch());
 
     // Apply hard limits. Stop the elevator if it hits the top or bottom limit switch.
-    if(getTopLimitSwitch() && velocity > 0 && (!isMotionMagic || (isMotionMagic && position > height)))
+    if(getTopLimitSwitch() && isMotionMagic && position > height)
     {
       resetPosition(ElevatorConstants.elevatorMaxTravel);  
       setSpeed(0.0);
     }
 
-    else if(getBottomLimitSwitch() && velocity < 0 && (!isMotionMagic || (isMotionMagic && position < height)))
+    else if(getBottomLimitSwitch() && isMotionMagic && position < height)
     {
         resetPosition(0.0);
         setSpeed(0.0);
     }
-}
+  }
 }
