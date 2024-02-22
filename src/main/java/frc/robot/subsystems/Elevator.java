@@ -12,6 +12,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.*;
+import com.ctre.phoenix6.signals.MotionMagicIsRunningValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.util.Units;
@@ -42,9 +43,6 @@ public class Elevator extends SubsystemBase {
   private MotionMagicVoltage elevatorMotionMagicVoltage;
 
   private double position;
-
-  private boolean isManual = true;
-  private double manualSpeed = 0.0;
 
   private StatusSignal<Double> elevatorMotorVelocity;
   private StatusSignal<Double> elevatorMotorHeight;
@@ -114,8 +112,6 @@ public class Elevator extends SubsystemBase {
     }
 
     elevatorMotor.set(speed);
-    isManual = true;
-    manualSpeed = speed;
   }
 
   public Command setHeight(double height) {
@@ -125,8 +121,7 @@ public class Elevator extends SubsystemBase {
       }  
         @Override
         public void initialize() {
-          
-          isManual = false;  
+           
           if(height >= 0 && height <= ElevatorConstants.elevatorMaxTravel) {
                 position = height;
                 elevatorMotor.setControl(elevatorMotionMagicVoltage.withPosition(position));
@@ -221,38 +216,24 @@ public class Elevator extends SubsystemBase {
   public void periodic() {
     double velocity = getVelocity();
     double height = getHeight();
+    boolean isMotionMagic = elevatorMotor.getMotionMagicIsRunning().getValue() == MotionMagicIsRunningValue.Enabled;
 
     elevatorHeightEntry.setDouble(Units.metersToInches(height));
     elevatorSpeedEntry.setDouble(Units.metersToInches(velocity));
     topLimitSwitchEntry.setBoolean(getTopLimitSwitch());
     bottomLimitSwitchEntry.setBoolean(getBottomLimitSwitch());
 
-    //Apply hard limits. Stop the elevator if it hits the top or bottom limit switch.
-
-    //TODO: Fix limit switch logic.
-    if(getTopLimitSwitch())
+    // Apply hard limits. Stop the elevator if it hits the top or bottom limit switch.
+    if(getTopLimitSwitch() && velocity > 0 && (!isMotionMagic || (isMotionMagic && position > height)))
     {
-      if(isManual && manualSpeed > 0.01){
-        setSpeed(0.0);
-      }
-
-      else if(!isManual && velocity > 0.3)
-      {
-        setSpeed(0);
-      }
+      resetPosition(ElevatorConstants.elevatorMaxTravel);  
+      setSpeed(0.0);
     }
 
-     else if(getBottomLimitSwitch()) {
-      resetPosition(0.0);
-
-      if(isManual && manualSpeed < 0.01){
+    else if(getBottomLimitSwitch() && velocity < 0 && (!isMotionMagic || (isMotionMagic && position < height)))
+    {
+        resetPosition(0.0);
         setSpeed(0.0);
-      }
-
-      else if(!isManual && velocity < -0.3)
-      {
-        setSpeed(0);
-      }
     }
-  }
+}
 }

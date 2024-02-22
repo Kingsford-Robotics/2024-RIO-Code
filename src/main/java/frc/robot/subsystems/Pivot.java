@@ -62,6 +62,8 @@ public class Pivot extends SubsystemBase {
     pivotLeftMotor = new CANSparkMax(PivotConstants.pivotLeftMotorID, MotorType.kBrushless);
     pivotRightMotor = new CANSparkMax(PivotConstants.pivotRightMotorID, MotorType.kBrushless);
 
+    tab.add("Pivot", this);
+
 
     pivotAbsoluteEncoder = new CANcoder(PivotConstants.pivotAbsoluteEncoderID);
 
@@ -98,7 +100,7 @@ public class Pivot extends SubsystemBase {
     pivotRightMotor.burnFlash();
   }
 
-  public Command setPivotAngle(Rotation2d angle){
+  public Command setPivotAngle(Rotation2d angle, Command defaultCommand){
     return new Command() {
       {
         addRequirements(Pivot.this);
@@ -124,7 +126,7 @@ public class Pivot extends SubsystemBase {
       }
 
       @Override
-      public void end(boolean interrupted){
+      public void end(boolean interrupted) {
         setSpeed(0.0);
       }
     }; 

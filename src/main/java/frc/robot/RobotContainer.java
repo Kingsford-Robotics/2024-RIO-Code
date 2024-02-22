@@ -86,6 +86,7 @@ public class RobotContainer {
         /* Driver Buttons */
         OIConstants.speakerTarget.whileTrue(
             new SequentialCommandGroup(
+                s_Pivot.setPivotAngle(Rotation2d.fromDegrees(45.0), m_PivotTeleopCommand),
                 s_Elevator.setHeight(Units.inchesToMeters(12))
             )
         );

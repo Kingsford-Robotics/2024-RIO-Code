@@ -148,7 +148,7 @@ public final class Constants {
         public static final int bottomLimitSwitchID = 1;
 
         //Elevator Travel Constants
-        public static final double elevatorMaxTravel = Units.inchesToMeters(12.2);
+        public static final double elevatorMaxTravel = Units.inchesToMeters(12.87);
         public static final double softLimit = Units.inchesToMeters(1); //Slows speed down when close to limit.
         public static final double errorThreshold = Units.inchesToMeters(0.125); //0.125 tolerance for positions.
 
@@ -207,8 +207,8 @@ public final class Constants {
         public static final Rotation2d pivotAngleOffset = Rotation2d.fromDegrees(130);
 
         //PID Values
-        public static final double pivotKP = 5;
-        public static final double pivotKI = 0;
+        public static final double pivotKP = 10;
+        public static final double pivotKI = 0.3;
         public static final double pivotKD = 0;
 
         public static final double pivotKG = 0.19;
