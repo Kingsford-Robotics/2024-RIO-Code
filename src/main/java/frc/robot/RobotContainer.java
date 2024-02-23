@@ -5,9 +5,9 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.OIConstants;
 import frc.robot.autos.*;
@@ -22,25 +22,43 @@ import frc.robot.subsystems.*;
  */
 public class RobotContainer {
     /* Subsystems */
-    private final Elevator s_Elevator = new Elevator();
-    private final Intake s_Intake = new Intake();
+    private final Elevator s_Elevator;
+    private final Intake s_Intake;
     //private final Jetson s_Jetson = new Jetson();
     //private final LedDriver s_LedDriver = new LedDriver();
     //private final Limelight s_Limelight = new Limelight();
-    private final Pivot s_Pivot = new Pivot();
-    private final Shooter s_Shooter = new Shooter();
-    private final Swerve s_Swerve = new Swerve();
+    private final Pivot s_Pivot;
+    private final Shooter s_Shooter;
+    private final Swerve s_Swerve;
 
     private enum targetMode {
         kSpeaker,
-        kAmp,
-        kPass
+        kAmp
     }
 
     private targetMode m_TargetMode = targetMode.kSpeaker;
 
+    private SequentialCommandGroup m_GoHome;
+    private SequentialCommandGroup m_AmpScore;
+    private SequentialCommandGroup m_deployIntake;
+    private SequentialCommandGroup m_SpeakerScore;
+
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
+        s_Elevator = new Elevator();
+        s_Intake = new Intake();
+        //s_Jetson = new Jetson();
+        //s_LedDriver = new LedDriver();
+        //s_Limelight = new Limelight();
+        s_Pivot = new Pivot();
+        s_Shooter = new Shooter();
+        s_Swerve = new Swerve();
+
+        m_GoHome = new GoHome(s_Elevator, s_Pivot);
+        m_AmpScore = new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter);
+        m_deployIntake = new DeployIntake(s_Elevator, s_Pivot, s_Intake);
+        m_SpeakerScore = new SpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter);
+
         s_Swerve.setDefaultCommand(
             new TeleopSwerve(
                 s_Swerve, 
@@ -50,15 +68,6 @@ public class RobotContainer {
                 () -> OIConstants.robotCentric.getAsBoolean(),
                 () -> OIConstants.slowSpeed.getAsBoolean()
             )
-        );
-
-        
-        s_Shooter.setDefaultCommand(
-            new InstantCommand(() -> s_Shooter.setShooterPercent(-OIConstants.shooterSpeed.getAsDouble() * 1.0), s_Shooter)
-        );
-
-        s_Intake.setDefaultCommand(
-            new InstantCommand(() -> s_Intake.setSpeed(OIConstants.intakeSpeed.getAsDouble()), s_Intake)
         );
 
         // Configure the button bindings
@@ -73,13 +82,6 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         /* Driver Buttons */
-        OIConstants.speakerTarget.whileTrue(
-            new SequentialCommandGroup(
-                s_Pivot.setPivotAngle(Rotation2d.fromDegrees(45.0)),
-                s_Elevator.setHeight(Units.inchesToMeters(10.0))
-            )
-        );
-
         OIConstants.climbDeploy.whileTrue(
             new ParallelCommandGroup(
                 s_Pivot.manualControl(() -> -OIConstants.pivotSpeed.getAsDouble() * 0.2),
@@ -87,12 +89,39 @@ public class RobotContainer {
             )
         );
 
-        //OIConstants.deployIntake.onTrue(m_deployIntake);
+        //A Button
+        OIConstants.ampTarget.onTrue(new InstantCommand(()-> m_TargetMode = targetMode.kAmp));
+
+        OIConstants.speakerTarget.onTrue(new InstantCommand(() -> m_TargetMode = targetMode.kSpeaker));
+
+        //Left Stick Center Button
+        OIConstants.homeButton.whileTrue(
+            m_GoHome
+        );
+
+        //Drive left trigger
+        OIConstants.deployIntake.whileTrue(
+            m_deployIntake
+        ).onFalse(m_GoHome);
+
+        OIConstants.shoot.whileTrue(
+            new ConditionalCommand(
+                m_SpeakerScore, 
+                m_AmpScore, 
+                () -> m_TargetMode == targetMode.kSpeaker
+            )
+        ).onFalse(
+            new ParallelCommandGroup(
+                new InstantCommand(() -> s_Shooter.setShooterPercent(0.0), s_Shooter),
+                new InstantCommand(() -> s_Intake.setSpeed(0.0), s_Intake),
+                m_GoHome
+            )
+        );
 
         /* Co-Driver Buttons */
 
         //Reverse Intake
-        /*OIConstants.reverseIntake.onTrue(new InstantCommand(() -> s_Intake.setSpeed(-0.5), s_Intake))
+        OIConstants.reverseIntake.onTrue(new InstantCommand(() -> s_Intake.setSpeed(-0.3), s_Intake))
             .onFalse(new InstantCommand(() -> s_Intake.setSpeed(0.0), s_Intake));
         
         //Speaker Mode
@@ -100,9 +129,6 @@ public class RobotContainer {
 
         //Amp Mode
         OIConstants.ampTarget.onTrue(new InstantCommand(() -> m_TargetMode = targetMode.kAmp));
-
-        //Pass Mode
-        OIConstants.passTarget.onTrue(new InstantCommand(() -> m_TargetMode = targetMode.kPass));
         
         //TODO: Add climb commands.*/
     }

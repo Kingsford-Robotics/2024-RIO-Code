@@ -4,29 +4,49 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Pivot;
+import frc.robot.subsystems.Shooter;
 
-public class SpeakerScore extends Command {
+public class SpeakerScore extends SequentialCommandGroup {
   /** Creates a new SpeakerScore. */
-  public SpeakerScore() {
-    // Use addRequirements() here to declare subsystem dependencies.
-  }
+  public SpeakerScore(Elevator elevator, Intake intake, Pivot pivot, Shooter shooter) {
+    // Add your commands in the addCommands() call, e.g.
+    // addCommands(new FooCommand(), new BarCommand());
+    addCommands(
+      new ConditionalCommand(
+        new SequentialCommandGroup(
+          elevator.setHeight(Units.inchesToMeters(12.78)),
+          pivot.setPivotAngle(Rotation2d.fromDegrees(20.0))
+        ), 
+        new ConditionalCommand(
+          new ParallelCommandGroup(
+            pivot.setPivotAngle(Rotation2d.fromDegrees(20.0)),
+            elevator.setHeight(Units.inchesToMeters(12.78))
+          ),
+          new SequentialCommandGroup(
+            pivot.setPivotAngle(Rotation2d.fromDegrees(8.0)),
+            new ParallelCommandGroup(
+              elevator.setHeight(Units.inchesToMeters(12.78)),
+              pivot.setPivotAngle(Rotation2d.fromDegrees(20))
+            )
+          ),
+          () -> pivot.getCANcoder().getDegrees() > 8.0), 
+        () -> elevator.getHeight() > 10 && pivot.getCANcoder().getDegrees() < 8.0
+      ),
 
-  // Called when the command is initially scheduled.
-  @Override
-  public void initialize() {}
-
-  // Called every time the scheduler runs while the command is scheduled.
-  @Override
-  public void execute() {}
-
-  // Called once the command ends or is interrupted.
-  @Override
-  public void end(boolean interrupted) {}
-
-  // Returns true when the command should end.
-  @Override
-  public boolean isFinished() {
-    return false;
+      //Fix this logic once I get RPMs setup. Wait until within speed tolerance.
+      new InstantCommand(() -> shooter.setShooterPercent(0.7), shooter),
+      new WaitCommand(1.0),
+      new InstantCommand(() -> intake.setSpeed(1.0), intake)
+    );
   }
 }

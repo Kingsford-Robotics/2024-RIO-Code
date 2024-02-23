@@ -78,7 +78,7 @@ public class Pivot extends SubsystemBase {
 
     pivotFeedforward = new ArmFeedforward(PivotConstants.pivotKS, PivotConstants.pivotKG, PivotConstants.pivotKV);
 
-    pidController = new ProfiledPIDController(PivotConstants.pivotKP, PivotConstants.pivotKI, PivotConstants.pivotKD, new Constraints(Units.degreesToRadians(90), Units.degreesToRadians(140)));
+    pidController = new ProfiledPIDController(PivotConstants.pivotKP, PivotConstants.pivotKI, PivotConstants.pivotKD, new Constraints(PivotConstants.pivotVelocity, PivotConstants.pivotAcceleration));
 
     pidController.setTolerance(0);
 

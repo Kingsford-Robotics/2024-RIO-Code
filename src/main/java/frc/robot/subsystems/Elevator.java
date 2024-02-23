@@ -6,12 +6,14 @@ package frc.robot.subsystems;
 
 import java.util.function.DoubleSupplier;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.*;
+import com.ctre.phoenix6.signals.ControlModeValue;
 import com.ctre.phoenix6.signals.MotionMagicIsRunningValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -89,6 +91,7 @@ public class Elevator extends SubsystemBase {
     elevatorMotorVelocity = elevatorMotor.getVelocity();
     elevatorMotorHeight = elevatorMotor.getPosition();
 
+    resetPosition(ElevatorConstants.elevatorMaxTravel - Units.inchesToMeters(0.5));
     position = getHeight();
   }
 
@@ -96,18 +99,14 @@ public class Elevator extends SubsystemBase {
     //Stops the elevator if it hits the top or bottom limit switch.
     if(getTopLimitSwitch() && speed > 0) {
       speed = 0;
-    }
-
-    else if(getBottomLimitSwitch() && speed < 0) {
+    } else if(getBottomLimitSwitch() && speed < 0) {
       speed = 0;
     }
 
     //Apply soft limits. Limit speed if within soft limit range.
     if(getHeight() >= ElevatorConstants.elevatorMaxTravel - ElevatorConstants.softLimit && speed > 0) {
       speed = Math.min(speed, 0.1);
-    }
-
-    else if(getHeight() <= 0 + ElevatorConstants.softLimit && speed < 0) {
+    } else if(getHeight() <= 0 + ElevatorConstants.softLimit && speed < 0) {
       speed = Math.max(speed, -0.1);
     }
 
@@ -131,11 +130,6 @@ public class Elevator extends SubsystemBase {
         @Override
         public boolean isFinished() {
           return Math.abs(height - getHeight()) < ElevatorConstants.errorThreshold;
-        }
-
-        @Override
-        public void end(boolean interrupted) {
-          elevatorMotor.set(0);
         }
     };
 }
@@ -220,7 +214,8 @@ public class Elevator extends SubsystemBase {
   public void periodic() {
     double velocity = getVelocity();
     double height = getHeight();
-    boolean isMotionMagic = elevatorMotor.getMotionMagicIsRunning().getValue() == MotionMagicIsRunningValue.Enabled;
+
+    double percentOutput = elevatorMotor.getDutyCycle().getValue();
 
     elevatorHeightEntry.setDouble(Units.metersToInches(height));
     elevatorSpeedEntry.setDouble(Units.metersToInches(velocity));
@@ -228,16 +223,16 @@ public class Elevator extends SubsystemBase {
     bottomLimitSwitchEntry.setBoolean(getBottomLimitSwitch());
 
     // Apply hard limits. Stop the elevator if it hits the top or bottom limit switch.
-    if(getTopLimitSwitch() && isMotionMagic && position > height)
+    if(getTopLimitSwitch() && percentOutput > 0.05)
     {
       resetPosition(ElevatorConstants.elevatorMaxTravel);  
-      setSpeed(0.0);
+      setHeight(getHeight() - Units.inchesToMeters(0.05));
     }
 
-    else if(getBottomLimitSwitch() && isMotionMagic && position < height)
+    else if(getBottomLimitSwitch() && percentOutput < -0.05)
     {
         resetPosition(0.0);
-        setSpeed(0.0);
+        setHeight(getHeight() + Units.inchesToMeters(0.05));
     }
   }
 }

@@ -1,7 +1,9 @@
 {
   "NTProvider": {
     "types": {
-      "/FMSInfo": "FMSInfo"
+      "/FMSInfo": "FMSInfo",
+      "/Shuffleboard/Pivot/Pivot": "Subsystem",
+      "/Shuffleboard/Swerve/Field": "Field2d"
     }
   },
   "NetworkTables Info": {
