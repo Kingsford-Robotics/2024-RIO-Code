@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -40,7 +41,7 @@ public class RobotContainer {
 
     private SequentialCommandGroup m_GoHome;
     private SequentialCommandGroup m_AmpScore;
-    private SequentialCommandGroup m_deployIntake;
+    private Command m_deployIntake;
     private SequentialCommandGroup m_SpeakerScore;
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -82,6 +83,11 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         /* Driver Buttons */
+        //A Button
+        OIConstants.ampTarget.onTrue(new InstantCommand(()-> m_TargetMode = targetMode.kAmp));
+
+        OIConstants.speakerTarget.onTrue(new InstantCommand(() -> m_TargetMode = targetMode.kSpeaker));
+
         OIConstants.climbDeploy.whileTrue(
             new ParallelCommandGroup(
                 s_Pivot.manualControl(() -> -OIConstants.pivotSpeed.getAsDouble() * 0.2),
@@ -89,20 +95,25 @@ public class RobotContainer {
             )
         );
 
-        //A Button
-        OIConstants.ampTarget.onTrue(new InstantCommand(()-> m_TargetMode = targetMode.kAmp));
-
-        OIConstants.speakerTarget.onTrue(new InstantCommand(() -> m_TargetMode = targetMode.kSpeaker));
-
         //Left Stick Center Button
         OIConstants.homeButton.whileTrue(
-            m_GoHome
+            new GoHome(s_Elevator, s_Pivot)
         );
 
         //Drive left trigger
         OIConstants.deployIntake.whileTrue(
-            m_deployIntake
-        ).onFalse(m_GoHome);
+            m_deployIntake.finallyDo(
+                (interrupted) -> {
+                    s_Intake.setSpeed(0);
+                    new GoHome(s_Elevator, s_Pivot).schedule();
+                }
+            )
+        );
+
+        //TODO: Remove this after testing limit switch logic.
+        OIConstants.climbRetract.whileTrue(
+            s_Elevator.setHeight(Units.inchesToMeters(12))
+        );
 
         OIConstants.shoot.whileTrue(
             new ConditionalCommand(
@@ -114,15 +125,19 @@ public class RobotContainer {
             new ParallelCommandGroup(
                 new InstantCommand(() -> s_Shooter.setShooterPercent(0.0), s_Shooter),
                 new InstantCommand(() -> s_Intake.setSpeed(0.0), s_Intake),
-                m_GoHome
+                new GoHome(s_Elevator, s_Pivot)
             )
+        );
+
+        OIConstants.resetGyro.onTrue(
+            new InstantCommand(() -> s_Swerve.zeroHeading(), s_Swerve)
         );
 
         /* Co-Driver Buttons */
 
         //Reverse Intake
-        OIConstants.reverseIntake.onTrue(new InstantCommand(() -> s_Intake.setSpeed(-0.3), s_Intake))
-            .onFalse(new InstantCommand(() -> s_Intake.setSpeed(0.0), s_Intake));
+        OIConstants.reverseIntake.whileTrue(new InstantCommand(() -> s_Intake.setSpeed(-0.3), s_Intake)).
+            onFalse(new InstantCommand(() -> s_Intake.setSpeed(0.0), s_Intake));
         
         //Speaker Mode
         OIConstants.speakerTarget.onTrue(new InstantCommand(() -> m_TargetMode = targetMode.kSpeaker));

@@ -131,6 +131,11 @@ public class Elevator extends SubsystemBase {
         public boolean isFinished() {
           return Math.abs(height - getHeight()) < ElevatorConstants.errorThreshold;
         }
+
+        @Override
+        public void end(boolean interrupted) {
+          elevatorMotor.setControl(elevatorMotionMagicVoltage.withPosition(getHeight()));
+        }
     };
 }
 
@@ -223,14 +228,16 @@ public class Elevator extends SubsystemBase {
     bottomLimitSwitchEntry.setBoolean(getBottomLimitSwitch());
 
     // Apply hard limits. Stop the elevator if it hits the top or bottom limit switch.
-    if(getTopLimitSwitch() && percentOutput > 0.05)
+    if(getTopLimitSwitch() && percentOutput > 0.01)
     {
+      setSpeed(0.0);
       resetPosition(ElevatorConstants.elevatorMaxTravel);  
       setHeight(getHeight() - Units.inchesToMeters(0.05));
     }
 
-    else if(getBottomLimitSwitch() && percentOutput < -0.05)
+    else if(getBottomLimitSwitch() && percentOutput < -0.01)
     {
+        setSpeed(0.0);  
         resetPosition(0.0);
         setHeight(getHeight() + Units.inchesToMeters(0.05));
     }

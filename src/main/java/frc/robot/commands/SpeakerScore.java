@@ -40,11 +40,11 @@ public class SpeakerScore extends SequentialCommandGroup {
             )
           ),
           () -> pivot.getCANcoder().getDegrees() > 8.0), 
-        () -> elevator.getHeight() > 10 && pivot.getCANcoder().getDegrees() < 8.0
+        () -> elevator.getHeight() > Units.inchesToMeters(10) && pivot.getCANcoder().getDegrees() < 8.0
       ),
 
       //Fix this logic once I get RPMs setup. Wait until within speed tolerance.
-      new InstantCommand(() -> shooter.setShooterPercent(0.7), shooter),
+      new InstantCommand(() -> shooter.setShooterPercent(-0.7), shooter),
       new WaitCommand(1.0),
       new InstantCommand(() -> intake.setSpeed(1.0), intake)
     );

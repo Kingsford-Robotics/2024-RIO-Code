@@ -46,6 +46,7 @@ public class OIConstants {
     public static final JoystickButton deployIntake = driveLeft.getTrigger();
     public static final JoystickButton shoot = driveRight.getTrigger();
     public static final JoystickButton homeButton = driveLeft.getStickCenterButton();
+    public static final JoystickButton resetGyro = driveRight.getStickCenterButton();
 
     //Handheld Controller Suppliers
     public static final DoubleSupplier elevatorSpeed = () -> coDriverController.getLeftY();
@@ -60,7 +61,7 @@ public class OIConstants {
     public static final JoystickButton climbDeploy = new JoystickButton(coDriverController, XboxController.Button.kLeftBumper.value);
     public static final JoystickButton climbRetract = new JoystickButton(coDriverController, XboxController.Button.kRightBumper.value);
 
-    public static final JoystickButton reverseIntake = new JoystickButton(coDriverController, XboxController.Button.kBack.value);
+    public static final JoystickButton reverseIntake = new JoystickButton(coDriverController, XboxController.Button.kX.value);
 
     public static final POVButton snapFront = new POVButton(coDriverController, 0);
     public static final POVButton snapBack = new POVButton(coDriverController, 180);

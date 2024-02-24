@@ -56,7 +56,7 @@ public class AmpScore extends SequentialCommandGroup {
       pivot.setPivotAngle(Rotation2d.fromDegrees(96)),
       new PrintCommand("Pivot to Angle"),
       new InstantCommand(() -> intake.setSpeed(0.3), intake),
-      new InstantCommand(() -> shooter.setShooterPercent(0.3), shooter)
+      new InstantCommand(() -> shooter.setShooterPercent(-0.3), shooter)
     );
   }
 }

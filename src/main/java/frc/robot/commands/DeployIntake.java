@@ -20,39 +20,37 @@ public class DeployIntake extends SequentialCommandGroup {
     addCommands(
       new ConditionalCommand(
         new SequentialCommandGroup(
-          elevator.setHeight(Units.inchesToMeters(12.78)),
+          elevator.setHeight(Units.inchesToMeters(12.83)),
           new ConditionalCommand(
             new ParallelCommandGroup(
-              pivot.setPivotAngle(Rotation2d.fromDegrees(8.0)),
+              pivot.setPivotAngle(Rotation2d.fromDegrees(9.0)),
               elevator.setHeight(Units.inchesToMeters(0.1))
             ),
             new SequentialCommandGroup(
-              pivot.setPivotAngle(Rotation2d.fromDegrees(8.0)),
+              pivot.setPivotAngle(Rotation2d.fromDegrees(9.0)),
               elevator.setHeight(Units.inchesToMeters(0.1))
             ),
-            () -> pivot.getCANcoder().getDegrees() > 8.0
+            () -> pivot.getCANcoder().getDegrees() > 9.0
           ),
-          pivot.setPivotAngle(Rotation2d.fromDegrees(-2.0))
+          pivot.setPivotAngle(Rotation2d.fromDegrees(-5.0))
         ),
         new ConditionalCommand(
           new ParallelCommandGroup(
-            pivot.setPivotAngle(Rotation2d.fromDegrees(8.0)),
+            pivot.setPivotAngle(Rotation2d.fromDegrees(9.0)),
             elevator.setHeight(Units.inchesToMeters(0.1))
           ),
           new SequentialCommandGroup(
-            pivot.setPivotAngle(Rotation2d.fromDegrees(8.0)),
+            pivot.setPivotAngle(Rotation2d.fromDegrees(9.0)),
             elevator.setHeight(Units.inchesToMeters(0.1))
           ),
-          () -> pivot.getCANcoder().getDegrees() > 8.0
+          () -> pivot.getCANcoder().getDegrees() > 9.0
         ),
-        () -> elevator.getHeight() > Units.inchesToMeters(10) && pivot.getCANcoder().getDegrees() < 8.0
+        () -> elevator.getHeight() > Units.inchesToMeters(10) && pivot.getCANcoder().getDegrees() < 9.0
       ),
       new SequentialCommandGroup(
-        pivot.setPivotAngle(Rotation2d.fromDegrees(-4.0)),
+        pivot.setPivotAngle(Rotation2d.fromDegrees(-5.0)),
         new InstantCommand(() -> intake.setSpeed(1), intake),
-        new WaitUntilCommand(() -> !intake.getBeamBreak()),
-        new InstantCommand(() -> intake.setSpeed(0.0), intake),
-        new GoHome(elevator, pivot)
+        new WaitUntilCommand(() -> !intake.getBeamBreak())
       )
     );
   }

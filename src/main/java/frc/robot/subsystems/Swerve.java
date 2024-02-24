@@ -184,7 +184,7 @@ public class Swerve extends SubsystemBase {
         swervePoseEstimator.update(getGyroYaw(), getModulePositions());
 
         //Update Shuffleboard values
-        /*frontLeftAngle.setDouble(mSwerveMods[0].getState().angle.getDegrees());
+        frontLeftAngle.setDouble(mSwerveMods[0].getState().angle.getDegrees());
         frontLeftSpeed.setDouble(mSwerveMods[0].getState().speedMetersPerSecond);
         frontLeftOffset.setDouble(Constants.Swerve.Mod0.angleOffset.getDegrees());
 
@@ -200,6 +200,6 @@ public class Swerve extends SubsystemBase {
         backRightSpeed.setDouble(mSwerveMods[3].getState().speedMetersPerSecond);
         backRightOffset.setDouble(Constants.Swerve.Mod3.angleOffset.getDegrees());
 
-        field.setRobotPose(getPose());*/
+        field.setRobotPose(getPose());
     }
 }
