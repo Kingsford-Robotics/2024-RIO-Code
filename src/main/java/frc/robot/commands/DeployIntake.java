@@ -49,7 +49,7 @@ public class DeployIntake extends SequentialCommandGroup {
       ),
       new SequentialCommandGroup(
         pivot.setPivotAngle(Rotation2d.fromDegrees(-5.0)),
-        new InstantCommand(() -> intake.setSpeed(1), intake),
+        new InstantCommand(() -> intake.setSpeed(0.5), intake),
         new WaitUntilCommand(() -> !intake.getBeamBreak())
       )
     );

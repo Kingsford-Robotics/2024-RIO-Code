@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.OIConstants;
 import frc.robot.autos.*;
 import frc.robot.commands.*;
@@ -32,12 +33,14 @@ public class RobotContainer {
     private final Shooter s_Shooter;
     private final Swerve s_Swerve;
 
-    private enum targetMode {
+    private CompetitionData s_CompetitionData;
+
+    public enum targetMode {
         kSpeaker,
         kAmp
     }
 
-    private targetMode m_TargetMode = targetMode.kSpeaker;
+    public targetMode m_TargetMode = targetMode.kSpeaker;
 
     private SequentialCommandGroup m_GoHome;
     private SequentialCommandGroup m_AmpScore;
@@ -54,6 +57,8 @@ public class RobotContainer {
         s_Pivot = new Pivot();
         s_Shooter = new Shooter();
         s_Swerve = new Swerve();
+
+        s_CompetitionData = new CompetitionData(this);
 
         m_GoHome = new GoHome(s_Elevator, s_Pivot);
         m_AmpScore = new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter);
@@ -91,7 +96,7 @@ public class RobotContainer {
         OIConstants.climbDeploy.whileTrue(
             new ParallelCommandGroup(
                 s_Pivot.manualControl(() -> -OIConstants.pivotSpeed.getAsDouble() * 0.2),
-                s_Elevator.manualControl(() -> -OIConstants.elevatorSpeed.getAsDouble() * 0.2)
+                s_Elevator.manualControl(() -> -OIConstants.elevatorSpeed.getAsDouble() * 0.5)
             )
         );
 
@@ -104,15 +109,23 @@ public class RobotContainer {
         OIConstants.deployIntake.whileTrue(
             m_deployIntake.finallyDo(
                 (interrupted) -> {
-                    s_Intake.setSpeed(0);
-                    new GoHome(s_Elevator, s_Pivot).schedule();
+                    new SequentialCommandGroup(
+                        new WaitCommand(0.2),
+                        new InstantCommand(() -> s_Intake.setSpeed(0.0)),
+                        new GoHome(s_Elevator, s_Pivot)
+                    ).schedule();
                 }
             )
         );
 
-        //TODO: Remove this after testing limit switch logic.
         OIConstants.climbRetract.whileTrue(
-            s_Elevator.setHeight(Units.inchesToMeters(12))
+            new MaxDist(s_Elevator, s_Intake, s_Pivot, s_Shooter)
+        ).onFalse(
+            new ParallelCommandGroup(
+                new InstantCommand(() -> s_Shooter.setShooterPercent(0.0), s_Shooter),
+                new InstantCommand(() -> s_Intake.setSpeed(0.0), s_Intake),
+                new GoHome(s_Elevator, s_Pivot)
+            )
         );
 
         OIConstants.shoot.whileTrue(

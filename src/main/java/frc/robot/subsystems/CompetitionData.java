@@ -4,14 +4,47 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.MjpegServer;
+import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.util.PixelFormat;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
+import frc.robot.RobotContainer.targetMode;
 
 public class CompetitionData extends SubsystemBase {
   /** Creates a new CompetitionData. */
-  public CompetitionData() {}
+  
+  private GenericEntry operatorMode;
+
+  private RobotContainer m_RobotContainer;
+
+  private ShuffleboardTab tab;
+  
+  private UsbCamera backCamera;
+
+  private MjpegServer backCameraServ;
+  
+  public CompetitionData(RobotContainer robotContainer) {
+    this.m_RobotContainer = robotContainer;
+    
+    tab = Shuffleboard.getTab("Competition");
+    backCamera = CameraServer.startAutomaticCapture(0);
+    backCamera.setVideoMode(PixelFormat.kMJPEG, 480, 320, 10);
+    backCameraServ = new MjpegServer("Turntable", 1182);
+
+    backCameraServ.setSource(backCamera);
+    tab.add("Back Camera", backCameraServ.getSource());
+
+    operatorMode = tab.add("Mode", "Speaker").getEntry();
+  }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    operatorMode.setString(m_RobotContainer.m_TargetMode == targetMode.kSpeaker? "Speaker": "Amp");
   }
 }
