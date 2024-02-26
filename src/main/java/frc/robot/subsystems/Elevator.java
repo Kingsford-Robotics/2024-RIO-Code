@@ -24,7 +24,11 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants.Constants.ElevatorConstants;
 
 public class Elevator extends SubsystemBase {
@@ -105,9 +109,9 @@ public class Elevator extends SubsystemBase {
 
     //Apply soft limits. Limit speed if within soft limit range.
     if(getHeight() >= ElevatorConstants.elevatorMaxTravel - ElevatorConstants.softLimit && speed > 0) {
-      speed = Math.min(speed, 0.1);
+      speed = Math.min(speed, 0.25);
     } else if(getHeight() <= 0 + ElevatorConstants.softLimit && speed < 0) {
-      speed = Math.max(speed, -0.1);
+      speed = Math.max(speed, -0.25);
     }
 
     elevatorMotor.set(speed);
@@ -137,7 +141,7 @@ public class Elevator extends SubsystemBase {
           elevatorMotor.setControl(elevatorMotionMagicVoltage.withPosition(getHeight()));
         }
     };
-}
+  }
 
   public Command manualControl(DoubleSupplier speed) {
     return new Command() {

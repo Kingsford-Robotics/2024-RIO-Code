@@ -25,18 +25,18 @@ public class MaxDist extends SequentialCommandGroup {
       new ConditionalCommand(
         new SequentialCommandGroup(
           elevator.setHeight(Units.inchesToMeters(12.78)),
-          pivot.setPivotAngle(Rotation2d.fromDegrees(45.0))
+          pivot.setPivotAngle(Rotation2d.fromDegrees(30.0))
         ), 
         new ConditionalCommand(
           new ParallelCommandGroup(
-            pivot.setPivotAngle(Rotation2d.fromDegrees(45.0)),
+            pivot.setPivotAngle(Rotation2d.fromDegrees(30.0)),
             elevator.setHeight(Units.inchesToMeters(12.78))
           ),
           new SequentialCommandGroup(
             pivot.setPivotAngle(Rotation2d.fromDegrees(8.0)),
             new ParallelCommandGroup(
               elevator.setHeight(Units.inchesToMeters(12.78)),
-              pivot.setPivotAngle(Rotation2d.fromDegrees(45))
+              pivot.setPivotAngle(Rotation2d.fromDegrees(30))
             )
           ),
           () -> pivot.getCANcoder().getDegrees() > 8.0), 

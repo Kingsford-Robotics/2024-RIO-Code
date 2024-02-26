@@ -167,7 +167,7 @@ public final class Constants {
         public static final double kG = 0.24;
 
         //Motion Magic Values
-        public static final double cruiseVelocity = Units.inchesToMeters(15);   //10 inches per second
+        public static final double cruiseVelocity = Units.inchesToMeters(12);   //10 inches per second
         public static final double acceleration = Units.inchesToMeters(24);     //20 inches per second squared
         public static final double jerk = Units.inchesToMeters(40);             //40 inches per second cubed
 
