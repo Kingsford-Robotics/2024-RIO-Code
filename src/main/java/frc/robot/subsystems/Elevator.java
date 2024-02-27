@@ -6,12 +6,14 @@ package frc.robot.subsystems;
 
 import java.util.function.DoubleSupplier;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.*;
+import com.ctre.phoenix6.signals.ControlModeValue;
 import com.ctre.phoenix6.signals.MotionMagicIsRunningValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -22,7 +24,11 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants.Constants.ElevatorConstants;
 
 public class Elevator extends SubsystemBase {
@@ -46,6 +52,8 @@ public class Elevator extends SubsystemBase {
 
   private StatusSignal<Double> elevatorMotorVelocity;
   private StatusSignal<Double> elevatorMotorHeight;
+
+  private boolean isCalibrated;
   
   public Elevator() {
     tab = Shuffleboard.getTab("Elevator");
@@ -89,26 +97,25 @@ public class Elevator extends SubsystemBase {
     elevatorMotorVelocity = elevatorMotor.getVelocity();
     elevatorMotorHeight = elevatorMotor.getPosition();
 
+    resetPosition(ElevatorConstants.elevatorMaxTravel - Units.inchesToMeters(0.5));
     position = getHeight();
+
+    isCalibrated = false;
   }
 
   public void setSpeed(double speed) {
     //Stops the elevator if it hits the top or bottom limit switch.
     if(getTopLimitSwitch() && speed > 0) {
       speed = 0;
-    }
-
-    else if(getBottomLimitSwitch() && speed < 0) {
+    } else if(getBottomLimitSwitch() && speed < 0) {
       speed = 0;
     }
 
     //Apply soft limits. Limit speed if within soft limit range.
     if(getHeight() >= ElevatorConstants.elevatorMaxTravel - ElevatorConstants.softLimit && speed > 0) {
-      speed = Math.min(speed, 0.1);
-    }
-
-    else if(getHeight() <= 0 + ElevatorConstants.softLimit && speed < 0) {
-      speed = Math.max(speed, -0.1);
+      speed = Math.min(speed, 0.25);
+    } else if(getHeight() <= 0 + ElevatorConstants.softLimit && speed < 0) {
+      speed = Math.max(speed, -0.25);
     }
 
     elevatorMotor.set(speed);
@@ -129,56 +136,68 @@ public class Elevator extends SubsystemBase {
         }
 
         @Override
+        public void execute(){
+          boolean isMotionMagic = elevatorMotor.getControlMode().getValue() == ControlModeValue.MotionMagicVoltage;
+          if(!isMotionMagic){
+            elevatorMotor.setControl(elevatorMotionMagicVoltage.withPosition(position));
+          }
+        }
+
+        @Override
         public boolean isFinished() {
           return Math.abs(height - getHeight()) < ElevatorConstants.errorThreshold;
         }
 
         @Override
         public void end(boolean interrupted) {
-          elevatorMotor.set(0);
+          elevatorMotor.setControl(elevatorMotionMagicVoltage.withPosition(getHeight()));
         }
     };
-}
+  }
 
-  public Command GetElevatorTeleop(DoubleSupplier speed){
-    return new Command(){
+  public Command manualControl(DoubleSupplier speed) {
+    return new Command() {
       {
         addRequirements(Elevator.this);
       }
 
       double endManualTime;
-      boolean isHoldingPosition = false;
+      boolean isHoldingPosition;
 
       @Override
-      public void initialize(){
+      public void initialize() {
         endManualTime = Timer.getFPGATimestamp();
+        position = getHeight();
+        isHoldingPosition = false;
       }
 
       @Override
-      public void execute(){
+      public void execute() {
         if(Math.abs(speed.getAsDouble()) > 0.05){
-          isHoldingPosition = false;
-
           setSpeed(speed.getAsDouble());
-          position = getHeight();
           endManualTime = Timer.getFPGATimestamp();
+          isHoldingPosition = false;
         }
 
         else if(Timer.getFPGATimestamp() - endManualTime < 0.250){
-          isHoldingPosition = false;
-
-          position = getHeight();
           setSpeed(0.0);
+          isHoldingPosition = false;
         }
 
         else if(!isHoldingPosition){
+          position = getHeight();
           elevatorMotor.setControl(elevatorMotionMagicVoltage.withPosition(position));
           isHoldingPosition = true;
         }
       }
+
+      @Override
+      public void end(boolean interrupted) {
+        position = getHeight();
+        elevatorMotor.setControl(elevatorMotionMagicVoltage.withPosition(position));
+      }
     };
   }
-
   public void resetPosition(double position)
   {
     elevatorMotor.setPosition(position);
@@ -216,7 +235,8 @@ public class Elevator extends SubsystemBase {
   public void periodic() {
     double velocity = getVelocity();
     double height = getHeight();
-    boolean isMotionMagic = elevatorMotor.getMotionMagicIsRunning().getValue() == MotionMagicIsRunningValue.Enabled;
+
+    double percentOutput = elevatorMotor.getDutyCycle().getValue();
 
     elevatorHeightEntry.setDouble(Units.metersToInches(height));
     elevatorSpeedEntry.setDouble(Units.metersToInches(velocity));
@@ -224,16 +244,19 @@ public class Elevator extends SubsystemBase {
     bottomLimitSwitchEntry.setBoolean(getBottomLimitSwitch());
 
     // Apply hard limits. Stop the elevator if it hits the top or bottom limit switch.
-    if(getTopLimitSwitch() && velocity > 0 && (!isMotionMagic || (isMotionMagic && position > height)))
+    if(getTopLimitSwitch() && percentOutput > 0.01)
     {
-      resetPosition(ElevatorConstants.elevatorMaxTravel);  
       setSpeed(0.0);
+      resetPosition(ElevatorConstants.elevatorMaxTravel);  
+      setHeight(getHeight() - Units.inchesToMeters(0.05));
     }
 
-    else if(getBottomLimitSwitch() && velocity < 0 && (!isMotionMagic || (isMotionMagic && position < height)))
+    else if(getBottomLimitSwitch() && percentOutput < -0.01)
     {
+        setSpeed(0.0);  
         resetPosition(0.0);
-        setSpeed(0.0);
+ 
+        setHeight(getHeight() + Units.inchesToMeters(0.05));
     }
-}
+  }
 }

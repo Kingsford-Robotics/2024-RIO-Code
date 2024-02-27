@@ -148,9 +148,9 @@ public final class Constants {
         public static final int bottomLimitSwitchID = 1;
 
         //Elevator Travel Constants
-        public static final double elevatorMaxTravel = Units.inchesToMeters(12.87);
+        public static final double elevatorMaxTravel = Units.inchesToMeters(12.95);
         public static final double softLimit = Units.inchesToMeters(1); //Slows speed down when close to limit.
-        public static final double errorThreshold = Units.inchesToMeters(0.125); //0.125 tolerance for positions.
+        public static final double errorThreshold = Units.inchesToMeters(0.15); //0.15 tolerance for positions.
 
         //Sensor to Mechanism Ratio
         private static final double gearRatio = 28.0;
@@ -167,9 +167,9 @@ public final class Constants {
         public static final double kG = 0.24;
 
         //Motion Magic Values
-        public static final double cruiseVelocity = Units.inchesToMeters(10);
-        public static final double acceleration = Units.inchesToMeters(20);
-        public static final double jerk = Units.inchesToMeters(40);
+        public static final double cruiseVelocity = Units.inchesToMeters(10);   //10 inches per second
+        public static final double acceleration = Units.inchesToMeters(20);     //20 inches per second squared
+        public static final double jerk = Units.inchesToMeters(40);             //40 inches per second cubed
 
         //Current Limiting
         public static final int currentLimit = 40;
@@ -188,9 +188,9 @@ public final class Constants {
         public static final double shooterKP = 0;
         public static final double shooterKI = 0;
 
-        public static final double shooterKF = 0;
+        public static final double shooterKF = 1.0;
         public static final double shooterRampRate = 0;
-        public static final int shooterToleranceRPM = 10;
+        public static final int shooterToleranceRPM = 50;
     }
 
     public static final class PivotConstants {
@@ -207,9 +207,9 @@ public final class Constants {
         public static final Rotation2d pivotAngleOffset = Rotation2d.fromDegrees(130);
 
         //PID Values
-        public static final double pivotKP = 10;
-        public static final double pivotKI = 0.3;
-        public static final double pivotKD = 0;
+        public static final double pivotKP = 5.0;
+        public static final double pivotKI = 0.0;
+        public static final double pivotKD = 0.0;
 
         public static final double pivotKG = 0.19;
         public static final double pivotKV = 3.41;
@@ -217,6 +217,9 @@ public final class Constants {
         public static final double pivotKS = 0.0;
 
         public static final Rotation2d pivotAbsoluteOffset = Rotation2d.fromDegrees(0);
+
+        public static final double pivotVelocity = Units.degreesToRadians(130);          //90 degrees per second
+        public static final double pivotAcceleration = Units.degreesToRadians(220);     //140 degrees per second squared
     }
 
     public static final class LedConstants {

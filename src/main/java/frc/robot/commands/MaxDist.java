@@ -16,27 +16,27 @@ import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Pivot;
 import frc.robot.subsystems.Shooter;
 
-public class SpeakerScore extends SequentialCommandGroup {
+public class MaxDist extends SequentialCommandGroup {
   /** Creates a new SpeakerScore. */
-  public SpeakerScore(Elevator elevator, Intake intake, Pivot pivot, Shooter shooter) {
+  public MaxDist(Elevator elevator, Intake intake, Pivot pivot, Shooter shooter) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
       new ConditionalCommand(
         new SequentialCommandGroup(
           elevator.setHeight(Units.inchesToMeters(12.78)),
-          pivot.setPivotAngle(Rotation2d.fromDegrees(20.0))
+          pivot.setPivotAngle(Rotation2d.fromDegrees(30.0))
         ), 
         new ConditionalCommand(
           new ParallelCommandGroup(
-            pivot.setPivotAngle(Rotation2d.fromDegrees(20.0)),
+            pivot.setPivotAngle(Rotation2d.fromDegrees(30.0)),
             elevator.setHeight(Units.inchesToMeters(12.78))
           ),
           new SequentialCommandGroup(
             pivot.setPivotAngle(Rotation2d.fromDegrees(8.0)),
             new ParallelCommandGroup(
               elevator.setHeight(Units.inchesToMeters(12.78)),
-              pivot.setPivotAngle(Rotation2d.fromDegrees(20))
+              pivot.setPivotAngle(Rotation2d.fromDegrees(30))
             )
           ),
           () -> pivot.getCANcoder().getDegrees() > 8.0), 
@@ -44,8 +44,8 @@ public class SpeakerScore extends SequentialCommandGroup {
       ),
 
       //Fix this logic once I get RPMs setup. Wait until within speed tolerance.
-      new InstantCommand(() -> shooter.setShooterPercent(-0.7), shooter),
-      new WaitCommand(1.0),
+      new InstantCommand(() -> shooter.setShooterPercent(-1), shooter),
+      new WaitCommand(4.0),
       new InstantCommand(() -> intake.setSpeed(1.0), intake)
     );
   }
