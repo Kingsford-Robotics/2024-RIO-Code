@@ -11,13 +11,14 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Pivot;
 import frc.robot.subsystems.Shooter;
 
 public class MaxDist extends SequentialCommandGroup {
-  /** Creates a new SpeakerScore. */
+  /** Creates a new MaxDist. */
   public MaxDist(Elevator elevator, Intake intake, Pivot pivot, Shooter shooter) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
@@ -25,18 +26,22 @@ public class MaxDist extends SequentialCommandGroup {
       new ConditionalCommand(
         new SequentialCommandGroup(
           elevator.setHeight(Units.inchesToMeters(12.78)),
-          pivot.setPivotAngle(Rotation2d.fromDegrees(30.0))
+          new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(30.0)), pivot),
+          new WaitUntilCommand(pivot::reachedSetpoint)
         ), 
         new ConditionalCommand(
           new ParallelCommandGroup(
-            pivot.setPivotAngle(Rotation2d.fromDegrees(30.0)),
+            new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(30.0)), pivot),
+            new WaitUntilCommand(pivot::reachedSetpoint),
             elevator.setHeight(Units.inchesToMeters(12.78))
           ),
           new SequentialCommandGroup(
-            pivot.setPivotAngle(Rotation2d.fromDegrees(8.0)),
+            new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(8.0)), pivot),
+            new WaitUntilCommand(pivot::reachedSetpoint),
             new ParallelCommandGroup(
               elevator.setHeight(Units.inchesToMeters(12.78)),
-              pivot.setPivotAngle(Rotation2d.fromDegrees(30))
+              new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(30)), pivot),
+              new WaitUntilCommand(pivot::reachedSetpoint)
             )
           ),
           () -> pivot.getCANcoder().getDegrees() > 8.0), 

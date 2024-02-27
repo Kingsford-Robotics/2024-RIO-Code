@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Pivot;
@@ -28,7 +29,8 @@ public class AmpScore extends SequentialCommandGroup {
           //If coming from home position, go up first and then set angle.
           new SequentialCommandGroup(
             elevator.setHeight(Units.inchesToMeters(12.78)),
-            pivot.setPivotAngle(Rotation2d.fromDegrees(90.0))
+            new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(90.0)), pivot),
+            new WaitUntilCommand(pivot::reachedSetpoint)
           ),
         
         //Not coming from home position
@@ -36,24 +38,28 @@ public class AmpScore extends SequentialCommandGroup {
         //If the angle is already greater than 8 degrees, can move pivot
         //and elevator in parallel.  
         new ParallelCommandGroup(
-          pivot.setPivotAngle(Rotation2d.fromDegrees(90.0)),
+          new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(90.0)), pivot),
+          new WaitUntilCommand(pivot::reachedSetpoint),
           elevator.setHeight(Units.inchesToMeters(12.78))
           ),
 
           //If the angle is less than 8 degrees, first get angle to 8
           //and then move pivot and elevator in parallel.
           new SequentialCommandGroup(
-            pivot.setPivotAngle(Rotation2d.fromDegrees(8.0)),
+            new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(8.0)), pivot),
+            new WaitUntilCommand(pivot::reachedSetpoint),
             new ParallelCommandGroup(
               elevator.setHeight(Units.inchesToMeters(12.78)),
-              pivot.setPivotAngle(Rotation2d.fromDegrees(90))
+              new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(90)), pivot),
+              new WaitUntilCommand(pivot::reachedSetpoint)
             )
           ),
           () -> pivot.getCANcoder().getDegrees() > 8.0),
 
         () -> elevator.getHeight() > Units.inchesToMeters(10)),
 
-      pivot.setPivotAngle(Rotation2d.fromDegrees(90)),
+      new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(90)), pivot),
+      new WaitUntilCommand(pivot::reachedSetpoint),
       new PrintCommand("Pivot to Angle"),
       new InstantCommand(() -> intake.setSpeed(0.3), intake),
       new InstantCommand(() -> shooter.setShooterPercent(-0.3), shooter)

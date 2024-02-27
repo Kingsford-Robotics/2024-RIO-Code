@@ -24,24 +24,29 @@ public class DeployIntake extends SequentialCommandGroup {
           elevator.setHeight(ElevatorConstants.elevatorMaxTravel - Units.inchesToMeters(0.05)),
           new ConditionalCommand(
             new ParallelCommandGroup(
-              pivot.setPivotAngle(Rotation2d.fromDegrees(9.0)),
+              new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(9.0)), pivot),
+              new WaitUntilCommand(pivot::reachedSetpoint),
               elevator.setHeight(Units.inchesToMeters(0.1))
             ),
             new SequentialCommandGroup(
-              pivot.setPivotAngle(Rotation2d.fromDegrees(9.0)),
+              new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(9.0)), pivot),
+              new WaitUntilCommand(pivot::reachedSetpoint),
               elevator.setHeight(Units.inchesToMeters(0.1))
             ),
             () -> pivot.getCANcoder().getDegrees() > 9.0
           ),
-          pivot.setPivotAngle(Rotation2d.fromDegrees(-5.0))
+          new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(-5.0)), pivot),
+          new WaitUntilCommand(pivot::reachedSetpoint)
         ),
         new ConditionalCommand(
           new ParallelCommandGroup(
-            pivot.setPivotAngle(Rotation2d.fromDegrees(9.0)),
+            new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(9.0)), pivot),
+            new WaitUntilCommand(pivot::reachedSetpoint),
             elevator.setHeight(Units.inchesToMeters(0.1))
           ),
           new SequentialCommandGroup(
-            pivot.setPivotAngle(Rotation2d.fromDegrees(9.0)),
+            new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(9.0)), pivot),
+            new WaitUntilCommand(pivot::reachedSetpoint),
             elevator.setHeight(Units.inchesToMeters(0.1))
           ),
           () -> pivot.getCANcoder().getDegrees() > 9.0
@@ -49,7 +54,8 @@ public class DeployIntake extends SequentialCommandGroup {
         () -> elevator.getHeight() > Units.inchesToMeters(10) && pivot.getCANcoder().getDegrees() < 9.0
       ),
       new SequentialCommandGroup(
-        pivot.setPivotAngle(Rotation2d.fromDegrees(-5.0)),
+        new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(-5.0)), pivot),
+        new WaitUntilCommand(pivot::reachedSetpoint),
         new InstantCommand(() -> intake.setSpeed(0.5), intake),
         new WaitUntilCommand(() -> !intake.getBeamBreak())
       )
