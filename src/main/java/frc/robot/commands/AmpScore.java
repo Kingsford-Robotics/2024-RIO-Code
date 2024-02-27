@@ -28,7 +28,7 @@ public class AmpScore extends SequentialCommandGroup {
           //If coming from home position, go up first and then set angle.
           new SequentialCommandGroup(
             elevator.setHeight(Units.inchesToMeters(12.78)),
-            pivot.setPivotAngle(Rotation2d.fromDegrees(96.0))
+            pivot.setPivotAngle(Rotation2d.fromDegrees(90.0))
           ),
         
         //Not coming from home position
@@ -36,7 +36,7 @@ public class AmpScore extends SequentialCommandGroup {
         //If the angle is already greater than 8 degrees, can move pivot
         //and elevator in parallel.  
         new ParallelCommandGroup(
-          pivot.setPivotAngle(Rotation2d.fromDegrees(96.0)),
+          pivot.setPivotAngle(Rotation2d.fromDegrees(90.0)),
           elevator.setHeight(Units.inchesToMeters(12.78))
           ),
 
@@ -46,14 +46,14 @@ public class AmpScore extends SequentialCommandGroup {
             pivot.setPivotAngle(Rotation2d.fromDegrees(8.0)),
             new ParallelCommandGroup(
               elevator.setHeight(Units.inchesToMeters(12.78)),
-              pivot.setPivotAngle(Rotation2d.fromDegrees(96))
+              pivot.setPivotAngle(Rotation2d.fromDegrees(90))
             )
           ),
           () -> pivot.getCANcoder().getDegrees() > 8.0),
 
         () -> elevator.getHeight() > Units.inchesToMeters(10)),
 
-      pivot.setPivotAngle(Rotation2d.fromDegrees(96)),
+      pivot.setPivotAngle(Rotation2d.fromDegrees(90)),
       new PrintCommand("Pivot to Angle"),
       new InstantCommand(() -> intake.setSpeed(0.3), intake),
       new InstantCommand(() -> shooter.setShooterPercent(-0.3), shooter)

@@ -52,6 +52,8 @@ public class Elevator extends SubsystemBase {
 
   private StatusSignal<Double> elevatorMotorVelocity;
   private StatusSignal<Double> elevatorMotorHeight;
+
+  private boolean isCalibrated;
   
   public Elevator() {
     tab = Shuffleboard.getTab("Elevator");
@@ -97,6 +99,8 @@ public class Elevator extends SubsystemBase {
 
     resetPosition(ElevatorConstants.elevatorMaxTravel - Units.inchesToMeters(0.5));
     position = getHeight();
+
+    isCalibrated = false;
   }
 
   public void setSpeed(double speed) {
@@ -129,6 +133,14 @@ public class Elevator extends SubsystemBase {
                 position = height;
                 elevatorMotor.setControl(elevatorMotionMagicVoltage.withPosition(position));
             } 
+        }
+
+        @Override
+        public void execute(){
+          boolean isMotionMagic = elevatorMotor.getControlMode().getValue() == ControlModeValue.MotionMagicVoltage;
+          if(!isMotionMagic){
+            elevatorMotor.setControl(elevatorMotionMagicVoltage.withPosition(position));
+          }
         }
 
         @Override
@@ -243,6 +255,7 @@ public class Elevator extends SubsystemBase {
     {
         setSpeed(0.0);  
         resetPosition(0.0);
+ 
         setHeight(getHeight() + Units.inchesToMeters(0.05));
     }
   }

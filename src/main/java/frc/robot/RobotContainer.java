@@ -100,6 +100,10 @@ public class RobotContainer {
             )
         );
 
+        OIConstants.climbRetract.whileTrue(
+            new PowerExitHome(s_Elevator, s_Pivot)
+        );
+
         //Left Stick Center Button
         OIConstants.homeButton.whileTrue(
             new GoHome(s_Elevator, s_Pivot)

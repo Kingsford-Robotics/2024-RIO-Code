@@ -25,8 +25,8 @@ public class OIConstants {
     public static final double highRotationSpeed = 1.0;
     public static final double lowRotationSpeed = 0.15;
 
-    public static final double translateRampTime = 0.5;
-    public static final double turnRampTime = 0.5;
+    public static final double translateRampTime = 1.0;
+    public static final double turnRampTime = 1.0;
 
     /*Drive Joysticks Setup*/
     public static final Thrustmaster driveLeft = new Thrustmaster(0);

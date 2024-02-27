@@ -148,9 +148,9 @@ public final class Constants {
         public static final int bottomLimitSwitchID = 1;
 
         //Elevator Travel Constants
-        public static final double elevatorMaxTravel = Units.inchesToMeters(12.83);
+        public static final double elevatorMaxTravel = Units.inchesToMeters(12.95);
         public static final double softLimit = Units.inchesToMeters(1); //Slows speed down when close to limit.
-        public static final double errorThreshold = Units.inchesToMeters(0.125); //0.125 tolerance for positions.
+        public static final double errorThreshold = Units.inchesToMeters(0.15); //0.15 tolerance for positions.
 
         //Sensor to Mechanism Ratio
         private static final double gearRatio = 28.0;
@@ -167,8 +167,8 @@ public final class Constants {
         public static final double kG = 0.24;
 
         //Motion Magic Values
-        public static final double cruiseVelocity = Units.inchesToMeters(12);   //10 inches per second
-        public static final double acceleration = Units.inchesToMeters(24);     //20 inches per second squared
+        public static final double cruiseVelocity = Units.inchesToMeters(10);   //10 inches per second
+        public static final double acceleration = Units.inchesToMeters(20);     //20 inches per second squared
         public static final double jerk = Units.inchesToMeters(40);             //40 inches per second cubed
 
         //Current Limiting
@@ -218,8 +218,8 @@ public final class Constants {
 
         public static final Rotation2d pivotAbsoluteOffset = Rotation2d.fromDegrees(0);
 
-        public static final double pivotVelocity = Units.degreesToRadians(150);          //90 degrees per second
-        public static final double pivotAcceleration = Units.degreesToRadians(250);     //140 degrees per second squared
+        public static final double pivotVelocity = Units.degreesToRadians(130);          //90 degrees per second
+        public static final double pivotAcceleration = Units.degreesToRadians(220);     //140 degrees per second squared
     }
 
     public static final class LedConstants {

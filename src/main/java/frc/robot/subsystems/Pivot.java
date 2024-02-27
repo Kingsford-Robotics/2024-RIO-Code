@@ -133,7 +133,7 @@ public class Pivot extends SubsystemBase {
       @Override
       public boolean isFinished() {
         double error = Math.abs(getCANcoder().getDegrees() - angle.getDegrees());
-        return error < 4.0;
+        return error < 2.0;
       }
 
       @Override
@@ -145,14 +145,6 @@ public class Pivot extends SubsystemBase {
   }
  
   public void setSpeed(double speed){
-    if(getPivotUpLimitSwitch() && speed > 0){
-      speed = 0;
-    }
-
-    else if(getPivotDownLimitSwitch() && speed < 0){
-      speed = 0;
-    }
-
     pivotLeftMotor.set(speed);
   }
 
@@ -213,13 +205,13 @@ public class Pivot extends SubsystemBase {
     return Rotation2d.fromRotations(pivotAbsoluteEncoder.getVelocity().getValueAsDouble());
   }
 
-  public boolean getPivotUpLimitSwitch(){
+  /*public boolean getPivotUpLimitSwitch(){
     return pivotUpLimitSwitch.get();
   }
 
   public boolean getPivotDownLimitSwitch(){
     return pivotDownLimitSwitch.get();
-  }
+  }*/
 
   @Override
   public void periodic() {
@@ -238,16 +230,6 @@ public class Pivot extends SubsystemBase {
       double output = pivotFeedforward.calculate(pidController.getSetpoint().position, pidController.getSetpoint().velocity);
       output += Math.abs(getCANcoder().minus(angleSetpoint).getDegrees()) < 0.5? pidController.calculate(getCANcoder().getRadians()) : 0;
       pivotLeftMotor.set(output / 12.0);
-    }
-
-    //Limit Switch Hard Stops
-    if(getPivotUpLimitSwitch() && getPivotSpeed().getDegrees() > 0.0)
-    {
-      setSpeed(0.0);
-    }
-
-    else if(getPivotDownLimitSwitch() && getPivotSpeed().getDegrees() < 0.0){
-      setSpeed(0.0);
     }
   }
 }

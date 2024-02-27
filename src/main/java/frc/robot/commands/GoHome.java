@@ -23,22 +23,22 @@ public class GoHome extends SequentialCommandGroup {
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
       new ConditionalCommand(
-        elevator.setHeight(Units.inchesToMeters(12.78)),  
+        elevator.setHeight(Units.inchesToMeters(12.5)),  
         new ConditionalCommand(
           new ParallelCommandGroup(
           pivot.setPivotAngle(Rotation2d.fromDegrees(8.0)),
-          elevator.setHeight(Units.inchesToMeters(12.78))
+          elevator.setHeight(Units.inchesToMeters(12.5))
           ),
 
           new SequentialCommandGroup(
             pivot.setPivotAngle(Rotation2d.fromDegrees(8.0)),
-            elevator.setHeight(Units.inchesToMeters(12.78))
+            elevator.setHeight(Units.inchesToMeters(12.5))
           ),
           () -> pivot.getCANcoder().getDegrees() > 8.0),
         () -> elevator.getHeight() > Units.inchesToMeters(10)),
 
-      pivot.setPivotAngle(Rotation2d.fromDegrees(-12.3)),
-      elevator.setHeight(Units.inchesToMeters(12.3))
+      pivot.setPivotAngle(Rotation2d.fromDegrees(-6.5)),
+      elevator.setHeight(Units.inchesToMeters(11.0))
     );
   }
 }
