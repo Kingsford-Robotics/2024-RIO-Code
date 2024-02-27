@@ -5,11 +5,9 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
-import frc.robot.Constants.Constants.ElevatorConstants;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Pivot;
 
@@ -20,9 +18,11 @@ public class PowerExitHome extends SequentialCommandGroup {
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
       new InstantCommand(() -> elevator.setSpeed(0.1), elevator),
-      new WaitUntilCommand(() -> elevator.getHeight() > ElevatorConstants.elevatorMaxTravel - Units.inchesToMeters(0.5)),
-      new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(15)), pivot),
-      new WaitUntilCommand(pivot::reachedSetpoint)
+      new InstantCommand(() -> elevator.resetLimitCheck(), elevator),
+      new WaitUntilCommand(() -> elevator.getTopLimitPressed()),
+      new InstantCommand(() -> pivot.setSpeed(0.3), pivot),
+      new WaitUntilCommand(() -> pivot.getCANcoder().getDegrees() > 10.0),
+      new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(10)), pivot)
     );
   }
 }

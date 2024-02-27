@@ -23,15 +23,11 @@ public class Limelight extends SubsystemBase {
     }
   }
 
+
+  private NetworkTable table;
   private LedMode ledMode;
-  private int tx;
-  private int ty;
-  private int tz;
 
-  private NetworkTableInstance inst;
-  private NetworkTable limelightTable;
-
-  private ShuffleboardTab limelightTab;
+  private ShuffleboardTab tab;
   private GenericEntry txEntry;
   private GenericEntry tyEntry;
   private GenericEntry tzEntry;
@@ -39,48 +35,48 @@ public class Limelight extends SubsystemBase {
 
   public Limelight() {
     ledMode = LedMode.kOff;
-    limelightTab = Shuffleboard.getTab("Limelight");
+    tab = Shuffleboard.getTab("Limelight");
 
-    txEntry = limelightTab.add("tx", 0.0).getEntry();
-    tyEntry = limelightTab.add("ty", 0.0).getEntry();
-    tzEntry = limelightTab.add("tz", 0.0).getEntry();
+    txEntry = tab.add("tx", 0.0).getEntry();
+    tyEntry = tab.add("ty", 0.0).getEntry();
+    tzEntry = tab.add("tz", 0.0).getEntry();
 
-    
+    table = NetworkTableInstance.getDefault().getTable("limelight");
   }
 
   public void setLedMode(LedMode ledMode) {
     this.ledMode = ledMode;
-    NetworkTableInstance.getDefault().getTable("limelight-rok").getEntry("ledMode").setNumber(ledMode.value);
+    table.getEntry("ledMode").setNumber(ledMode.value);
   }
 
   public double getTx() {
     //Get target x pose
-    return NetworkTableInstance.getDefault().getTable("limelight-rok").getEntry("botpose_targetspace").getDoubleArray(new double[3])[0];
+    return NetworkTableInstance.getDefault().getTable("limelight").getEntry("botpose_targetspace").getDoubleArray(new double[3])[0];
   }
 
   public double getTy() {
     //Get target y pose
-    return NetworkTableInstance.getDefault().getTable("limelight-rok").getEntry("botpose_targetspace").getDoubleArray(new double[3])[1];
+    return table.getEntry("botpose_targetspace").getDoubleArray(new double[3])[1];
   }
 
   public double getTz() {
     //Get target z pose
-    return NetworkTableInstance.getDefault().getTable("limelight-rok").getEntry("botpose_targetspace").getDoubleArray(new double[3])[2];
+    return table.getEntry("botpose_targetspace").getDoubleArray(new double[3])[2];
   }
 
   public double getAngle()
   {
-    return NetworkTableInstance.getDefault().getTable("limelight-rok").getEntry("tx").getDouble(0.0);
+    return table.getEntry("tx").getDouble(0.0);
   }
 
   public boolean isTargetFound()
   {
-    return NetworkTableInstance.getDefault().getTable("limelight-rok").getEntry("tv").getDouble(0.0) == 1.0;
+    return table.getEntry("tv").getDouble(0.0) == 1.0;
   }
 
   public void setPipeline(int pipeline)
   {
-    NetworkTableInstance.getDefault().getTable("limelight-rok").getEntry("pipeline").setNumber(pipeline);
+    table.getEntry("pipeline").setNumber(pipeline);
   }
 
   @Override

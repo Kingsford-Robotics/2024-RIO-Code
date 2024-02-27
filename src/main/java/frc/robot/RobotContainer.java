@@ -7,12 +7,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants.OIConstants;
-import frc.robot.Constants.Constants.ElevatorConstants;
 import frc.robot.autos.*;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
@@ -43,7 +40,6 @@ public class RobotContainer {
 
     public targetMode m_TargetMode = targetMode.kSpeaker;
 
-    private SequentialCommandGroup m_GoHome;
     private SequentialCommandGroup m_AmpScore;
     private Command m_deployIntake;
     private SequentialCommandGroup m_SpeakerScore;
@@ -61,7 +57,6 @@ public class RobotContainer {
 
         s_CompetitionData = new CompetitionData(this, s_Elevator);
 
-        m_GoHome = new GoHome(s_Elevator, s_Pivot);
         m_AmpScore = new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter);
         m_deployIntake = new DeployIntake(s_Elevator, s_Pivot, s_Intake);
         m_SpeakerScore = new SpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter);
@@ -101,8 +96,8 @@ public class RobotContainer {
             )
         );
 
-        OIConstants.climbRetract.whileTrue(
-            new InstantCommand(() -> s_Pivot.setPivotAngle(Rotation2d.fromDegrees(45)), s_Pivot)
+        OIConstants.climbRetract.onTrue(
+            new InstantCommand(() -> s_Pivot.setPivotAngle(Rotation2d.fromDegrees(60.0)), s_Pivot)
         );
 
         //Left Stick Center Button
@@ -115,7 +110,7 @@ public class RobotContainer {
             m_deployIntake.finallyDo(
                 (interrupted) -> {
                     new SequentialCommandGroup(
-                        new WaitCommand(0.15),
+                        new WaitCommand(0.2),
                         new InstantCommand(() -> s_Intake.setSpeed(0.0)),
                         new GoHome(s_Elevator, s_Pivot)
                     ).schedule();

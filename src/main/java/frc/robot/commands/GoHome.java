@@ -9,6 +9,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.Elevator;
@@ -24,25 +25,26 @@ public class GoHome extends SequentialCommandGroup {
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
       new ConditionalCommand(
-        new InstantCommand(() -> elevator.setHeight(Units.inchesToMeters(12.5)), elevator),
+        elevator.setHeight(Units.inchesToMeters(12.5)),
         new ConditionalCommand(
           new ParallelCommandGroup(
             new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(8.0)), pivot),
-            new WaitUntilCommand(pivot::reachedSetpoint),
-            new InstantCommand(() -> elevator.setHeight(Units.inchesToMeters(12.5)), elevator)
+            elevator.setHeight(Units.inchesToMeters(12.5)),
+            new WaitUntilCommand(pivot::reachedSetpoint)
           ),
           new SequentialCommandGroup(
             new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(8.0)), pivot),
             new WaitUntilCommand(pivot::reachedSetpoint),
-            new InstantCommand(() -> elevator.setHeight(Units.inchesToMeters(12.5)), elevator)
+            new PrintCommand("Pivot Reached Setpoint Lower"),
+            elevator.setHeight(Units.inchesToMeters(12.5))
           ),
           () -> pivot.getCANcoder().getDegrees() > 8.0
         ),
         () -> elevator.getHeight() > Units.inchesToMeters(10)
       ),
-      new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(-6.5)), pivot),
+      new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(-2.0)), pivot),
       new WaitUntilCommand(pivot::reachedSetpoint),
-      new InstantCommand(() -> elevator.setHeight(Units.inchesToMeters(11.0)), elevator)
+      elevator.setHeight(Units.inchesToMeters(10.5))
     );
   }
 }
