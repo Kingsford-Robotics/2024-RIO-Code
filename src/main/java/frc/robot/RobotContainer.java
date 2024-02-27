@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -101,7 +102,7 @@ public class RobotContainer {
         );
 
         OIConstants.climbRetract.whileTrue(
-            new PowerExitHome(s_Elevator, s_Pivot)
+            new InstantCommand(() -> s_Pivot.setPivotAngle(Rotation2d.fromDegrees(45)), s_Pivot)
         );
 
         //Left Stick Center Button

@@ -21,8 +21,8 @@ public class PowerExitHome extends SequentialCommandGroup {
     addCommands(
       new InstantCommand(() -> elevator.setSpeed(0.1), elevator),
       new WaitUntilCommand(() -> elevator.getHeight() > ElevatorConstants.elevatorMaxTravel - Units.inchesToMeters(0.5)),
-      pivot.setPivotAngle(Rotation2d.fromDegrees(15)
-    )
+      new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(15)), pivot),
+      new WaitUntilCommand(pivot::reachedSetpoint)
     );
   }
 }

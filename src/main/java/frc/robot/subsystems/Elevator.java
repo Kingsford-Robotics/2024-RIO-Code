@@ -52,8 +52,6 @@ public class Elevator extends SubsystemBase {
 
   private StatusSignal<Double> elevatorMotorVelocity;
   private StatusSignal<Double> elevatorMotorHeight;
-
-  private boolean isCalibrated;
   
   public Elevator() {
     tab = Shuffleboard.getTab("Elevator");
@@ -99,8 +97,6 @@ public class Elevator extends SubsystemBase {
 
     resetPosition(ElevatorConstants.elevatorMaxTravel - Units.inchesToMeters(0.5));
     position = getHeight();
-
-    isCalibrated = false;
   }
 
   public void setSpeed(double speed) {

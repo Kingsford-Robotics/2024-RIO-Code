@@ -17,7 +17,6 @@ import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
@@ -33,7 +32,7 @@ public class Pivot extends SubsystemBase {
   //Shuffleboard Data
   private ShuffleboardTab tab; 
   private GenericEntry absoluteAngleEntry;
-  private GenericEntry positionError;
+  private GenericEntry targetAngle;
   private GenericEntry pivotSpeedEntry;
   private GenericEntry downLimitSwitchEntry;
   private GenericEntry upLimitSwitchEntry;
@@ -49,9 +48,8 @@ public class Pivot extends SubsystemBase {
   private DigitalInput pivotUpLimitSwitch;
 
   private Rotation2d angleSetpoint;
-
-  private boolean isCommandRunning = false;
-  private boolean isHoldingPosition = false;
+  private boolean isManualRunning = false;
+  private boolean isControllerSet = false;
 
   public Pivot() {
     //Shuffleboard Setup
@@ -60,13 +58,12 @@ public class Pivot extends SubsystemBase {
     pivotSpeedEntry = tab.add("Pivot Speed", 0.0).getEntry();
     downLimitSwitchEntry = tab.add("Down Limit Switch", false).getEntry();
     upLimitSwitchEntry = tab.add("Up Limit Switch", false).getEntry();
-    positionError = tab.add("Position Error", 0.0).getEntry();
+    targetAngle = tab.add("Target Angle", 0.0).getEntry();
     
     pivotLeftMotor = new CANSparkMax(PivotConstants.pivotLeftMotorID, MotorType.kBrushless);
     pivotRightMotor = new CANSparkMax(PivotConstants.pivotRightMotorID, MotorType.kBrushless);
 
     tab.add("Pivot", this);
-
 
     pivotAbsoluteEncoder = new CANcoder(PivotConstants.pivotAbsoluteEncoderID);
 
@@ -106,45 +103,21 @@ public class Pivot extends SubsystemBase {
     angleSetpoint = getCANcoder();
   }
 
-  public Command setPivotAngle(Rotation2d angle){
-    return new Command() {
-      {
-        addRequirements(Pivot.this);
-      }
-    
-      @Override 
-      public void initialize() {
-        pidController.reset(getCANcoder().getRadians());
-        pidController.setGoal(angle.getRadians());
-        angleSetpoint = angle;
-        isCommandRunning = true;
-        isHoldingPosition = false;
-      }
-
-      @Override
-      public void execute() {
-        isCommandRunning = true;
-        isHoldingPosition = false;
-        double output = pidController.calculate(getCANcoder().getRadians()) + pivotFeedforward.calculate(pidController.getSetpoint().position, pidController.getSetpoint().velocity);
-        pivotLeftMotor.set(output / 12.0);
-        positionError.setDouble(Units.radiansToDegrees(pidController.getPositionError()));
-      }
-
-      @Override
-      public boolean isFinished() {
-        double error = Math.abs(getCANcoder().getDegrees() - angle.getDegrees());
-        return error < 2.0;
-      }
-
-      @Override
-      public void end(boolean interrupted) {
-        isCommandRunning = false;
-        isHoldingPosition = false;
-      }
-    }; 
+  public void setPivotAngle(Rotation2d angle){
+    pidController.reset(getCANcoder().getRadians());
+    pidController.setGoal(angle.getRadians());
+    angleSetpoint = Rotation2d.fromRadians(angle.getRadians());
+    isManualRunning = false;
+    isControllerSet = true;
   }
- 
+
+  public boolean reachedSetpoint(){
+    return Math.abs(getCANcoder().minus(angleSetpoint).getDegrees()) < 2.0;
+  }
+
   public void setSpeed(double speed){
+    isManualRunning = true;
+    isControllerSet = false;
     pivotLeftMotor.set(speed);
   }
 
@@ -159,15 +132,13 @@ public class Pivot extends SubsystemBase {
       @Override
       public void initialize(){
         endManualTime = Timer.getFPGATimestamp();
-        isCommandRunning = true;
-        isHoldingPosition = false;
       }
 
       @Override
       public void execute(){
         if(Math.abs(speed.getAsDouble()) > 0.05){
-          isHoldingPosition = false;
-          isCommandRunning = true;
+          isControllerSet = false;
+          isManualRunning = true;
 
           setSpeed(speed.getAsDouble());
           angleSetpoint = getCANcoder();
@@ -175,23 +146,22 @@ public class Pivot extends SubsystemBase {
         }
 
         else if(Timer.getFPGATimestamp() - endManualTime < 0.250){
-          isHoldingPosition = false;
-          isCommandRunning = true;
-
-          angleSetpoint = getCANcoder();
           setSpeed(0.0);
+          isManualRunning = true;
+          isControllerSet = false;
+          angleSetpoint = getCANcoder();
         }
 
         else{
-          isCommandRunning = false;
+          isManualRunning = false;
         }
       }
 
       @Override
       public void end(boolean interrupted){
         setSpeed(0.0);
-        isCommandRunning = false;
-        isHoldingPosition = false;
+        isManualRunning = false;
+        isControllerSet = false;
       }
     };
   }
@@ -205,31 +175,24 @@ public class Pivot extends SubsystemBase {
     return Rotation2d.fromRotations(pivotAbsoluteEncoder.getVelocity().getValueAsDouble());
   }
 
-  /*public boolean getPivotUpLimitSwitch(){
-    return pivotUpLimitSwitch.get();
-  }
-
-  public boolean getPivotDownLimitSwitch(){
-    return pivotDownLimitSwitch.get();
-  }*/
-
   @Override
   public void periodic() {
+    double output = 0.0;
+
     absoluteAngleEntry.setDouble(getCANcoder().getDegrees());
     pivotSpeedEntry.setDouble(getPivotSpeed().getDegrees());
     downLimitSwitchEntry.setBoolean(pivotDownLimitSwitch.get());
     upLimitSwitchEntry.setBoolean(pivotUpLimitSwitch.get());
+    targetAngle.setDouble(angleSetpoint.getDegrees());
 
-    if(!isHoldingPosition && !isCommandRunning) {
-      pidController.reset(getCANcoder().getRadians());
-      pidController.setGoal(angleSetpoint.getRadians());
-      isHoldingPosition = true;
-    }
-
-    if(!isCommandRunning){
-      double output = pivotFeedforward.calculate(pidController.getSetpoint().position, pidController.getSetpoint().velocity);
-      output += Math.abs(getCANcoder().minus(angleSetpoint).getDegrees()) < 0.5? pidController.calculate(getCANcoder().getRadians()) : 0;
+    if(!isManualRunning){
+      output = pivotFeedforward.calculate(pidController.getSetpoint().position, pidController.getSetpoint().velocity);
+      output += pidController.calculate(getCANcoder().getRadians());
       pivotLeftMotor.set(output / 12.0);
     }
+
+    System.out.println("Is Manual Running: " + isManualRunning);
+    System.out.println("Is controller set: " + isControllerSet);
+    System.out.println("Output: " + output);  
   }
 }
