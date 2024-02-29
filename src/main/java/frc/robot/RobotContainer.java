@@ -1,5 +1,7 @@
 package frc.robot;
 
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -26,7 +28,7 @@ public class RobotContainer {
     private final Intake s_Intake;
     //private final Jetson s_Jetson = new Jetson();
     //private final LedDriver s_LedDriver = new LedDriver();
-    //private final Limelight s_Limelight = new Limelight();
+    private final Limelight s_Limelight;
     private final Pivot s_Pivot;
     private final Shooter s_Shooter;
     private final Swerve s_Swerve;
@@ -44,13 +46,16 @@ public class RobotContainer {
     private Command m_deployIntake;
     private SequentialCommandGroup m_SpeakerScore;
 
+    private double autoAlignTurn;       //Supplies a value to control the angle to a setpoint while driving.
+    private double autoAlignStrafe;       //Supplies a value to control the side-to-side position while driving.
+
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
         s_Elevator = new Elevator();
         s_Intake = new Intake();
         //s_Jetson = new Jetson();
         //s_LedDriver = new LedDriver();
-        //s_Limelight = new Limelight();
+        s_Limelight = new Limelight();
         s_Pivot = new Pivot();
         s_Shooter = new Shooter();
         s_Swerve = new Swerve();
@@ -59,7 +64,10 @@ public class RobotContainer {
 
         m_AmpScore = new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter);
         m_deployIntake = new DeployIntake(s_Elevator, s_Pivot, s_Intake);
-        m_SpeakerScore = new SpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter);
+        m_SpeakerScore = new SpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, RobotContainer.this);
+
+        autoAlignTurn = 0.0;
+        autoAlignStrafe = 0.0;
 
         s_Swerve.setDefaultCommand(
             new TeleopSwerve(
@@ -68,7 +76,9 @@ public class RobotContainer {
                 () -> -OIConstants.strafeSupplier.get(),
                 () -> -OIConstants.rotationSupplier.get(),
                 () -> OIConstants.robotCentric.getAsBoolean(),
-                () -> OIConstants.slowSpeed.getAsBoolean()
+                () -> OIConstants.slowSpeed.getAsBoolean(),
+                () -> autoAlignTurn,
+                () -> autoAlignStrafe
             )
         );
 
@@ -96,8 +106,8 @@ public class RobotContainer {
             )
         );
 
-        OIConstants.climbRetract.onTrue(
-            new InstantCommand(() -> s_Pivot.setPivotAngle(Rotation2d.fromDegrees(60.0)), s_Pivot)
+        OIConstants.climbRetract.whileTrue(
+            new SpeakerAlign(RobotContainer.this)
         );
 
         //Left Stick Center Button
@@ -110,7 +120,7 @@ public class RobotContainer {
             m_deployIntake.finallyDo(
                 (interrupted) -> {
                     new SequentialCommandGroup(
-                        new WaitCommand(0.2),
+                        new WaitCommand(0.10),
                         new InstantCommand(() -> s_Intake.setSpeed(0.0)),
                         new GoHome(s_Elevator, s_Pivot)
                     ).schedule();
@@ -160,4 +170,12 @@ public class RobotContainer {
         // An ExampleCommand will run in autonomous
         return new exampleAuto(s_Swerve);
     }
+
+    public void setAutoAlignTurn(double value) {
+        autoAlignTurn = value;
+      }
+    
+      public void setAutoAlignStrafe(double value) {
+        autoAlignStrafe = value;
+      }
 }

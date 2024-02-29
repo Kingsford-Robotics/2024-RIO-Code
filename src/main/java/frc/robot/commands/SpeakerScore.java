@@ -10,8 +10,8 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Pivot;
@@ -19,39 +19,37 @@ import frc.robot.subsystems.Shooter;
 
 public class SpeakerScore extends SequentialCommandGroup {
   /** Creates a new SpeakerScore. */
-  public SpeakerScore(Elevator elevator, Intake intake, Pivot pivot, Shooter shooter) {
+  public SpeakerScore(Elevator elevator, Intake intake, Pivot pivot, Shooter shooter, RobotContainer container) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-      new ConditionalCommand(
-        new SequentialCommandGroup(
-          elevator.setHeight(Units.inchesToMeters(12.78)),
-          new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(20.0)), pivot),
-          new WaitUntilCommand(pivot::reachedSetpoint)
-        ), 
-        new ConditionalCommand(
-          new ParallelCommandGroup(
-            new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(20.0)), pivot),
-            new WaitUntilCommand(pivot::reachedSetpoint),
-            elevator.setHeight(Units.inchesToMeters(12.78))
-          ),
-          new SequentialCommandGroup(
-            new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(8.0)), pivot),
-            new WaitUntilCommand(pivot::reachedSetpoint),
-            new ParallelCommandGroup(
-              elevator.setHeight(Units.inchesToMeters(12.78)),
-              new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(20)), pivot),
-              new WaitUntilCommand(pivot::reachedSetpoint)
-            )
-          ),
-          () -> pivot.getCANcoder().getDegrees() > 8.0), 
-        () -> elevator.getHeight() > Units.inchesToMeters(10) && pivot.getCANcoder().getDegrees() < 8.0
-      ),
+        /*
+        new InstantCommand(() -> shooter.setShooterPercent(-0.7), shooter),
+        new ParallelCommandGroup(
+            new SpeakerAlign(container),
 
-      //Fix this logic once I get RPMs setup. Wait until within speed tolerance.
-      new InstantCommand(() -> shooter.setShooterPercent(-0.7), shooter),
-      new WaitCommand(1.0),
-      new InstantCommand(() -> intake.setSpeed(1.0), intake)
-    );
+            new SequentialCommandGroup(
+                new ConditionalCommand(
+                    new SequentialCommandGroup(
+                        elevator.setHeight(Units.inchesToMeters(12.78)),
+                        new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(20.0)), pivot),
+                        new WaitUntilCommand(pivot::reachedSetpoint)),
+                    new ConditionalCommand(
+                        new ParallelCommandGroup(
+                            new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(20.0)), pivot),
+                            new WaitUntilCommand(pivot::reachedSetpoint),
+                            elevator.setHeight(Units.inchesToMeters(12.78))),
+                        new SequentialCommandGroup(
+                            new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(8.0)), pivot),
+                            new WaitUntilCommand(pivot::reachedSetpoint),
+                            new ParallelCommandGroup(
+                                elevator.setHeight(Units.inchesToMeters(12.78)),
+                                new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(20)), pivot),
+                                new WaitUntilCommand(pivot::reachedSetpoint))),
+                        () -> pivot.getCANcoder().getDegrees() > 8.0),
+                    () -> elevator.getHeight() > Units.inchesToMeters(10) && pivot.getCANcoder().getDegrees() < 8.0),
+                new InstantCommand(() -> intake.setSpeed(1.0), intake))
+        )*/
+        );
   }
 }

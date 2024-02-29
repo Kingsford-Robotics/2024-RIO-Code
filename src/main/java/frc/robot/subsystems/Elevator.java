@@ -114,38 +114,15 @@ public class Elevator extends SubsystemBase {
     elevatorMotor.set(speed);
   }
 
-  public Command setHeight(double height) {
-    return new Command() {
-      {
-        addRequirements(Elevator.this);
-      }  
-        @Override
-        public void initialize() {
-           
-          if(height >= 0 && height <= ElevatorConstants.elevatorMaxTravel) {
+  public void setHeight(double height){
+     if(height >= 0 && height <= ElevatorConstants.elevatorMaxTravel) {
                 position = height;
                 elevatorMotor.setControl(elevatorMotionMagicVoltage.withPosition(position));
-            } 
-        }
+    } 
+  }
 
-        @Override
-        public void execute(){
-          boolean isMotionMagic = elevatorMotor.getControlMode().getValue() == ControlModeValue.MotionMagicVoltage;
-          if(!isMotionMagic){
-            elevatorMotor.setControl(elevatorMotionMagicVoltage.withPosition(position));
-          }
-        }
-
-        @Override
-        public boolean isFinished() {
-          return Math.abs(height - getHeight()) < ElevatorConstants.errorThreshold;
-        }
-
-        @Override
-        public void end(boolean interrupted) {
-          elevatorMotor.setControl(elevatorMotionMagicVoltage.withPosition(getHeight()));
-        }
-    };
+  public boolean reachedSetpoint(){
+    return Math.abs(position - getHeight()) < ElevatorConstants.errorThreshold;
   }
 
   public Command manualControl(DoubleSupplier speed) {
@@ -254,7 +231,8 @@ public class Elevator extends SubsystemBase {
     {
       topLimitPressed = true;
       setSpeed(0.0);
-      resetPosition(ElevatorConstants.elevatorMaxTravel);  
+      //TODO: Fix this when limit switch triggering if figured out.
+      //resetPosition(ElevatorConstants.elevatorMaxTravel);  
       setHeight(getHeight() - Units.inchesToMeters(0.05));
     }
 

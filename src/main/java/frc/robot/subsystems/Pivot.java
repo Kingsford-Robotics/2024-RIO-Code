@@ -112,7 +112,7 @@ public class Pivot extends SubsystemBase {
   }
 
   public boolean reachedSetpoint(){
-    return Math.abs(getCANcoder().minus(angleSetpoint).getDegrees()) < 2.0;
+    return Math.abs(getCANcoder().minus(angleSetpoint).getDegrees()) < 3.0;
   }
 
   public void setSpeed(double speed){
@@ -191,7 +191,12 @@ public class Pivot extends SubsystemBase {
 
     if(!isManualRunning){
       output = pivotFeedforward.calculate(pidController.getSetpoint().position, pidController.getSetpoint().velocity);
-      output += pidController.calculate(getCANcoder().getRadians());
+      
+      //Add PID controller output if the error is greater than 1.0 degrees.
+      if(Math.abs(angleSetpoint.minus(getCANcoder()).getDegrees()) > 1.0){
+        output += pidController.calculate(getCANcoder().getRadians());
+      }
+      
       pivotLeftMotor.set(output / 12.0);
     } 
   }

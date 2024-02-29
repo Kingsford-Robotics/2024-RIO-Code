@@ -23,7 +23,8 @@ public class MaxDist extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-      new ConditionalCommand(
+      /*
+    new ConditionalCommand(
         new SequentialCommandGroup(
           elevator.setHeight(Units.inchesToMeters(12.78)),
           new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(30.0)), pivot),
@@ -50,8 +51,9 @@ public class MaxDist extends SequentialCommandGroup {
 
       //Fix this logic once I get RPMs setup. Wait until within speed tolerance.
       new InstantCommand(() -> shooter.setShooterPercent(-1), shooter),
-      new WaitCommand(4.0),
+      new WaitCommand(3.0),
       new InstantCommand(() -> intake.setSpeed(1.0), intake)
+      */
     );
   }
 }

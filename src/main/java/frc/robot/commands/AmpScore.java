@@ -24,8 +24,8 @@ public class AmpScore extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
       addCommands(
-        new ConditionalCommand(
-          
+      /* 
+      new ConditionalCommand(
           //If coming from home position, go up first and then set angle.
           new SequentialCommandGroup(
             elevator.setHeight(Units.inchesToMeters(12.78)),
@@ -61,8 +61,9 @@ public class AmpScore extends SequentialCommandGroup {
       new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(90)), pivot),
       new WaitUntilCommand(pivot::reachedSetpoint),
       new PrintCommand("Pivot to Angle"),
-      new InstantCommand(() -> intake.setSpeed(0.3), intake),
-      new InstantCommand(() -> shooter.setShooterPercent(-0.3), shooter)
+      new InstantCommand(() -> intake.setSpeed(1), intake),
+      new InstantCommand(() -> shooter.setShooterPercent(-0.4), shooter)
+      */
     );
   }
 }
