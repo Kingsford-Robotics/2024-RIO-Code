@@ -34,7 +34,8 @@ public class AmpScore extends SequentialCommandGroup {
         new ParallelCommandGroup(
           new AmpAlign(container),
 
-          new ConditionalCommand(
+          new SequentialCommandGroup(
+            new ConditionalCommand(
             //Coming from not in home.
             new SequentialCommandGroup(
                 new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(10)), pivot),
@@ -59,6 +60,7 @@ public class AmpScore extends SequentialCommandGroup {
             new WaitCommand(0.75)
           )
         )
+        )   
       );
   }
 }

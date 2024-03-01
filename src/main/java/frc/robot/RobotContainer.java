@@ -4,6 +4,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
@@ -46,9 +47,9 @@ public class RobotContainer {
     private SequentialCommandGroup m_SpeakerScore;
 
     private double autoAlignTurn;       //Supplies a value to control the angle to a setpoint while driving.
-    private double autoAlignStrafe;       //Supplies a value to control the side-to-side position while driving.
+    private double autoAlignStrafe;     //Supplies a value to control the side-to-side position while driving.
 
-     private final SendableChooser<Command> autoChooser;
+    private final SendableChooser<Command> autoChooser;
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
@@ -63,8 +64,9 @@ public class RobotContainer {
 
         s_CompetitionData = new CompetitionData(this, s_Elevator);
 
-        NamedCommands.registerCommand("speakerScore", new SpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, null));
-        NamedCommands.registerCommand("ampScore", new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter, null));
+        
+        NamedCommands.registerCommand("speakerScore", new SpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, RobotContainer.this));
+        NamedCommands.registerCommand("ampScore", new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter, RobotContainer.this));
         NamedCommands.registerCommand("intake", new DeployIntake(s_Elevator, s_Pivot, s_Intake));
         NamedCommands.registerCommand("home", new GoHome(s_Elevator, s_Pivot));
         NamedCommands.registerCommand("stopIntakeShooter", 
@@ -80,6 +82,8 @@ public class RobotContainer {
         m_SpeakerScore = new SpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, RobotContainer.this);
 
         autoChooser = AutoBuilder.buildAutoChooser();
+
+        Shuffleboard.getTab("Competition").add(autoChooser);
 
         autoAlignTurn = 0.0;
         autoAlignStrafe = 0.0;
