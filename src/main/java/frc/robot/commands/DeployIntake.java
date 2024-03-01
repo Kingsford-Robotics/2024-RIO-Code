@@ -30,7 +30,7 @@ public class DeployIntake extends SequentialCommandGroup {
         new InstantCommand(() -> elevator.setHeight(Units.inchesToMeters(0.0)), elevator),
         new WaitUntilCommand(() -> elevator.getHeight() < Units.inchesToMeters(1.0)),
         new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(-1.75)), pivot),
-        new InstantCommand(() -> intake.setSpeed(0.5), intake),
+        new InstantCommand(() -> intake.setSpeed(0.8), intake),
         new WaitUntilCommand(() -> !intake.getBeamBreak())
     );
   }

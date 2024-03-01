@@ -1,10 +1,10 @@
 package frc.robot;
 
-import java.util.function.DoubleSupplier;
-
-import edu.wpi.first.math.geometry.Rotation2d;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.OIConstants;
-import frc.robot.autos.*;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 
@@ -49,6 +48,8 @@ public class RobotContainer {
     private double autoAlignTurn;       //Supplies a value to control the angle to a setpoint while driving.
     private double autoAlignStrafe;       //Supplies a value to control the side-to-side position while driving.
 
+     private final SendableChooser<Command> autoChooser;
+
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
         s_Elevator = new Elevator();
@@ -62,9 +63,23 @@ public class RobotContainer {
 
         s_CompetitionData = new CompetitionData(this, s_Elevator);
 
-        m_AmpScore = new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter);
+        NamedCommands.registerCommand("speakerScore", new SpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, null));
+        NamedCommands.registerCommand("ampScore", new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter, null));
+        NamedCommands.registerCommand("intake", new DeployIntake(s_Elevator, s_Pivot, s_Intake));
+        NamedCommands.registerCommand("home", new GoHome(s_Elevator, s_Pivot));
+        NamedCommands.registerCommand("stopIntakeShooter", 
+            new ParallelCommandGroup(
+                new InstantCommand(() -> s_Intake.setSpeed(0.0), s_Intake),
+                new InstantCommand(() -> s_Shooter.setShooterPercent(0.0), s_Shooter)
+            )
+        );
+        
+
+        m_AmpScore = new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter, RobotContainer.this);
         m_deployIntake = new DeployIntake(s_Elevator, s_Pivot, s_Intake);
         m_SpeakerScore = new SpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, RobotContainer.this);
+
+        autoChooser = AutoBuilder.buildAutoChooser();
 
         autoAlignTurn = 0.0;
         autoAlignStrafe = 0.0;
@@ -121,7 +136,7 @@ public class RobotContainer {
         );
 
         OIConstants.climbRetract.whileTrue(
-            new SpeakerAlign(RobotContainer.this)
+            new AmpAlign(RobotContainer.this)
         );
 
         //Left Stick Center Button
@@ -175,15 +190,9 @@ public class RobotContainer {
         //TODO: Add climb commands.*/
     }
 
-    /**
-     * Use this to pass the autonomous command to the main {@link Robot} class.
-     *
-     * @return the command to run in autonomous
-     */
     public Command getAutonomousCommand() {
-        // An ExampleCommand will run in autonomous
-        return new exampleAuto(s_Swerve);
-    }
+        return autoChooser.getSelected();
+      }
 
     public void setAutoAlignTurn(double value) {
         autoAlignTurn = value;

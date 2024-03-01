@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -25,8 +26,31 @@ public class SpeakerScore extends SequentialCommandGroup {
 
         //TODO: Add logic to adjust angle based on distance from target.
         addCommands(
+            //Stop elevator and pivot motions.
+            new ParallelCommandGroup(
+                new InstantCommand(() -> elevator.setHeight(elevator.getHeight()), elevator),
+                new InstantCommand(() -> pivot.setPivotAngle(pivot.getCANcoder()), pivot)
+            ),    
             new InstantCommand(() -> shooter.setShooterPercent(1.0), shooter),
-            new InstantCommand(() ->elevator.setHeight(Units.inchesToMeters(11.00)), elevator),
+
+            new ConditionalCommand(
+                //Coming from not in home.
+                new SequentialCommandGroup(
+                    new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(10)), pivot),
+                    new WaitUntilCommand(() -> pivot.getCANcoder().getDegrees() > 8.0),
+                    new InstantCommand(() ->elevator.setHeight(Units.inchesToMeters(11.50)), elevator),
+                    new WaitUntilCommand(() -> elevator.getHeight() > Units.inchesToMeters(11))
+                ),
+                
+                //Coming from in home
+                new SequentialCommandGroup(
+                    new InstantCommand(() ->elevator.setHeight(Units.inchesToMeters(11.50)), elevator),
+                    new WaitUntilCommand(() -> elevator.getHeight() > Units.inchesToMeters(11))
+                ),
+                () -> elevator.getHeight() < Units.inchesToMeters(9.75)
+
+            ),
+   
             new ParallelCommandGroup(
                 new SpeakerAlign(container),
 
@@ -50,7 +74,8 @@ public class SpeakerScore extends SequentialCommandGroup {
                     //TODO: Add check if the pivot is at the desired angle.
                     new WaitCommand(0.3),
                     new WaitUntilCommand(() -> pivot.angleErrorDegrees() < 2.0 && elevator.reachedSetpoint() && LimelightHelpers.getTX("limelight") < 2.0 && shooter.getShooterRPM() > 2500.0),
-                    new InstantCommand(() -> intake.setSpeed(1.0), intake)
+                    new InstantCommand(() -> intake.setSpeed(1.0), intake),
+                    new WaitCommand(0.5)
                 )
             )
         );
@@ -80,8 +105,7 @@ public class SpeakerScore extends SequentialCommandGroup {
             return angles[angles.length - 1];
         }*/
         
-        return -0.405124 * distance*distance + 8.44125* distance - 9.7179;
-
+        return Math.max(-0.405124 * distance*distance + 8.44125* distance - 7, 14);
     }
 }
 
