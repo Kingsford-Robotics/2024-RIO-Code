@@ -18,6 +18,7 @@ public class Limelight extends SubsystemBase {
   private GenericEntry tzEntry;
   private GenericEntry tXDist;
   private GenericEntry targetId;
+  private GenericEntry distanceEntry;
 
   private GenericEntry kP;
   private GenericEntry kI;
@@ -32,6 +33,7 @@ public class Limelight extends SubsystemBase {
     tzEntry = tab.add("tz", 0.0).getEntry();
     tXDist = tab.add("txDist", 0.0).getEntry();
     targetId = tab.add("targetId", 0).getEntry();
+    distanceEntry = tab.add("Distance", 0.0).getEntry();
 
     kP = tab.add("kP", 0.0).getEntry();
     kI = tab.add("kI", 0.0).getEntry();
@@ -47,6 +49,14 @@ public class Limelight extends SubsystemBase {
     tzEntry.setDouble(Units.metersToFeet(LimelightHelpers.getCameraPose3d_TargetSpace("limelight").getZ()));
     tXDist.setDouble(Units.metersToFeet(LimelightHelpers.getCameraPose3d_TargetSpace("limelight").getX()));
     targetId.setDouble(LimelightHelpers.getFiducialID("limelight"));
+
+    double distance = 
+      Math.sqrt(
+          Math.pow(LimelightHelpers.getCameraPose3d_TargetSpace("limelight").getX(), 2) + 
+          Math.pow(LimelightHelpers.getCameraPose3d_TargetSpace("limelight").getZ(), 2)
+      );
+
+    distanceEntry.setDouble(Units.metersToFeet(distance));
   }
 }
 

@@ -82,6 +82,20 @@ public class RobotContainer {
             )
         );
 
+        s_Shooter.setDefaultCommand(
+            new InstantCommand(
+                () -> s_Shooter.setShooterPercent(OIConstants.shooterSpeed.getAsDouble()), 
+                s_Shooter
+            )
+        );
+
+        s_Intake.setDefaultCommand(
+            new InstantCommand(
+                () -> s_Intake.setSpeed(OIConstants.intakeSpeed.getAsDouble()), 
+                s_Intake
+            )
+        );
+
         // Configure the button bindings
         configureButtonBindings();
     }
@@ -120,7 +134,7 @@ public class RobotContainer {
             m_deployIntake.finallyDo(
                 (interrupted) -> {
                     new SequentialCommandGroup(
-                        new WaitCommand(0.10),
+                        new WaitCommand(0.15),
                         new InstantCommand(() -> s_Intake.setSpeed(0.0)),
                         new GoHome(s_Elevator, s_Pivot)
                     ).schedule();

@@ -37,7 +37,9 @@ public class Shooter extends SubsystemBase {
     shooterLeftMotor.configFactoryDefault();
     shooterRightMotor.configFactoryDefault();
 
-    shooterRightMotor.setInverted(true);
+    shooterLeftMotor.setInverted(true);
+    shooterRightMotor.setInverted(false);
+
     shooterRightMotor.follow(shooterLeftMotor);
 
     shooterLeftMotor.configSelectedFeedbackSensor(TalonSRXFeedbackDevice.CTRE_MagEncoder_Relative,0,0);
@@ -60,9 +62,9 @@ public class Shooter extends SubsystemBase {
   /**
    * Sets the shooter speed in RPM.
    */
-  public void setShooterRPM(double speed) {
+  /*public void setShooterRPM(double speed) {
     shooterLeftMotor.set(ControlMode.Velocity, speed * 4096 / 600);
-  }
+  }*/
 
   /*
    * Sets the shooter speed in percent output.

@@ -105,7 +105,7 @@ public class Pivot extends SubsystemBase {
 
   public void setPivotAngle(Rotation2d angle){
     angleSetpoint = Rotation2d.fromRadians(angle.getRadians());
-    pidController.reset(getCANcoder().getRadians());
+    //pidController.reset(getCANcoder().getRadians());
     pidController.setGoal(angleSetpoint.getRadians());
     isManualRunning = false;
     isControllerSet = true;
@@ -113,6 +113,14 @@ public class Pivot extends SubsystemBase {
 
   public boolean reachedSetpoint(){
     return Math.abs(getCANcoder().minus(angleSetpoint).getDegrees()) < 3.0;
+  }
+
+  public double angleErrorDegrees(){
+    return Math.abs(getCANcoder().minus(angleSetpoint).getDegrees());
+  }
+
+  public double getAngleSetpoint(){
+    return angleSetpoint.getDegrees();
   }
 
   public void setSpeed(double speed){
