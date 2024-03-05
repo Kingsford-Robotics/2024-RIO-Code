@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.5,
-      "y": 5.55
+      "x": 1.25,
+      "y": 6.5
     },
-    "rotation": 180.0
+    "rotation": -120.0
   },
   "command": {
     "type": "sequential",
@@ -14,7 +14,7 @@
         {
           "type": "named",
           "data": {
-            "name": "speakerScore"
+            "name": "lowSpeakerScore"
           }
         },
         {
@@ -34,31 +34,12 @@
                 }
               },
               {
-                "type": "sequential",
+                "type": "path",
                 "data": {
-                  "commands": [
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 2.0
-                      }
-                    },
-                    {
-                      "type": "path",
-                      "data": {
-                        "pathName": "BackUp"
-                      }
-                    }
-                  ]
+                  "pathName": "LeftNote"
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.15
           }
         },
         {
@@ -70,13 +51,56 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.0
+            "waitTime": 0.15
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "speakerScore"
+            "name": "lowSpeakerScore"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopIntakeShooter"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "intake"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "LeftToCenter"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopIntakeShooter"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.15
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "lowSpeakerScore"
           }
         }
       ]

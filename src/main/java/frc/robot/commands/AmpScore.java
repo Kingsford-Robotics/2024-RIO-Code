@@ -24,43 +24,38 @@ public class AmpScore extends SequentialCommandGroup {
   
   public AmpScore(Pivot pivot, Elevator elevator, Intake intake, Shooter shooter, RobotContainer container) {
       addCommands(
-
         //Stop elevator and pivot motions.
         new ParallelCommandGroup(
           new InstantCommand(() -> elevator.setHeight(elevator.getHeight()), elevator),
-          new InstantCommand(() -> pivot.setPivotAngle(pivot.getCANcoder()), pivot)
+          new InstantCommand(() -> pivot.setPivotAngle(pivot.getCANcoder()), pivot),
+          new InstantCommand(() -> shooter.setShooterPercent(0.4), shooter)
         ),
 
-        new ParallelCommandGroup(
-          new AmpAlign(container),
-
+        new SequentialCommandGroup(
+          new ConditionalCommand(
+          //Coming from not in home.
           new SequentialCommandGroup(
-            new ConditionalCommand(
-            //Coming from not in home.
-            new SequentialCommandGroup(
-                new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(10)), pivot),
-                new WaitUntilCommand(() -> pivot.getCANcoder().getDegrees() > 8.0),
-                new InstantCommand(() ->elevator.setHeight(Units.inchesToMeters(12.75)), elevator),
-                new WaitUntilCommand(() -> elevator.getHeight() > Units.inchesToMeters(11))
-            ),
-
-            //Coming from in home
-            new SequentialCommandGroup(
-                new InstantCommand(() ->elevator.setHeight(Units.inchesToMeters(12.75)), elevator),
-                new WaitUntilCommand(() -> elevator.getHeight() > Units.inchesToMeters(11))
-            ),
-            () -> elevator.getHeight() < Units.inchesToMeters(9.75)
+              new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(10)), pivot),
+              new WaitUntilCommand(() -> pivot.getCANcoder().getDegrees() > 8.0),
+              new InstantCommand(() ->elevator.setHeight(Units.inchesToMeters(12.75)), elevator),
+              new WaitUntilCommand(() -> elevator.getHeight() > Units.inchesToMeters(11))
           ),
 
+          //Coming from in home
           new SequentialCommandGroup(
-            new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(90)), pivot),
-            new WaitUntilCommand(() -> pivot.getCANcoder().getDegrees() > 87 && LimelightHelpers.getCameraPose3d_TargetSpace("limelight").getX() < Units.inchesToMeters(2.5)),
-            new InstantCommand(() -> intake.setSpeed(1.0), intake),
-            new InstantCommand(() -> shooter.setShooterPercent(0.6), shooter),
-            new WaitCommand(0.75)
-          )
+              new InstantCommand(() ->elevator.setHeight(Units.inchesToMeters(12.75)), elevator),
+              new WaitUntilCommand(() -> elevator.getHeight() > Units.inchesToMeters(11))
+          ),
+          () -> elevator.getHeight() < Units.inchesToMeters(9.75)
         )
-        )   
-      );
+      ),
+
+      new SequentialCommandGroup(
+        new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(90)), pivot),
+        new WaitUntilCommand(() -> pivot.getCANcoder().getDegrees() > 87.0),
+        new InstantCommand(() -> intake.setSpeed(1.0), intake),
+        new WaitCommand(1.0)
+      )
+    );
   }
 }

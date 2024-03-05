@@ -5,6 +5,8 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.CvSink;
+import edu.wpi.first.cscore.CvSource;
 import edu.wpi.first.cscore.MjpegServer;
 import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.math.util.Units;
@@ -27,21 +29,26 @@ public class CompetitionData extends SubsystemBase {
 
   private ShuffleboardTab tab;
   
-  private UsbCamera backCamera;
-
-  private MjpegServer backCameraServ;
-  
   public CompetitionData(RobotContainer robotContainer, Elevator elevator) {
     this.m_RobotContainer = robotContainer;
     this.m_Elevator = elevator;
     
     tab = Shuffleboard.getTab("Competition");
-    backCamera = CameraServer.startAutomaticCapture(0);
-    backCamera.setVideoMode(PixelFormat.kMJPEG, 480, 320, 10);
-    backCameraServ = new MjpegServer("Turntable", 1182);
+    
+    //Create two USB camera and put the video feed on Shuffleboard
+    UsbCamera camera1 = CameraServer.startAutomaticCapture(0);
+    camera1.setResolution(320, 240);
+    camera1.setFPS(15);
+    camera1.setPixelFormat(PixelFormat.kMJPEG);
+    MjpegServer mjpegServer1 = new MjpegServer("serve_USB Camera 0", 1181);
+    mjpegServer1.setSource(camera1);
 
-    backCameraServ.setSource(backCamera);
-    tab.add("Back Camera", backCameraServ.getSource());
+    UsbCamera camera2 = CameraServer.startAutomaticCapture(1);
+    camera2.setResolution(320, 240);
+    camera2.setFPS(15);
+    camera2.setPixelFormat(PixelFormat.kMJPEG);
+    MjpegServer mjpegServer2 = new MjpegServer("serve_USB Camera 1", 1182);
+    mjpegServer2.setSource(camera2);
 
     operatorMode = tab.add("Mode", "Speaker").getEntry();
     elevatorHeight = tab.add("Elevator Height", 0.0).getEntry();

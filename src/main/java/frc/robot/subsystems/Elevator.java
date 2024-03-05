@@ -34,6 +34,8 @@ public class Elevator extends SubsystemBase {
   GenericEntry elevatorSpeedEntry;
   GenericEntry topLimitSwitchEntry;
   GenericEntry bottomLimitSwitchEntry;
+
+  GenericEntry setElevatorHeighEntry;
   
   private TalonFX elevatorMotor;
 
@@ -56,6 +58,8 @@ public class Elevator extends SubsystemBase {
     elevatorSpeedEntry = tab.add("Elevator Speed", 0.0).getEntry();
     topLimitSwitchEntry = tab.add("Top Limit Switch", false).getEntry();
     bottomLimitSwitchEntry = tab.add("Bottom Limit Switch", false).getEntry();
+
+    setElevatorHeighEntry = tab.add("Set Elevator Height", 0.0).getEntry();
   
     elevatorMotor = new TalonFX(ElevatorConstants.elevatorMotorID);
     topLimitSwitch = new DigitalInput(ElevatorConstants.topLimitSwitchID);
@@ -225,6 +229,13 @@ public class Elevator extends SubsystemBase {
     elevatorSpeedEntry.setDouble(Units.metersToInches(velocity));
     topLimitSwitchEntry.setBoolean(getTopLimitSwitch());
     bottomLimitSwitchEntry.setBoolean(getBottomLimitSwitch());
+
+    /*double setHeight = Units.inchesToMeters(setElevatorHeighEntry.getDouble(0.0));
+
+    if(setHeight != position){
+      position = setHeight;
+      elevatorMotor.setControl(elevatorMotionMagicVoltage.withPosition(position));
+    }*/
 
     // Apply hard limits. Stop the elevator if it hits the top or bottom limit switch.
     if(getTopLimitSwitch() && percentOutput > 0.01)

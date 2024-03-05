@@ -16,7 +16,7 @@ import frc.robot.Controllers.Thrustmaster;
 /** Add your docs here. */
 public class OIConstants {
     //Deadband for Joystick
-    public static final double stickDeadband = 0.05;
+    public static final double stickDeadband = 0.1;
 
     //Drive Speeds
     public static final double highTranslationSpeed = 1.0;

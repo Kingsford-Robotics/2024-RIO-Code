@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.OIConstants;
@@ -64,31 +65,10 @@ public class RobotContainer {
 
         s_CompetitionData = new CompetitionData(this, s_Elevator);
 
-        
-        NamedCommands.registerCommand("speakerScore", new SpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, RobotContainer.this));
-        NamedCommands.registerCommand("ampScore", new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter, RobotContainer.this));
-        NamedCommands.registerCommand("intake", new DeployIntake(s_Elevator, s_Pivot, s_Intake));
-        NamedCommands.registerCommand("home", new GoHome(s_Elevator, s_Pivot));
-        NamedCommands.registerCommand("stopIntakeShooter", 
-            new ParallelCommandGroup(
-                new InstantCommand(() -> s_Intake.setSpeed(0.0), s_Intake),
-                new InstantCommand(() -> s_Shooter.setShooterPercent(0.0), s_Shooter)
-            )
-        );
-        
-
-        m_AmpScore = new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter, RobotContainer.this);
-        m_deployIntake = new DeployIntake(s_Elevator, s_Pivot, s_Intake);
-        m_SpeakerScore = new SpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, RobotContainer.this);
-
-        autoChooser = AutoBuilder.buildAutoChooser();
-
-        Shuffleboard.getTab("Competition").add(autoChooser);
-
         autoAlignTurn = 0.0;
         autoAlignStrafe = 0.0;
 
-        s_Swerve.setDefaultCommand(
+         s_Swerve.setDefaultCommand(
             new TeleopSwerve(
                 s_Swerve, 
                 () -> -OIConstants.translationSupplier.get(),
@@ -100,23 +80,42 @@ public class RobotContainer {
                 () -> autoAlignStrafe
             )
         );
+        
+        m_AmpScore = new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter, RobotContainer.this);
+        m_deployIntake = new DeployIntake(s_Elevator, s_Pivot, s_Intake);
+        m_SpeakerScore = new SpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, RobotContainer.this);
+
+       s_Intake.setDefaultCommand(
+            new RunCommand(
+                () -> s_Intake.setSpeed(OIConstants.intakeSpeed.getAsDouble()), 
+                s_Intake
+            )
+       );
 
         s_Shooter.setDefaultCommand(
-            new InstantCommand(
+            new RunCommand(
                 () -> s_Shooter.setShooterPercent(OIConstants.shooterSpeed.getAsDouble()), 
                 s_Shooter
             )
         );
 
-        s_Intake.setDefaultCommand(
-            new InstantCommand(
-                () -> s_Intake.setSpeed(OIConstants.intakeSpeed.getAsDouble()), 
-                s_Intake
+        // Configure the button bindings
+        configureButtonBindings();
+
+        NamedCommands.registerCommand("highSpeakerScore", new SpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, RobotContainer.this));
+        NamedCommands.registerCommand("lowSpeakerScore", new LowSpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, s_Swerve));
+        NamedCommands.registerCommand("ampScore", new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter, RobotContainer.this));
+        NamedCommands.registerCommand("intake", new DeployIntake(s_Elevator, s_Pivot, s_Intake));
+        NamedCommands.registerCommand("home", new GoHome(s_Elevator, s_Pivot));
+        NamedCommands.registerCommand("stopIntakeShooter", 
+            new ParallelCommandGroup(
+                new InstantCommand(() -> s_Intake.setSpeed(0.0), s_Intake),
+                new InstantCommand(() -> s_Shooter.setShooterPercent(0.0), s_Shooter)
             )
         );
 
-        // Configure the button bindings
-        configureButtonBindings();
+        autoChooser = AutoBuilder.buildAutoChooser();
+        Shuffleboard.getTab("Competition").add(autoChooser);
     }
 
     /**
@@ -181,8 +180,7 @@ public class RobotContainer {
 
         /* Co-Driver Buttons */
 
-        //Reverse Intake
-        OIConstants.reverseIntake.whileTrue(new InstantCommand(() -> s_Intake.setSpeed(-0.3), s_Intake)).
+        OIConstants.reverseIntake.whileTrue(new RunCommand(() -> s_Intake.setSpeed(-0.25), s_Intake)).
             onFalse(new InstantCommand(() -> s_Intake.setSpeed(0.0), s_Intake));
         
         //Speaker Mode
@@ -200,9 +198,9 @@ public class RobotContainer {
 
     public void setAutoAlignTurn(double value) {
         autoAlignTurn = value;
-      }
+    }
     
-      public void setAutoAlignStrafe(double value) {
+    public void setAutoAlignStrafe(double value) {
         autoAlignStrafe = value;
-      }
+    }
 }
