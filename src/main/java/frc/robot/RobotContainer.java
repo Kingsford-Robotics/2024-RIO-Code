@@ -1,19 +1,19 @@
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Rotation2d;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants.OIConstants;
-import frc.robot.Constants.Constants.ElevatorConstants;
-import frc.robot.autos.*;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 
@@ -27,58 +27,91 @@ public class RobotContainer {
     /* Subsystems */
     private final Elevator s_Elevator;
     private final Intake s_Intake;
-    //private final Jetson s_Jetson = new Jetson();
-    //private final LedDriver s_LedDriver = new LedDriver();
-    //private final Limelight s_Limelight = new Limelight();
     private final Pivot s_Pivot;
     private final Shooter s_Shooter;
     private final Swerve s_Swerve;
-
-    private CompetitionData s_CompetitionData;
+    private final CompetitionData s_CompetitionData;
 
     public enum targetMode {
         kSpeaker,
-        kAmp
+        kAmp,
+        kTrap
     }
 
     public targetMode m_TargetMode = targetMode.kSpeaker;
 
-    private SequentialCommandGroup m_GoHome;
     private SequentialCommandGroup m_AmpScore;
     private Command m_deployIntake;
     private SequentialCommandGroup m_SpeakerScore;
+
+    private double autoAlignTurn;       //Supplies a value to control the angle to a setpoint while driving.
+    private double autoAlignStrafe;     //Supplies a value to control the side-to-side position while driving.
+
+    private final SendableChooser<Command> autoChooser;
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
         s_Elevator = new Elevator();
         s_Intake = new Intake();
-        //s_Jetson = new Jetson();
-        //s_LedDriver = new LedDriver();
-        //s_Limelight = new Limelight();
         s_Pivot = new Pivot();
         s_Shooter = new Shooter();
         s_Swerve = new Swerve();
-
         s_CompetitionData = new CompetitionData(this, s_Elevator);
 
-        m_GoHome = new GoHome(s_Elevator, s_Pivot);
-        m_AmpScore = new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter);
-        m_deployIntake = new DeployIntake(s_Elevator, s_Pivot, s_Intake);
-        m_SpeakerScore = new SpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter);
 
-        s_Swerve.setDefaultCommand(
+        Limelight s_Limelight = new Limelight();
+
+        autoAlignTurn = 0.0;
+        autoAlignStrafe = 0.0;
+
+         s_Swerve.setDefaultCommand(
             new TeleopSwerve(
                 s_Swerve, 
                 () -> -OIConstants.translationSupplier.get(),
                 () -> -OIConstants.strafeSupplier.get(),
                 () -> -OIConstants.rotationSupplier.get(),
                 () -> OIConstants.robotCentric.getAsBoolean(),
-                () -> OIConstants.slowSpeed.getAsBoolean()
+                () -> OIConstants.slowSpeed.getAsBoolean(),
+                () -> autoAlignTurn,
+                () -> autoAlignStrafe
+            )
+        );
+        
+        m_AmpScore = new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter, RobotContainer.this);
+        m_deployIntake = new DeployIntake(s_Elevator, s_Pivot, s_Intake);
+        m_SpeakerScore = new SpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, RobotContainer.this);
+
+       s_Intake.setDefaultCommand(
+            new RunCommand(
+                () -> s_Intake.setSpeed(OIConstants.intakeSpeed.getAsDouble()), 
+                s_Intake
+            )
+       );
+
+        s_Shooter.setDefaultCommand(
+            new RunCommand(
+                () -> s_Shooter.setShooterPercent(OIConstants.shooterSpeed.getAsDouble()), 
+                s_Shooter
             )
         );
 
         // Configure the button bindings
         configureButtonBindings();
+
+        NamedCommands.registerCommand("highSpeakerScore", new SpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, RobotContainer.this));
+        NamedCommands.registerCommand("lowSpeakerScore", new LowSpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, s_Swerve));
+        NamedCommands.registerCommand("ampScore", new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter, RobotContainer.this));
+        NamedCommands.registerCommand("intake", new DeployIntake(s_Elevator, s_Pivot, s_Intake));
+        NamedCommands.registerCommand("home", new GoHome(s_Elevator, s_Pivot));
+        NamedCommands.registerCommand("stopIntakeShooter", 
+            new ParallelCommandGroup(
+                new InstantCommand(() -> s_Intake.setSpeed(0.0), s_Intake),
+                new InstantCommand(() -> s_Shooter.setShooterPercent(0.0), s_Shooter)
+            )
+        );
+
+        autoChooser = AutoBuilder.buildAutoChooser();
+        Shuffleboard.getTab("Competition").add(autoChooser);
     }
 
     /**
@@ -88,29 +121,62 @@ public class RobotContainer {
      * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
-        /* Driver Buttons */
+        /*Controller Mappings*/
+        
         //A Button
         OIConstants.ampTarget.onTrue(new InstantCommand(()-> m_TargetMode = targetMode.kAmp));
 
+        //Y Button
         OIConstants.speakerTarget.onTrue(new InstantCommand(() -> m_TargetMode = targetMode.kSpeaker));
 
-        OIConstants.climbDeploy.whileTrue(
+        //B Button
+        OIConstants.trapTarget.onTrue(new InstantCommand(() -> m_TargetMode = targetMode.kTrap));
+
+        //X Button
+        OIConstants.reverseIntake.whileTrue(new RunCommand(() -> s_Intake.setSpeed(-0.25), s_Intake)).
+            onFalse(new InstantCommand(() -> s_Intake.setSpeed(0.0), s_Intake));
+
+        //Left Bumper
+        OIConstants.manualActive.whileTrue(
             new ParallelCommandGroup(
                 s_Pivot.manualControl(() -> -OIConstants.pivotSpeed.getAsDouble() * 0.2),
                 s_Elevator.manualControl(() -> -OIConstants.elevatorSpeed.getAsDouble() * 0.4)
             )
         );
 
-        OIConstants.climbRetract.whileTrue(
-            new InstantCommand(() -> s_Pivot.setPivotAngle(Rotation2d.fromDegrees(45)), s_Pivot)
+        //Right Bumper
+        /*
+        OIConstants.ampAlign.whileTrue(
+            new AmpAlign(RobotContainer.this)
+        );*/
+
+        //Temporarily switch camera using the left and right bumpers
+
+
+        //Toggle camera mode using this button
+        OIConstants.ampAlign.onTrue(
+            new InstantCommand(() -> s_CompetitionData.switchCamera(!s_CompetitionData.isChainCamera()), s_Swerve)
         );
+
+
+        //Climber Deploy
+        OIConstants.climberDeploy.whileTrue(
+            new InstantCommand()
+        );
+
+        //Climate Retract
+        OIConstants.climberRetract.whileTrue(
+            new InstantCommand()
+        );
+
+        /*Driver Mappings */
 
         //Left Stick Center Button
         OIConstants.homeButton.whileTrue(
             new GoHome(s_Elevator, s_Pivot)
         );
 
-        //Drive left trigger
+        //Drive Left Trigger
         OIConstants.deployIntake.whileTrue(
             m_deployIntake.finallyDo(
                 (interrupted) -> {
@@ -123,6 +189,7 @@ public class RobotContainer {
             )
         );
 
+        //Drive Right Trigger
         OIConstants.shoot.whileTrue(
             new ConditionalCommand(
                 m_SpeakerScore, 
@@ -137,32 +204,21 @@ public class RobotContainer {
             )
         );
 
+        //Drive Right Stick Center Button
         OIConstants.resetGyro.onTrue(
             new InstantCommand(() -> s_Swerve.zeroHeading(), s_Swerve)
         );
-
-        /* Co-Driver Buttons */
-
-        //Reverse Intake
-        OIConstants.reverseIntake.whileTrue(new InstantCommand(() -> s_Intake.setSpeed(-0.3), s_Intake)).
-            onFalse(new InstantCommand(() -> s_Intake.setSpeed(0.0), s_Intake));
-        
-        //Speaker Mode
-        OIConstants.speakerTarget.onTrue(new InstantCommand(() -> m_TargetMode = targetMode.kSpeaker));
-
-        //Amp Mode
-        OIConstants.ampTarget.onTrue(new InstantCommand(() -> m_TargetMode = targetMode.kAmp));
-        
-        //TODO: Add climb commands.*/
     }
 
-    /**
-     * Use this to pass the autonomous command to the main {@link Robot} class.
-     *
-     * @return the command to run in autonomous
-     */
     public Command getAutonomousCommand() {
-        // An ExampleCommand will run in autonomous
-        return new exampleAuto(s_Swerve);
+        return autoChooser.getSelected();
+      }
+
+    public void setAutoAlignTurn(double value) {
+        autoAlignTurn = value;
+    }
+    
+    public void setAutoAlignStrafe(double value) {
+        autoAlignStrafe = value;
     }
 }

@@ -21,11 +21,14 @@ public class TeleopSwerve extends Command {
     private BooleanSupplier robotCentricSup;
     private BooleanSupplier slowModeSup;
 
+    private DoubleSupplier autoAngle;
+    private DoubleSupplier autoStrafe;
+
     private SlewRateLimiter translationLimiter;
     private SlewRateLimiter strafeLimiter;
     private SlewRateLimiter rotationLimiter;
 
-    public TeleopSwerve(Swerve s_Swerve, DoubleSupplier translationSup, DoubleSupplier strafeSup, DoubleSupplier rotationSup, BooleanSupplier robotCentricSup, BooleanSupplier slowModeSup) {
+    public TeleopSwerve(Swerve s_Swerve, DoubleSupplier translationSup, DoubleSupplier strafeSup, DoubleSupplier rotationSup, BooleanSupplier robotCentricSup, BooleanSupplier slowModeSup, DoubleSupplier autoAngle, DoubleSupplier autoStrafe) {
         this.s_Swerve = s_Swerve;
         addRequirements(s_Swerve);
 
@@ -34,6 +37,9 @@ public class TeleopSwerve extends Command {
         this.rotationSup = rotationSup;
         this.robotCentricSup = robotCentricSup;
         this.slowModeSup = slowModeSup;
+
+        this.autoAngle = autoAngle;
+        this.autoStrafe = autoStrafe;
 
         //Instantiates slew rate limiters using translation and turn ramp times.
         translationLimiter = new SlewRateLimiter(1/OIConstants.translateRampTime);
@@ -48,6 +54,9 @@ public class TeleopSwerve extends Command {
         double strafeVal = strafeLimiter.calculate(Math.copySign(Math.pow(MathUtil.applyDeadband(strafeSup.getAsDouble(), OIConstants.stickDeadband) ,2), MathUtil.applyDeadband(strafeSup.getAsDouble(), OIConstants.stickDeadband)));
         double rotationVal = rotationLimiter.calculate(Math.copySign(Math.pow(MathUtil.applyDeadband(rotationSup.getAsDouble(), OIConstants.stickDeadband) ,2), MathUtil.applyDeadband(rotationSup.getAsDouble(), OIConstants.stickDeadband)));
 
+        rotationVal += autoAngle.getAsDouble();
+        strafeVal += autoStrafe.getAsDouble();
+        
         /* Slow mode */
         if(slowModeSup.getAsBoolean()) {
             translationVal *= OIConstants.lowTranslationSpeed;

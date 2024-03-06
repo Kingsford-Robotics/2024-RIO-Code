@@ -4,92 +4,64 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.LimelightHelpers;
 
 public class Limelight extends SubsystemBase {
-  public enum LedMode {
-    kOff(0), kOn(1), kBlink(2);
-
-    public final int value;
-
-    LedMode(int value) {
-      this.value = value;
-    }
-  }
-
-  private LedMode ledMode;
-  private int tx;
-  private int ty;
-  private int tz;
-
-  private NetworkTableInstance inst;
-  private NetworkTable limelightTable;
-
-  private ShuffleboardTab limelightTab;
+  private ShuffleboardTab tab;
   private GenericEntry txEntry;
   private GenericEntry tyEntry;
   private GenericEntry tzEntry;
+  private GenericEntry tXDist;
+  private GenericEntry targetId;
+  private GenericEntry distanceEntry;
 
+  private GenericEntry kP;
+  private GenericEntry kI;
+  private GenericEntry kD;
+  private GenericEntry feedforward;
 
   public Limelight() {
-    ledMode = LedMode.kOff;
-    limelightTab = Shuffleboard.getTab("Limelight");
+    tab = Shuffleboard.getTab("Limelight");
 
-    txEntry = limelightTab.add("tx", 0.0).getEntry();
-    tyEntry = limelightTab.add("ty", 0.0).getEntry();
-    tzEntry = limelightTab.add("tz", 0.0).getEntry();
+    txEntry = tab.add("tx", 0.0).getEntry();
+    tyEntry = tab.add("ty", 0.0).getEntry();
+    tzEntry = tab.add("tz", 0.0).getEntry();
+    tXDist = tab.add("txDist", 0.0).getEntry();
+    targetId = tab.add("targetId", 0).getEntry();
+    distanceEntry = tab.add("Distance", 0.0).getEntry();
 
-    
-  }
-
-  public void setLedMode(LedMode ledMode) {
-    this.ledMode = ledMode;
-    NetworkTableInstance.getDefault().getTable("limelight-rok").getEntry("ledMode").setNumber(ledMode.value);
-  }
-
-  public double getTx() {
-    //Get target x pose
-    return NetworkTableInstance.getDefault().getTable("limelight-rok").getEntry("botpose_targetspace").getDoubleArray(new double[3])[0];
-  }
-
-  public double getTy() {
-    //Get target y pose
-    return NetworkTableInstance.getDefault().getTable("limelight-rok").getEntry("botpose_targetspace").getDoubleArray(new double[3])[1];
-  }
-
-  public double getTz() {
-    //Get target z pose
-    return NetworkTableInstance.getDefault().getTable("limelight-rok").getEntry("botpose_targetspace").getDoubleArray(new double[3])[2];
-  }
-
-  public double getAngle()
-  {
-    return NetworkTableInstance.getDefault().getTable("limelight-rok").getEntry("tx").getDouble(0.0);
-  }
-
-  public boolean isTargetFound()
-  {
-    return NetworkTableInstance.getDefault().getTable("limelight-rok").getEntry("tv").getDouble(0.0) == 1.0;
-  }
-
-  public void setPipeline(int pipeline)
-  {
-    NetworkTableInstance.getDefault().getTable("limelight-rok").getEntry("pipeline").setNumber(pipeline);
+    kP = tab.add("kP", 0.0).getEntry();
+    kI = tab.add("kI", 0.0).getEntry();
+    kD = tab.add("kD", 0.0).getEntry();
+    feedforward = tab.add("Feedforward", 0.0).getEntry();
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    txEntry.setDouble(getTx());
-    tyEntry.setDouble(getTy());
-    tzEntry.setDouble(getTz());
+    txEntry.setDouble(LimelightHelpers.getTX("limelight"));
+    tyEntry.setDouble(LimelightHelpers.getTY("limelight"));
+    tzEntry.setDouble(Units.metersToFeet(LimelightHelpers.getCameraPose3d_TargetSpace("limelight").getZ()));
+    tXDist.setDouble(Units.metersToFeet(LimelightHelpers.getCameraPose3d_TargetSpace("limelight").getX()));
+    targetId.setDouble(LimelightHelpers.getFiducialID("limelight"));
 
-    SmartDashboard.putBoolean("Target Found", isTargetFound());
+    double distance = 
+      Math.sqrt(
+          Math.pow(LimelightHelpers.getCameraPose3d_TargetSpace("limelight").getX(), 2) + 
+          Math.pow(LimelightHelpers.getCameraPose3d_TargetSpace("limelight").getZ(), 2)
+      );
+
+    distanceEntry.setDouble(Units.metersToFeet(distance));
   }
 }
+
+
+//Red Speaker 3
+//Blue Speaker 7
+//Red Amp 5
+//Blue Amp 6
