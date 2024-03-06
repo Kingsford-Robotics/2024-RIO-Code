@@ -144,29 +144,31 @@ public class RobotContainer {
             )
         );
 
-        //Right Bumper
-        /*
-        OIConstants.ampAlign.whileTrue(
-            new AmpAlign(RobotContainer.this)
-        );*/
-
-        //Temporarily switch camera using the left and right bumpers
-
-
         //Toggle camera mode using this button
-        OIConstants.ampAlign.onTrue(
+        OIConstants.cameraToggle.onTrue(
             new InstantCommand(() -> s_CompetitionData.switchCamera(!s_CompetitionData.isChainCamera()), s_Swerve)
         );
 
-
         //Climber Deploy
         OIConstants.climberDeploy.whileTrue(
-            new InstantCommand()
+            new ClimbDeploy(s_Pivot, s_Elevator)
+        ).onFalse(
+            new SequentialCommandGroup(
+                new InstantCommand(() -> s_Elevator.setHeight(s_Elevator.getHeight()), s_Elevator),
+                new InstantCommand(() -> s_Pivot.setPivotAngle(s_Pivot.getCANcoder()), s_Pivot),
+                new InstantCommand(() -> s_Elevator.retractActuator(), s_Elevator)
+            )
         );
 
         //Climate Retract
         OIConstants.climberRetract.whileTrue(
-            new InstantCommand()
+            new ClimbRetract(s_Elevator)
+        ).onFalse(
+            new SequentialCommandGroup(
+                new InstantCommand(() -> s_Elevator.setHeight(s_Elevator.getHeight()), s_Elevator),
+                new InstantCommand(() -> s_Pivot.setPivotAngle(s_Pivot.getCANcoder()), s_Pivot),
+                new InstantCommand(() -> s_Elevator.retractActuator(), s_Elevator)
+            )
         );
 
         /*Driver Mappings */

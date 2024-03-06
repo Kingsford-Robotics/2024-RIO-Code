@@ -130,6 +130,7 @@ public final class Constants {
         public static final int elevatorMotorID = 9;
         public static final int topLimitSwitchID = 0;
         public static final int bottomLimitSwitchID = 1;
+        public static final int linearActuatorID = 0;
 
         //Elevator Travel Constants
         public static final double elevatorMaxTravel = Units.inchesToMeters(12.95);

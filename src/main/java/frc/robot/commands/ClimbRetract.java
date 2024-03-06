@@ -4,31 +4,29 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.Pivot;
 
-public class PowerExitHome extends SequentialCommandGroup {
-  /** Creates a new PowerExitHome. */
-  public PowerExitHome(Elevator elevator, Pivot pivot) {
+// NOTE:  Consider using this command inline, rather than writing a subclass.  For more
+// information, see:
+// https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
+public class ClimbRetract extends SequentialCommandGroup {
+  /** Creates a new ClimbRetract. */
+  public ClimbRetract(Elevator elevator) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
       new SequentialCommandGroup(
         new InstantCommand(() -> elevator.setHeight(elevator.getHeight()), elevator),
-        new InstantCommand(() -> pivot.setPivotAngle(pivot.getCANcoder()), pivot),
         new InstantCommand(() -> elevator.retractActuator(), elevator)
-      ), 
+      ),
 
-      new InstantCommand(() -> elevator.setSpeed(0.1), elevator),
-      new InstantCommand(() -> elevator.resetLimitCheck(), elevator),
-      new WaitUntilCommand(() -> elevator.getTopLimitPressed()),
-      new InstantCommand(() -> pivot.setSpeed(0.3), pivot),
-      new WaitUntilCommand(() -> pivot.getCANcoder().getDegrees() > 10.0),
-      new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(10)), pivot)
+      new InstantCommand(() -> elevator.setHeight(Units.inchesToMeters(0)), elevator),
+      new WaitUntilCommand(() -> elevator.getHeight() < Units.inchesToMeters(1)),
+      new InstantCommand(() -> elevator.deployActuator(), elevator)
     );
   }
 }

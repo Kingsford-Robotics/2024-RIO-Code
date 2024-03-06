@@ -59,7 +59,7 @@ public class OIConstants {
     public static final JoystickButton trapTarget = new JoystickButton(coDriverController, XboxController.Button.kB.value);
 
     public static final JoystickButton manualActive = new JoystickButton(coDriverController, XboxController.Button.kLeftBumper.value);
-    public static final JoystickButton ampAlign = new JoystickButton(coDriverController, XboxController.Button.kRightBumper.value);
+    public static final JoystickButton cameraToggle = new JoystickButton(coDriverController, XboxController.Button.kRightBumper.value);
 
     public static final JoystickButton reverseIntake = new JoystickButton(coDriverController, XboxController.Button.kX.value);
 

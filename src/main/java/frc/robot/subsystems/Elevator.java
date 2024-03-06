@@ -17,6 +17,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -50,6 +51,8 @@ public class Elevator extends SubsystemBase {
 
   private boolean topLimitPressed = false;
   private boolean bottomLimitPressed = false;
+
+  private Servo linearActuator;
   
   public Elevator() {
     tab = Shuffleboard.getTab("Elevator");
@@ -97,6 +100,11 @@ public class Elevator extends SubsystemBase {
 
     resetPosition(Units.inchesToMeters(11.0)); //Adjust this to starting height in full home.
     position = getHeight();
+
+    linearActuator = new Servo(ElevatorConstants.linearActuatorID);
+    linearActuator.setBoundsMicroseconds(2000, 1800, 1500, 1200, 1000);
+
+    linearActuator.setSpeed(-1);
   }
 
   public void setSpeed(double speed) {
@@ -126,6 +134,14 @@ public class Elevator extends SubsystemBase {
 
   public boolean reachedSetpoint(){
     return Math.abs(position - getHeight()) < ElevatorConstants.errorThreshold;
+  }
+
+  public void deployActuator(){
+    linearActuator.setSpeed(1.0);
+  }
+
+  public void retractActuator(){
+    linearActuator.setSpeed(-1.0);
   }
 
   public Command manualControl(DoubleSupplier speed) {
