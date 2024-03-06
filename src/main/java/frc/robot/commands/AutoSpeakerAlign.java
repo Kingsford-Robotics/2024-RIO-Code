@@ -9,15 +9,12 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.LimelightHelpers;
-import frc.robot.RobotContainer;
 import frc.robot.subsystems.Swerve;
 
 public class AutoSpeakerAlign extends Command {
   /** Creates a new SpeakerAlign. */
   PIDController pidController;
   Swerve swerve;
-
-
 
   ShuffleboardTab tab;
 

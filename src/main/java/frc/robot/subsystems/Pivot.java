@@ -34,10 +34,8 @@ public class Pivot extends SubsystemBase {
   private GenericEntry absoluteAngleEntry;
   private GenericEntry targetAngle;
   private GenericEntry pivotSpeedEntry;
-  private GenericEntry downLimitSwitchEntry;
-  private GenericEntry upLimitSwitchEntry;
 
-  private GenericEntry angleEntry;
+  //private GenericEntry angleEntry;
 
   private CANSparkMax pivotLeftMotor;
   private CANSparkMax pivotRightMotor;
@@ -46,23 +44,17 @@ public class Pivot extends SubsystemBase {
   private ArmFeedforward pivotFeedforward;
   private ProfiledPIDController pidController;
 
-  private DigitalInput pivotDownLimitSwitch;
-  private DigitalInput pivotUpLimitSwitch;
-
   private Rotation2d angleSetpoint;
   private boolean isManualRunning = false;
-  private boolean isControllerSet = false;
 
   public Pivot() {
     //Shuffleboard Setup
     tab = Shuffleboard.getTab("Pivot");
     absoluteAngleEntry = tab.add("Absolute Angle", 0.0).getEntry();
     pivotSpeedEntry = tab.add("Pivot Speed", 0.0).getEntry();
-    downLimitSwitchEntry = tab.add("Down Limit Switch", false).getEntry();
-    upLimitSwitchEntry = tab.add("Up Limit Switch", false).getEntry();
     targetAngle = tab.add("Target Angle", 0.0).getEntry();
 
-    angleEntry = tab.add("Set Angle", 0.0).getEntry();
+    //angleEntry = tab.add("Set Angle", 0.0).getEntry();
     
     pivotLeftMotor = new CANSparkMax(PivotConstants.pivotLeftMotorID, MotorType.kBrushless);
     pivotRightMotor = new CANSparkMax(PivotConstants.pivotRightMotorID, MotorType.kBrushless);
@@ -82,9 +74,6 @@ public class Pivot extends SubsystemBase {
     pidController = new ProfiledPIDController(PivotConstants.pivotKP, PivotConstants.pivotKI, PivotConstants.pivotKD, new Constraints(PivotConstants.pivotVelocity, PivotConstants.pivotAcceleration));
 
     pidController.setTolerance(0);
-
-    pivotDownLimitSwitch = new DigitalInput(PivotConstants.pivotDownLimitSwitchID);
-    pivotUpLimitSwitch = new DigitalInput(PivotConstants.pivotUpLimitSwitchID);
     
     pivotLeftMotor.restoreFactoryDefaults();
     pivotRightMotor.restoreFactoryDefaults();
@@ -111,7 +100,6 @@ public class Pivot extends SubsystemBase {
     angleSetpoint = Rotation2d.fromRadians(angle.getRadians());
     pidController.setGoal(angleSetpoint.getRadians());
     isManualRunning = false;
-    isControllerSet = true;
   }
 
   public boolean reachedSetpoint(){
@@ -128,7 +116,6 @@ public class Pivot extends SubsystemBase {
 
   public void setSpeed(double speed){
     isManualRunning = true;
-    isControllerSet = false;
     pivotLeftMotor.set(speed);
   }
 
@@ -148,7 +135,6 @@ public class Pivot extends SubsystemBase {
       @Override
       public void execute(){
         if(Math.abs(speed.getAsDouble()) > 0.05){
-          isControllerSet = false;
           isManualRunning = true;
 
           setSpeed(speed.getAsDouble());
@@ -161,7 +147,6 @@ public class Pivot extends SubsystemBase {
         else if(Timer.getFPGATimestamp() - endManualTime < 0.250){
           setSpeed(0.0);
           isManualRunning = true;
-          isControllerSet = false;
           angleSetpoint = getCANcoder();
           pidController.reset(getCANcoder().getRadians());
           pidController.setGoal(angleSetpoint.getRadians());
@@ -176,7 +161,6 @@ public class Pivot extends SubsystemBase {
       public void end(boolean interrupted){
         setSpeed(0.0);
         isManualRunning = false;
-        isControllerSet = false;
       }
     };
   }
@@ -196,8 +180,6 @@ public class Pivot extends SubsystemBase {
 
     absoluteAngleEntry.setDouble(getCANcoder().getDegrees());
     pivotSpeedEntry.setDouble(getPivotSpeed().getDegrees());
-    downLimitSwitchEntry.setBoolean(pivotDownLimitSwitch.get());
-    upLimitSwitchEntry.setBoolean(pivotUpLimitSwitch.get());
     targetAngle.setDouble(angleSetpoint.getDegrees());
 
     /*double newAngle = angleEntry.getDouble(0.0);

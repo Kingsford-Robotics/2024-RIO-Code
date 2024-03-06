@@ -27,18 +27,15 @@ public class RobotContainer {
     /* Subsystems */
     private final Elevator s_Elevator;
     private final Intake s_Intake;
-    //private final Jetson s_Jetson = new Jetson();
-    //private final LedDriver s_LedDriver = new LedDriver();
-    private final Limelight s_Limelight;
     private final Pivot s_Pivot;
     private final Shooter s_Shooter;
     private final Swerve s_Swerve;
-
-    private CompetitionData s_CompetitionData;
+    private final CompetitionData s_CompetitionData;
 
     public enum targetMode {
         kSpeaker,
-        kAmp
+        kAmp,
+        kTrap
     }
 
     public targetMode m_TargetMode = targetMode.kSpeaker;
@@ -56,14 +53,13 @@ public class RobotContainer {
     public RobotContainer() {
         s_Elevator = new Elevator();
         s_Intake = new Intake();
-        //s_Jetson = new Jetson();
-        //s_LedDriver = new LedDriver();
-        s_Limelight = new Limelight();
         s_Pivot = new Pivot();
         s_Shooter = new Shooter();
         s_Swerve = new Swerve();
-
         s_CompetitionData = new CompetitionData(this, s_Elevator);
+
+
+        Limelight s_Limelight = new Limelight();
 
         autoAlignTurn = 0.0;
         autoAlignStrafe = 0.0;
@@ -125,29 +121,62 @@ public class RobotContainer {
      * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
-        /* Driver Buttons */
+        /*Controller Mappings*/
+        
         //A Button
         OIConstants.ampTarget.onTrue(new InstantCommand(()-> m_TargetMode = targetMode.kAmp));
 
+        //Y Button
         OIConstants.speakerTarget.onTrue(new InstantCommand(() -> m_TargetMode = targetMode.kSpeaker));
 
-        OIConstants.climbDeploy.whileTrue(
+        //B Button
+        OIConstants.trapTarget.onTrue(new InstantCommand(() -> m_TargetMode = targetMode.kTrap));
+
+        //X Button
+        OIConstants.reverseIntake.whileTrue(new RunCommand(() -> s_Intake.setSpeed(-0.25), s_Intake)).
+            onFalse(new InstantCommand(() -> s_Intake.setSpeed(0.0), s_Intake));
+
+        //Left Bumper
+        OIConstants.manualActive.whileTrue(
             new ParallelCommandGroup(
                 s_Pivot.manualControl(() -> -OIConstants.pivotSpeed.getAsDouble() * 0.2),
                 s_Elevator.manualControl(() -> -OIConstants.elevatorSpeed.getAsDouble() * 0.4)
             )
         );
 
-        OIConstants.climbRetract.whileTrue(
+        //Right Bumper
+        /*
+        OIConstants.ampAlign.whileTrue(
             new AmpAlign(RobotContainer.this)
+        );*/
+
+        //Temporarily switch camera using the left and right bumpers
+
+
+        //Toggle camera mode using this button
+        OIConstants.ampAlign.onTrue(
+            new InstantCommand(() -> s_CompetitionData.switchCamera(!s_CompetitionData.isChainCamera()), s_Swerve)
         );
+
+
+        //Climber Deploy
+        OIConstants.climberDeploy.whileTrue(
+            new InstantCommand()
+        );
+
+        //Climate Retract
+        OIConstants.climberRetract.whileTrue(
+            new InstantCommand()
+        );
+
+        /*Driver Mappings */
 
         //Left Stick Center Button
         OIConstants.homeButton.whileTrue(
             new GoHome(s_Elevator, s_Pivot)
         );
 
-        //Drive left trigger
+        //Drive Left Trigger
         OIConstants.deployIntake.whileTrue(
             m_deployIntake.finallyDo(
                 (interrupted) -> {
@@ -160,6 +189,7 @@ public class RobotContainer {
             )
         );
 
+        //Drive Right Trigger
         OIConstants.shoot.whileTrue(
             new ConditionalCommand(
                 m_SpeakerScore, 
@@ -174,22 +204,10 @@ public class RobotContainer {
             )
         );
 
+        //Drive Right Stick Center Button
         OIConstants.resetGyro.onTrue(
             new InstantCommand(() -> s_Swerve.zeroHeading(), s_Swerve)
         );
-
-        /* Co-Driver Buttons */
-
-        OIConstants.reverseIntake.whileTrue(new RunCommand(() -> s_Intake.setSpeed(-0.25), s_Intake)).
-            onFalse(new InstantCommand(() -> s_Intake.setSpeed(0.0), s_Intake));
-        
-        //Speaker Mode
-        OIConstants.speakerTarget.onTrue(new InstantCommand(() -> m_TargetMode = targetMode.kSpeaker));
-
-        //Amp Mode
-        OIConstants.ampTarget.onTrue(new InstantCommand(() -> m_TargetMode = targetMode.kAmp));
-        
-        //TODO: Add climb commands.*/
     }
 
     public Command getAutonomousCommand() {
