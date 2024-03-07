@@ -26,7 +26,7 @@ public class AmpScore extends SequentialCommandGroup {
         new SequentialCommandGroup(
           new InstantCommand(() -> elevator.setHeight(elevator.getHeight()), elevator),
           new InstantCommand(() -> pivot.setPivotAngle(pivot.getCANcoder()), pivot),
-          new InstantCommand(() -> shooter.setShooterPercent(0.4), shooter),
+          new InstantCommand(() -> shooter.setShooterPercent(0.2), shooter),
           new InstantCommand(() -> elevator.retractActuator(), elevator)
         ),
 

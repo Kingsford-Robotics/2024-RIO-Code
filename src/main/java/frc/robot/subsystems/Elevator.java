@@ -98,7 +98,7 @@ public class Elevator extends SubsystemBase {
     elevatorMotorVelocity = elevatorMotor.getVelocity();
     elevatorMotorHeight = elevatorMotor.getPosition();
 
-    resetPosition(Units.inchesToMeters(11.0)); //Adjust this to starting height in full home.
+    resetPosition(Units.inchesToMeters(12.2)); //Adjust this to starting height in full home.
     position = getHeight();
 
     linearActuator = new Servo(ElevatorConstants.linearActuatorID);
@@ -137,7 +137,7 @@ public class Elevator extends SubsystemBase {
   }
 
   public void deployActuator(){
-    linearActuator.setSpeed(1.0);
+    linearActuator.setSpeed(0.30);
   }
 
   public void retractActuator(){

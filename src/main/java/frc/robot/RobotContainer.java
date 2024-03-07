@@ -98,15 +98,16 @@ public class RobotContainer {
         // Configure the button bindings
         configureButtonBindings();
 
-        NamedCommands.registerCommand("highSpeakerScore", new SpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, RobotContainer.this));
+        NamedCommands.registerCommand("highSpeakerScore", new HighSpeakerAuton(s_Elevator, s_Intake, s_Pivot, s_Shooter));
         NamedCommands.registerCommand("lowSpeakerScore", new LowSpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, s_Swerve));
         NamedCommands.registerCommand("ampScore", new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter, RobotContainer.this));
         NamedCommands.registerCommand("intake", new DeployIntake(s_Elevator, s_Pivot, s_Intake));
+        NamedCommands.registerCommand("exitHome", new PowerExitHome(s_Elevator, s_Pivot));
         NamedCommands.registerCommand("home", new GoHome(s_Elevator, s_Pivot));
         NamedCommands.registerCommand("stopIntakeShooter", 
             new ParallelCommandGroup(
-                new InstantCommand(() -> s_Intake.setSpeed(0.0), s_Intake),
-                new InstantCommand(() -> s_Shooter.setShooterPercent(0.0), s_Shooter)
+                new InstantCommand(() -> s_Intake.setSpeed(0.0), s_Intake)//,
+                //new InstantCommand(() -> s_Shooter.setShooterPercent(0.0), s_Shooter)
             )
         );
 
@@ -210,6 +211,10 @@ public class RobotContainer {
         OIConstants.resetGyro.onTrue(
             new InstantCommand(() -> s_Swerve.zeroHeading(), s_Swerve)
         );
+
+        OIConstants.snapBack.whileTrue(new RunCommand(() -> s_Elevator.retractActuator(), s_Elevator));
+
+        OIConstants.snapFront.whileTrue(new RunCommand(() -> s_Elevator.deployActuator(), s_Elevator));
     }
 
     public Command getAutonomousCommand() {
@@ -222,5 +227,13 @@ public class RobotContainer {
     
     public void setAutoAlignStrafe(double value) {
         autoAlignStrafe = value;
+    }
+
+    public SequentialCommandGroup reset(){
+        return new SequentialCommandGroup(
+            new InstantCommand(() -> s_Elevator.retractActuator(), s_Elevator),
+            new InstantCommand(() -> s_Pivot.setPivotAngle(s_Pivot.getCANcoder()), s_Pivot),
+            new InstantCommand(() -> s_Elevator.setHeight(s_Elevator.getHeight()), s_Elevator)
+        );
     }
 }

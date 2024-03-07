@@ -4,26 +4,21 @@
 
 package frc.robot.subsystems;
 
-import java.io.ObjectInputStream.GetField;
-
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
 
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.CvSink;
 import edu.wpi.first.cscore.CvSource;
-import edu.wpi.first.cscore.MjpegServer;
 import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.util.PixelFormat;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.RobotContainer.targetMode;
@@ -46,10 +41,14 @@ public class CompetitionData extends SubsystemBase {
   private UsbCamera chainCamera;
 
   private boolean isChainCameraActive = false;
+
+  private Command retractActuator;
   
   public CompetitionData(RobotContainer robotContainer, Elevator elevator) {
     this.m_RobotContainer = robotContainer;
     this.m_Elevator = elevator;
+
+    retractActuator = new InstantCommand(() -> elevator.retractActuator(), elevator);
     
     tab = Shuffleboard.getTab("Competition");
     
@@ -57,6 +56,7 @@ public class CompetitionData extends SubsystemBase {
     elevatorHeight = tab.add("Elevator Height", 0.0).getEntry();
     matchTime = tab.add("Match Time", 0.0).getEntry();
     batteryVoltage = tab.add("Battery Voltage", 0.0).getEntry();
+    tab.add("Retract Actuator", retractActuator);
 
     backCamera = CameraServer.startAutomaticCapture(0);
     backCamera.setResolution(320, 240);

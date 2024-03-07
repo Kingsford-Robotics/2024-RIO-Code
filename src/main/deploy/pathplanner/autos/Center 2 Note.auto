@@ -3,9 +3,9 @@
   "startingPose": {
     "position": {
       "x": 1.25,
-      "y": 6.5
+      "y": 5.55
     },
-    "rotation": -120.0
+    "rotation": 180.0
   },
   "command": {
     "type": "sequential",
@@ -14,6 +14,12 @@
         {
           "type": "named",
           "data": {
+            "name": "exitHome"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "lowSpeakerScore"
           }
         },
@@ -34,9 +40,22 @@
                 }
               },
               {
-                "type": "path",
+                "type": "sequential",
                 "data": {
-                  "pathName": "LeftNote"
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 1.0
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "CenterBackup"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -67,40 +86,9 @@
           }
         },
         {
-          "type": "race",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "intake"
-                }
-              },
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "LeftToCenter"
-                }
-              }
-            ]
-          }
-        },
-        {
           "type": "named",
           "data": {
-            "name": "stopIntakeShooter"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.15
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "lowSpeakerScore"
+            "name": "home"
           }
         }
       ]

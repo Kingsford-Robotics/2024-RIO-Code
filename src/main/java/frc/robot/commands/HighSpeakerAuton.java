@@ -18,11 +18,10 @@ import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Pivot;
 import frc.robot.subsystems.Shooter;
-import frc.robot.subsystems.Swerve;
 
-public class LowSpeakerScore extends SequentialCommandGroup {
+public class HighSpeakerAuton extends SequentialCommandGroup {
   /** Creates a new SpeakerScore. */
-    public LowSpeakerScore(Elevator elevator, Intake intake, Pivot pivot, Shooter shooter, Swerve swerve) {
+    public HighSpeakerAuton(Elevator elevator, Intake intake, Pivot pivot, Shooter shooter) {
 
         //TODO: Add logic to adjust angle based on distance from target.
         addCommands(
@@ -35,57 +34,25 @@ public class LowSpeakerScore extends SequentialCommandGroup {
 
             new InstantCommand(() -> shooter.setShooterPercent(1.0), shooter),
 
-            new ParallelRaceGroup(
-                new AutoSpeakerAlign(swerve),
-
+     
+            new ConditionalCommand(
+                //Coming from not in home.
                 new SequentialCommandGroup(
-                    new ConditionalCommand(
-                        new SequentialCommandGroup(
-                            new InstantCommand(() -> elevator.setHeight(Units.inchesToMeters(12.85)), elevator),
-                            new WaitUntilCommand(() -> elevator.getHeight() > Units.inchesToMeters(10.5)),
-                            new InstantCommand(() -> 
-                                {
-                                    // Calculate the desired angle based on the distance from the Limelight
-
-                                    double distance = 
-                                    Math.sqrt(
-                                        Math.pow(LimelightHelpers.getCameraPose3d_TargetSpace("limelight").getX(), 2) + 
-                                        Math.pow(LimelightHelpers.getCameraPose3d_TargetSpace("limelight").getZ(), 2)
-                                    );
-
-                                    //Distance is in meters but the calculateDesiredAngle function requires feet.
-                                    double desiredAngle = calculateDesiredAngle(Units.metersToFeet(distance));
-                                    pivot.setPivotAngle(Rotation2d.fromDegrees(desiredAngle));
-                                }, pivot
-                            )
-                        ),
-
-                        new InstantCommand(() -> 
-                                {
-                                    // Calculate the desired angle based on the distance from the Limelight
-
-                                    double distance = 
-                                    Math.sqrt(
-                                        Math.pow(LimelightHelpers.getCameraPose3d_TargetSpace("limelight").getX(), 2) + 
-                                        Math.pow(LimelightHelpers.getCameraPose3d_TargetSpace("limelight").getZ(), 2)
-                                    );
-
-                                    //Distance is in meters but the calculateDesiredAngle function requires feet.
-                                    double desiredAngle = calculateDesiredAngle(Units.metersToFeet(distance));
-                                    pivot.setPivotAngle(Rotation2d.fromDegrees(desiredAngle));
-                                }, pivot
-                            ),
-                        () -> elevator.getHeight() > Units.inchesToMeters(9.75)
-                    ),
-
+                    new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(10)), pivot),
                     new WaitUntilCommand(() -> pivot.getCANcoder().getDegrees() > 8.0),
-                    new InstantCommand(() -> elevator.setHeight(Units.inchesToMeters(0.1)), elevator)
-                )
+                    new InstantCommand(() ->elevator.setHeight(Units.inchesToMeters(12.85)), elevator),
+                    new WaitUntilCommand(() -> elevator.getHeight() > Units.inchesToMeters(11))
+                ),
+
+                //Coming from in home
+                new SequentialCommandGroup(
+                    new InstantCommand(() ->elevator.setHeight(Units.inchesToMeters(12.85)), elevator),
+                    new WaitUntilCommand(() -> elevator.getHeight() > Units.inchesToMeters(11))
+                ),
+                () -> elevator.getHeight() < Units.inchesToMeters(9.75)
             ),
-
+            
             new ParallelRaceGroup(
-                new AutoSpeakerAlign(swerve),
-
                 new RunCommand(() -> {
                     // Calculate the desired angle based on the distance from the Limelight
                     
@@ -102,7 +69,7 @@ public class LowSpeakerScore extends SequentialCommandGroup {
                 }, pivot),
                 
                 new SequentialCommandGroup(
-                    new WaitUntilCommand(() -> pivot.angleErrorDegrees() < 1.5 && elevator.reachedSetpoint() && LimelightHelpers.getTX("limelight") < 1.0 && shooter.getShooterRPM() > 3000.0),
+                    new WaitUntilCommand(() -> pivot.angleErrorDegrees() < 2.0 && elevator.reachedSetpoint() && shooter.getShooterRPM() > 2500.0),
                     new InstantCommand(() -> intake.setSpeed(1.0), intake),
                     new WaitCommand(0.25)
                 )
@@ -134,6 +101,6 @@ public class LowSpeakerScore extends SequentialCommandGroup {
             return angles[angles.length - 1];
         }*/
         
-        return Math.max(2.35357 + 4.38036 * distance - 0.116071 * distance * distance, 16);
+        return Math.max(-0.43544 * distance * distance + 9.29602 * distance - 12.2466, 15);
     }
 }
