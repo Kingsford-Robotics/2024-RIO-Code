@@ -49,7 +49,7 @@ public class ClimbDeploy extends SequentialCommandGroup {
         )
       ),
 
-      new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(90)), pivot),
+      new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(95)), pivot),
       new WaitUntilCommand(pivot::reachedSetpoint)
     );
   }

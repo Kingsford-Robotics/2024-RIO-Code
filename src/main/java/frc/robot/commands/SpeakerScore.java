@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.LimelightHelpers;
 import frc.robot.RobotContainer;
@@ -77,7 +76,7 @@ public class SpeakerScore extends SequentialCommandGroup {
                 new SequentialCommandGroup(
                     new WaitUntilCommand(() -> pivot.angleErrorDegrees() < 2.0 && elevator.reachedSetpoint() && LimelightHelpers.getTX("limelight") < 2.0 && shooter.getShooterRPM() > 2500.0),
                     new InstantCommand(() -> intake.setSpeed(1.0), intake),
-                    new WaitCommand(0.25)
+                    new WaitUntilCommand(() -> false)
                 )
             )
         );
