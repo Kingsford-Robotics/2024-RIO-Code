@@ -15,8 +15,6 @@ public class SpeakerAlign extends Command {
   PIDController pidController;
   RobotContainer container;
 
-
-
   ShuffleboardTab tab;
 
   double thetafeedforward;

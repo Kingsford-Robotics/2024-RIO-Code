@@ -4,40 +4,49 @@
 
 package frc.robot.commands;
 
+import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest.RobotCentric;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import frc.robot.RobotContainer;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Pivot;
 
 public class DeployIntake extends SequentialCommandGroup {
-  public DeployIntake(Elevator elevator, Pivot pivot, Intake intake) {
-    addCommands(
-        new SequentialCommandGroup(
-          new InstantCommand(() -> elevator.setHeight(elevator.getHeight()), elevator),
-          new InstantCommand(() -> pivot.setPivotAngle(pivot.getCANcoder()), pivot),
-          new InstantCommand(() -> elevator.retractActuator(), elevator)
-        ), 
+  public DeployIntake(Elevator elevator, Pivot pivot, Intake intake, RobotContainer container) {
+    addCommands( 
+      new SequentialCommandGroup(
+            new InstantCommand(() -> elevator.setHeight(elevator.getHeight()), elevator),
+            new InstantCommand(() -> pivot.setPivotAngle(pivot.getCANcoder()), pivot),
+            new InstantCommand(() -> elevator.retractActuator(), elevator)
+          ), 
 
-        new ConditionalCommand(
+        new ParallelRaceGroup(
           new SequentialCommandGroup(
-            new InstantCommand(() -> elevator.setHeight(Units.inchesToMeters(11.0)), elevator),
-            new WaitUntilCommand(() -> elevator.getHeight() > Units.inchesToMeters(10.5)),
-            new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(10.0)), pivot)
+            new ConditionalCommand(
+              new SequentialCommandGroup(
+                new InstantCommand(() -> elevator.setHeight(Units.inchesToMeters(11.0)), elevator),
+                new WaitUntilCommand(() -> elevator.getHeight() > Units.inchesToMeters(10.5)),
+                new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(10.0)), pivot)
+              ),
+                new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(10.0)), pivot)
+              , 
+              () -> elevator.getHeight() > Units.inchesToMeters(9.75)),
+            new WaitUntilCommand(() -> pivot.getCANcoder().getDegrees() > 8.0),
+            new InstantCommand(() -> elevator.setHeight(Units.inchesToMeters(0.0)), elevator),
+            new WaitUntilCommand(() -> elevator.getHeight() < Units.inchesToMeters(1.0)),
+            new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(-1.75)), pivot),
+            new InstantCommand(() -> intake.setSpeed(0.8), intake),
+            new WaitUntilCommand(() -> !intake.getBeamBreak())
           ),
-            new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(10.0)), pivot)
-          , 
-          () -> elevator.getHeight() > Units.inchesToMeters(9.75)),
-        new WaitUntilCommand(() -> pivot.getCANcoder().getDegrees() > 8.0),
-        new InstantCommand(() -> elevator.setHeight(Units.inchesToMeters(0.0)), elevator),
-        new WaitUntilCommand(() -> elevator.getHeight() < Units.inchesToMeters(1.0)),
-        new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(-1.75)), pivot),
-        new InstantCommand(() -> intake.setSpeed(0.8), intake),
-        new WaitUntilCommand(() -> !intake.getBeamBreak())
+          new TrackNote(container)
+      )
     );
   }
 }

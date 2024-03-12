@@ -21,6 +21,8 @@ import frc.robot.subsystems.Shooter;
 
 public class SpeakerScore extends SequentialCommandGroup {
   /** Creates a new SpeakerScore. */
+
+  private double distance;
     public SpeakerScore(Elevator elevator, Intake intake, Pivot pivot, Shooter shooter, RobotContainer container) {
 
         //TODO: Add logic to adjust angle based on distance from target.
@@ -61,7 +63,7 @@ public class SpeakerScore extends SequentialCommandGroup {
                 new RunCommand(() -> {
                     // Calculate the desired angle based on the distance from the Limelight
                     
-                    double distance = 
+                    distance = 
                     Math.sqrt(
                         Math.pow(LimelightHelpers.getCameraPose3d_TargetSpace("limelight").getX(), 2) + 
                         Math.pow(LimelightHelpers.getCameraPose3d_TargetSpace("limelight").getZ(), 2)
@@ -74,7 +76,7 @@ public class SpeakerScore extends SequentialCommandGroup {
                 }, pivot),
                 
                 new SequentialCommandGroup(
-                    new WaitUntilCommand(() -> pivot.angleErrorDegrees() < 2.0 && elevator.reachedSetpoint() && LimelightHelpers.getTX("limelight") < 2.0 && shooter.getShooterRPM() > 2500.0),
+                    new WaitUntilCommand(() -> pivot.angleErrorDegrees() < 2.0 && elevator.reachedSetpoint() && LimelightHelpers.getTX("limelight") < 2.0 && LimelightHelpers.getTV("limelight") && distance < Units.feetToMeters(10) && shooter.getShooterRPM() > 2500.0),
                     new InstantCommand(() -> intake.setSpeed(1.0), intake),
                     new WaitUntilCommand(() -> false)
                 )

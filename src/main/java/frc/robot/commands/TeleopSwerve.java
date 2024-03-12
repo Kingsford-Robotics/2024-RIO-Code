@@ -20,6 +20,7 @@ public class TeleopSwerve extends Command {
     private DoubleSupplier rotationSup;
     private BooleanSupplier robotCentricSup;
     private BooleanSupplier slowModeSup;
+    private BooleanSupplier intakeCentric;
 
     private DoubleSupplier autoAngle;
     private DoubleSupplier autoStrafe;
@@ -28,7 +29,7 @@ public class TeleopSwerve extends Command {
     private SlewRateLimiter strafeLimiter;
     private SlewRateLimiter rotationLimiter;
 
-    public TeleopSwerve(Swerve s_Swerve, DoubleSupplier translationSup, DoubleSupplier strafeSup, DoubleSupplier rotationSup, BooleanSupplier robotCentricSup, BooleanSupplier slowModeSup, DoubleSupplier autoAngle, DoubleSupplier autoStrafe) {
+    public TeleopSwerve(Swerve s_Swerve, DoubleSupplier translationSup, DoubleSupplier strafeSup, DoubleSupplier rotationSup, BooleanSupplier robotCentricSup, BooleanSupplier intakeCentric, BooleanSupplier slowModeSup, DoubleSupplier autoAngle, DoubleSupplier autoStrafe) {
         this.s_Swerve = s_Swerve;
         addRequirements(s_Swerve);
 
@@ -37,6 +38,7 @@ public class TeleopSwerve extends Command {
         this.rotationSup = rotationSup;
         this.robotCentricSup = robotCentricSup;
         this.slowModeSup = slowModeSup;
+        this.intakeCentric = intakeCentric;
 
         this.autoAngle = autoAngle;
         this.autoStrafe = autoStrafe;
@@ -70,11 +72,16 @@ public class TeleopSwerve extends Command {
             rotationVal *= OIConstants.highRotationSpeed;
         }
 
+        if(intakeCentric.getAsBoolean()){
+            translationVal = -translationVal;
+            strafeVal = -strafeVal;
+        }
+
         /* Drive */
         s_Swerve.drive(
             new Translation2d(translationVal, strafeVal).times(Constants.Swerve.maxSpeed), 
             rotationVal * Constants.Swerve.maxAngularVelocity, 
-            !robotCentricSup.getAsBoolean(), 
+            !(robotCentricSup.getAsBoolean() || intakeCentric.getAsBoolean()), 
             true
         );
     }

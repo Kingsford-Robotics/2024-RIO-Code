@@ -36,12 +36,6 @@ public class CompetitionData extends SubsystemBase {
 
   private ShuffleboardTab tab;
 
-  private CvSink cvSink;
-  private UsbCamera backCamera;
-  private UsbCamera chainCamera;
-
-  private boolean isChainCameraActive = false;
-
   private Command retractActuator;
   
   public CompetitionData(RobotContainer robotContainer, Elevator elevator) {
@@ -57,55 +51,8 @@ public class CompetitionData extends SubsystemBase {
     matchTime = tab.add("Match Time", 0.0).getEntry();
     batteryVoltage = tab.add("Battery Voltage", 0.0).getEntry();
     tab.add("Retract Actuator", retractActuator);
-
-    backCamera = CameraServer.startAutomaticCapture(0);
-    backCamera.setResolution(320, 240);
-
-    chainCamera = CameraServer.startAutomaticCapture(1);
-    chainCamera.setResolution(320, 240);
-
-    cvSink = CameraServer.getVideo();
-    switchCamera(false); // Start with backCamera
-
-    Thread m_visionThread;
-    m_visionThread = new Thread(() -> {
-        // Setup a CvSource. This will send images back to the Dashboard
-        CvSource outputStream = CameraServer.putVideo("Camera", 320, 240);
-
-        // Mats are very memory expensive. Lets reuse this Mat.
-        Mat mat = new Mat();
-
-        while (!Thread.interrupted()) {
-            if (cvSink.grabFrame(mat) == 0) {
-                outputStream.notifyError(cvSink.getError());
-                continue;
-            }
-
-            // Only flip the image if the chainCamera is active
-            if (isChainCameraActive) {
-                Core.flip(mat, mat, 0);
-            }
-
-            outputStream.putFrame(mat);
-        }
-    });
-    m_visionThread.setDaemon(true);
-    m_visionThread.start();
   }
 
-  public void switchCamera(boolean useChainCamera) {
-    isChainCameraActive = useChainCamera;
-
-    if (useChainCamera) {
-        cvSink.setSource(chainCamera);
-    } else {
-        cvSink.setSource(backCamera);
-    }
-  }
-
-  public boolean isChainCamera(){
-    return isChainCameraActive;
-  }
 
   @Override
   public void periodic() {

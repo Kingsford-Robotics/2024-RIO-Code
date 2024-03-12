@@ -46,6 +46,7 @@ public class RobotContainer {
 
     private double autoAlignTurn;       //Supplies a value to control the angle to a setpoint while driving.
     private double autoAlignStrafe;     //Supplies a value to control the side-to-side position while driving.
+    private boolean intakeCentric = false;
 
     private final SendableChooser<Command> autoChooser;
 
@@ -71,6 +72,7 @@ public class RobotContainer {
                 () -> -OIConstants.strafeSupplier.get(),
                 () -> -OIConstants.rotationSupplier.get(),
                 () -> OIConstants.robotCentric.getAsBoolean(),
+                () -> intakeCentric,
                 () -> OIConstants.slowSpeed.getAsBoolean(),
                 () -> autoAlignTurn,
                 () -> autoAlignStrafe
@@ -78,7 +80,7 @@ public class RobotContainer {
         );
         
         m_AmpScore = new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter, RobotContainer.this);
-        m_deployIntake = new DeployIntake(s_Elevator, s_Pivot, s_Intake);
+        m_deployIntake = new DeployIntake(s_Elevator, s_Pivot, s_Intake, RobotContainer.this);
         m_SpeakerScore = new SpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, RobotContainer.this);
 
        s_Intake.setDefaultCommand(
@@ -101,7 +103,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("highSpeakerScore", new HighSpeakerAuton(s_Elevator, s_Intake, s_Pivot, s_Shooter));
         NamedCommands.registerCommand("lowSpeakerScore", new LowSpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, s_Swerve));
         NamedCommands.registerCommand("ampScore", new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter, RobotContainer.this));
-        NamedCommands.registerCommand("intake", new DeployIntake(s_Elevator, s_Pivot, s_Intake));
+        NamedCommands.registerCommand("intake", new DeployIntake(s_Elevator, s_Pivot, s_Intake, RobotContainer.this));
         NamedCommands.registerCommand("exitHome", new PowerExitHome(s_Elevator, s_Pivot));
         NamedCommands.registerCommand("home", new GoHome(s_Elevator, s_Pivot));
         NamedCommands.registerCommand("stopIntakeShooter", 
@@ -143,11 +145,6 @@ public class RobotContainer {
                 s_Pivot.manualControl(() -> -OIConstants.pivotSpeed.getAsDouble() * 0.2),
                 s_Elevator.manualControl(() -> -OIConstants.elevatorSpeed.getAsDouble() * 0.4)
             )
-        );
-
-        //Toggle camera mode using this button
-        OIConstants.cameraToggle.onTrue(
-            new InstantCommand(() -> s_CompetitionData.switchCamera(!s_CompetitionData.isChainCamera()), s_Swerve)
         );
 
         //Climber Deploy
@@ -192,6 +189,10 @@ public class RobotContainer {
             )
         );
 
+        OIConstants.deployIntake.onFalse(
+            new InstantCommand(() -> setIntakeCentric(false)) 
+        );
+
         //Drive Right Trigger
         OIConstants.shoot.whileTrue(
             new ConditionalCommand(
@@ -227,6 +228,10 @@ public class RobotContainer {
     
     public void setAutoAlignStrafe(double value) {
         autoAlignStrafe = value;
+    }
+
+    public void setIntakeCentric(boolean value) {
+        intakeCentric = value;
     }
 
     public SequentialCommandGroup reset(){

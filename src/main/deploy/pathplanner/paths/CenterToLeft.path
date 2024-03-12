@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.6176424481650393,
-        "y": 6.872899327194003
+        "x": 1.124437157965225,
+        "y": 6.6047521185951465
       },
       "isLocked": false,
       "linkedName": "CenterNote"
@@ -20,15 +20,21 @@
         "y": 7.034441832747708
       },
       "prevControl": {
-        "x": 2.0875842825030917,
-        "y": 6.9022706918401315
+        "x": 2.1412704643591107,
+        "y": 6.79132703719953
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.5,
+      "rotationDegrees": -160.0,
+      "rotateFast": false
+    }
+  ],
   "constraintZones": [],
   "eventMarkers": [],
   "globalConstraints": {
