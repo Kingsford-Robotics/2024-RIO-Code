@@ -30,8 +30,7 @@ public class SpeakerScore extends SequentialCommandGroup {
             //Stop elevator and pivot motions.
             new SequentialCommandGroup(
                 new InstantCommand(() -> elevator.setHeight(elevator.getHeight()), elevator),
-                new InstantCommand(() -> pivot.setPivotAngle(pivot.getCANcoder()), pivot),
-                new InstantCommand(() -> elevator.retractActuator(), elevator)
+                new InstantCommand(() -> pivot.setPivotAngle(pivot.getCANcoder()), pivot)
             ),  
 
             new InstantCommand(() -> shooter.setShooterPercent(1.0), shooter),

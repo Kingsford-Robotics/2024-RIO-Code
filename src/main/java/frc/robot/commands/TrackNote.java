@@ -5,6 +5,7 @@
 package frc.robot.commands;
 
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
@@ -22,8 +23,6 @@ public class TrackNote extends Command {
   double strafeKI;
   double strafeKD;
 
-  boolean wasTracking = false;
-
   public TrackNote(RobotContainer container) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.container = container;
@@ -32,10 +31,9 @@ public class TrackNote extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    strafeKP = 0.008;
+    strafeKP = 0.005;
     strafeKI = 0.0;
-    strafeKD = 0.001;
-    strafefeedforward= 0.01;
+    strafeKD = 0.0;
     strafeController = new PIDController(strafeKP, strafeKI, strafeKD);
     strafeController.setSetpoint(0.0);
     strafeController.setTolerance(0.0);
@@ -56,40 +54,18 @@ public class TrackNote extends Command {
       var xOffset = target.getYaw();
       var targetArea = target.getArea();
 
-      if(targetArea > 0.15){
+      if(targetArea > 0.1){
         double output = strafeController.calculate(xOffset);
-        output = Math.max(Math.min(output, 0.4), -0.4);
+        output = MathUtil.clamp(output, -0.4, 0.4);
 
-        if(Math.abs(output) < strafefeedforward){
-          output = Math.copySign(strafefeedforward, output);
-        }
-
-        //Does not re-engage tracking until larger error -- reduces jitters.
-        if(Math.abs(xOffset) > 2 && !wasTracking){
-          container.setAutoAlignStrafe(output);
-          wasTracking = true;
-        }
-
-        else if(Math.abs(xOffset) > 0.5 && !wasTracking){
-          container.setAutoAlignStrafe(output);
-          wasTracking = true;
-        }
-
-        else{
-          container.setAutoAlignStrafe(0.0);
-          wasTracking = false;
-        }
+        container.setAutoAlignStrafe(output);
       }
-
       else{
         container.setAutoAlignStrafe(0.0);
-        wasTracking = false;
       }
     }
-
     else{
       container.setAutoAlignStrafe(0.0);
-      wasTracking = false;
     }
   }
 

@@ -8,7 +8,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.Elevator;
@@ -26,8 +25,7 @@ public class ClimbDeploy extends SequentialCommandGroup {
       //Stop elevator and pivot motions.
       new SequentialCommandGroup(
         new InstantCommand(() -> elevator.setHeight(elevator.getHeight()), elevator),
-        new InstantCommand(() -> pivot.setPivotAngle(pivot.getCANcoder()), pivot),
-        new InstantCommand(() -> elevator.retractActuator(), elevator)
+        new InstantCommand(() -> pivot.setPivotAngle(pivot.getCANcoder()), pivot)
       ),
 
       new SequentialCommandGroup(

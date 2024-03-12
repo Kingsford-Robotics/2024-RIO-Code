@@ -19,14 +19,9 @@ public class ClimbRetract extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-      new SequentialCommandGroup(
-        new InstantCommand(() -> elevator.setHeight(elevator.getHeight()), elevator),
-        new InstantCommand(() -> elevator.retractActuator(), elevator)
-      ),
-
+      new InstantCommand(() -> elevator.setHeight(elevator.getHeight()), elevator),
       new InstantCommand(() -> elevator.setHeight(Units.inchesToMeters(0)), elevator),
-      new WaitUntilCommand(() -> elevator.getHeight() < Units.inchesToMeters(1)),
-      new InstantCommand(() -> elevator.deployActuator(), elevator)
+      new WaitUntilCommand(() -> elevator.getHeight() < Units.inchesToMeters(1))
     );
   }
 }

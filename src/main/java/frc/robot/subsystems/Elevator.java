@@ -52,7 +52,7 @@ public class Elevator extends SubsystemBase {
   private boolean topLimitPressed = false;
   private boolean bottomLimitPressed = false;
 
-  private Servo linearActuator;
+  //private Servo linearActuator;
   
   public Elevator() {
     tab = Shuffleboard.getTab("Elevator");
@@ -101,10 +101,10 @@ public class Elevator extends SubsystemBase {
     resetPosition(Units.inchesToMeters(12.2)); //Adjust this to starting height in full home.
     position = getHeight();
 
-    linearActuator = new Servo(ElevatorConstants.linearActuatorID);
+    /*linearActuator = new Servo(ElevatorConstants.linearActuatorID);
     linearActuator.setBoundsMicroseconds(2000, 1800, 1500, 1200, 1000);
 
-    linearActuator.setSpeed(-1);
+    linearActuator.setSpeed(-1);*/
   }
 
   public void setSpeed(double speed) {
@@ -136,13 +136,13 @@ public class Elevator extends SubsystemBase {
     return Math.abs(position - getHeight()) < ElevatorConstants.errorThreshold;
   }
 
-  public void deployActuator(){
+  /*public void deployActuator(){
     linearActuator.setSpeed(0.30);
   }
 
   public void retractActuator(){
     linearActuator.setSpeed(-1.0);
-  }
+  }*/
 
   public Command manualControl(DoubleSupplier speed) {
     return new Command() {

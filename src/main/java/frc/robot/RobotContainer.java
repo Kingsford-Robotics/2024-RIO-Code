@@ -2,6 +2,8 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -13,6 +15,8 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
@@ -31,6 +35,7 @@ public class RobotContainer {
     private final Shooter s_Shooter;
     private final Swerve s_Swerve;
     private final CompetitionData s_CompetitionData;
+    private final LedDriver s_LedDriver;
 
     public enum targetMode {
         kSpeaker,
@@ -57,7 +62,9 @@ public class RobotContainer {
         s_Pivot = new Pivot();
         s_Shooter = new Shooter();
         s_Swerve = new Swerve();
-        s_CompetitionData = new CompetitionData(this, s_Elevator);
+        s_CompetitionData = new CompetitionData(this, s_Elevator, s_Swerve);
+
+        s_LedDriver = new LedDriver();
 
 
         Limelight s_Limelight = new Limelight();
@@ -80,7 +87,7 @@ public class RobotContainer {
         );
         
         m_AmpScore = new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter, RobotContainer.this);
-        m_deployIntake = new DeployIntake(s_Elevator, s_Pivot, s_Intake, RobotContainer.this);
+        m_deployIntake = new DeployIntake(s_Elevator, s_Pivot, s_Intake, RobotContainer.this, s_LedDriver);
         m_SpeakerScore = new SpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, RobotContainer.this);
 
        s_Intake.setDefaultCommand(
@@ -103,7 +110,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("highSpeakerScore", new HighSpeakerAuton(s_Elevator, s_Intake, s_Pivot, s_Shooter));
         NamedCommands.registerCommand("lowSpeakerScore", new LowSpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, s_Swerve));
         NamedCommands.registerCommand("ampScore", new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter, RobotContainer.this));
-        NamedCommands.registerCommand("intake", new DeployIntake(s_Elevator, s_Pivot, s_Intake, RobotContainer.this));
+        NamedCommands.registerCommand("intake", new DeployIntake(s_Elevator, s_Pivot, s_Intake, RobotContainer.this, s_LedDriver));
         NamedCommands.registerCommand("exitHome", new PowerExitHome(s_Elevator, s_Pivot));
         NamedCommands.registerCommand("home", new GoHome(s_Elevator, s_Pivot));
         NamedCommands.registerCommand("stopIntakeShooter", 
@@ -153,8 +160,7 @@ public class RobotContainer {
         ).onFalse(
             new SequentialCommandGroup(
                 new InstantCommand(() -> s_Elevator.setHeight(s_Elevator.getHeight()), s_Elevator),
-                new InstantCommand(() -> s_Pivot.setPivotAngle(s_Pivot.getCANcoder()), s_Pivot),
-                new InstantCommand(() -> s_Elevator.retractActuator(), s_Elevator)
+                new InstantCommand(() -> s_Pivot.setPivotAngle(s_Pivot.getCANcoder()), s_Pivot)
             )
         );
 
@@ -164,8 +170,7 @@ public class RobotContainer {
         ).onFalse(
             new SequentialCommandGroup(
                 new InstantCommand(() -> s_Elevator.setHeight(s_Elevator.getHeight()), s_Elevator),
-                new InstantCommand(() -> s_Pivot.setPivotAngle(s_Pivot.getCANcoder()), s_Pivot),
-                new InstantCommand(() -> s_Elevator.retractActuator(), s_Elevator)
+                new InstantCommand(() -> s_Pivot.setPivotAngle(s_Pivot.getCANcoder()), s_Pivot)
             )
         );
 
@@ -186,6 +191,14 @@ public class RobotContainer {
                         new GoHome(s_Elevator, s_Pivot)
                     ).schedule();
                 }
+            )
+        );
+
+        new Trigger(() -> s_Intake.getBeamBreak()).onTrue(
+            new SequentialCommandGroup(
+                new InstantCommand( () -> s_LedDriver.setColor(LedColor.StrobeWhite), s_LedDriver),
+                new WaitCommand(1),
+                new InstantCommand(() -> s_LedDriver.setColor(LedColor.Black), s_LedDriver)
             )
         );
 
@@ -213,9 +226,21 @@ public class RobotContainer {
             new InstantCommand(() -> s_Swerve.zeroHeading(), s_Swerve)
         );
 
-        OIConstants.snapBack.whileTrue(new RunCommand(() -> s_Elevator.retractActuator(), s_Elevator));
+        OIConstants.snapFront.whileTrue(
+            new TurnToAngle(RobotContainer.this, Rotation2d.fromDegrees(0.0), s_Swerve)
+        );
 
-        OIConstants.snapFront.whileTrue(new RunCommand(() -> s_Elevator.deployActuator(), s_Elevator));
+         OIConstants.snapBack.whileTrue(
+            new TurnToAngle(RobotContainer.this, Rotation2d.fromDegrees(-180), s_Swerve)
+        );
+
+         OIConstants.snapLeft.whileTrue(
+            new TurnToAngle(RobotContainer.this, Rotation2d.fromDegrees(90), s_Swerve)
+        );
+
+         OIConstants.snapRight.whileTrue(
+            new TurnToAngle(RobotContainer.this, Rotation2d.fromDegrees(-90), s_Swerve)
+        );
     }
 
     public Command getAutonomousCommand() {
@@ -236,7 +261,6 @@ public class RobotContainer {
 
     public SequentialCommandGroup reset(){
         return new SequentialCommandGroup(
-            new InstantCommand(() -> s_Elevator.retractActuator(), s_Elevator),
             new InstantCommand(() -> s_Pivot.setPivotAngle(s_Pivot.getCANcoder()), s_Pivot),
             new InstantCommand(() -> s_Elevator.setHeight(s_Elevator.getHeight()), s_Elevator)
         );

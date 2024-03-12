@@ -66,8 +66,8 @@ public class OIConstants {
     public static final JoystickButton climberDeploy = new JoystickButton(coDriverController, XboxController.Button.kStart.value);
     public static final JoystickButton climberRetract = new JoystickButton(coDriverController, XboxController.Button.kBack.value);
 
-    public static final POVButton snapFront = new POVButton(coDriverController, 0);
-    public static final POVButton snapBack = new POVButton(coDriverController, 180);
-    public static final POVButton snapRight = new POVButton(coDriverController, 90);
-    public static final POVButton snapLeft = new POVButton(coDriverController, 270);
+    public static final POVButton snapFront = driveLeft.getUpPovButton();
+    public static final POVButton snapBack = driveLeft.getDownPovButton();
+    public static final POVButton snapRight = driveLeft.getRightPovButton();
+    public static final POVButton snapLeft = driveLeft.getLeftPovButton();
 }

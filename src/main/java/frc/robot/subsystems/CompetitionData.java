@@ -4,13 +4,6 @@
 
 package frc.robot.subsystems;
 
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-
-import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.cscore.CvSink;
-import edu.wpi.first.cscore.CvSource;
-import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.RobotController;
@@ -18,7 +11,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.RobotContainer.targetMode;
@@ -30,19 +22,18 @@ public class CompetitionData extends SubsystemBase {
   private GenericEntry elevatorHeight;
   private GenericEntry matchTime;
   private GenericEntry batteryVoltage;
+  private GenericEntry heading;
 
   private RobotContainer m_RobotContainer;
   private Elevator m_Elevator;
+  private Swerve m_Swerve;
 
   private ShuffleboardTab tab;
-
-  private Command retractActuator;
   
-  public CompetitionData(RobotContainer robotContainer, Elevator elevator) {
+  public CompetitionData(RobotContainer robotContainer, Elevator elevator, Swerve swerve) {
     this.m_RobotContainer = robotContainer;
     this.m_Elevator = elevator;
-
-    retractActuator = new InstantCommand(() -> elevator.retractActuator(), elevator);
+    this.m_Swerve = swerve;
     
     tab = Shuffleboard.getTab("Competition");
     
@@ -50,7 +41,7 @@ public class CompetitionData extends SubsystemBase {
     elevatorHeight = tab.add("Elevator Height", 0.0).getEntry();
     matchTime = tab.add("Match Time", 0.0).getEntry();
     batteryVoltage = tab.add("Battery Voltage", 0.0).getEntry();
-    tab.add("Retract Actuator", retractActuator);
+    heading = tab.add("Heading", 0.0).getEntry();
   }
 
 
@@ -61,5 +52,6 @@ public class CompetitionData extends SubsystemBase {
     elevatorHeight.setDouble(Units.metersToInches(m_Elevator.getHeight()));  
     matchTime.setDouble(Timer.getMatchTime());
     batteryVoltage.setDouble(RobotController.getBatteryVoltage());
+    heading.setDouble(m_Swerve.getHeading().getDegrees());
   }
 }

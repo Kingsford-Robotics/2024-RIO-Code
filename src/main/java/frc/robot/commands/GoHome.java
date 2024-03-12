@@ -20,8 +20,7 @@ public class GoHome extends SequentialCommandGroup {
 
     new SequentialCommandGroup(
       new InstantCommand(() -> elevator.setHeight(elevator.getHeight()), elevator),
-      new InstantCommand(() -> pivot.setPivotAngle(pivot.getCANcoder()), pivot),
-      new InstantCommand(() -> elevator.retractActuator(), elevator)
+      new InstantCommand(() -> pivot.setPivotAngle(pivot.getCANcoder()), pivot)
     ),   
 
     new ConditionalCommand(
