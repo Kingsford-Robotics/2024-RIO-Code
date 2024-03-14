@@ -100,19 +100,19 @@ public class LowSpeakerScore extends SequentialCommandGroup {
                 }, pivot),
                 
                 new SequentialCommandGroup(
-                    new WaitUntilCommand(() -> pivot.angleErrorDegrees() < 1.5 && elevator.getHeight() < Units.inchesToMeters(1.5)),
+                    new WaitUntilCommand(() -> pivot.angleErrorDegrees() < 1.0 && elevator.getHeight() < Units.inchesToMeters(1.5)),
                     new ParallelRaceGroup(
-                        new WaitUntilCommand(() -> LimelightHelpers.getTX("limelight") < 2.0 && shooter.getShooterRPM() > 2500.0),
-                        new WaitCommand(1.0)
+                        new WaitUntilCommand(() -> LimelightHelpers.getTX("limelight") < 2.0 && shooter.getShooterRPM() > 3000.0),
+                        new WaitCommand(1.5)
                     ),
                     new InstantCommand(() -> intake.setSpeed(1.0), intake),
-                    new WaitCommand(0.15)
+                    new WaitCommand(0.25)
                 )
             )
         );
     }
 
     private double calculateDesiredAngle(double distance) {
-        return MathUtil.clamp(3.35357 + 4.38036 * distance - 0.116071 * distance * distance, 16, 90);
+        return MathUtil.clamp(4.35357 + 4.38036 * distance - 0.116071 * distance * distance, 16, 90);
     }
 }

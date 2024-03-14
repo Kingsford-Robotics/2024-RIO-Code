@@ -34,6 +34,7 @@ public class Elevator extends SubsystemBase {
   GenericEntry elevatorSpeedEntry;
   GenericEntry topLimitSwitchEntry;
   GenericEntry bottomLimitSwitchEntry;
+  GenericEntry homeLimitSwitchEntry;
 
   GenericEntry setElevatorHeighEntry;
   
@@ -61,6 +62,7 @@ public class Elevator extends SubsystemBase {
     elevatorSpeedEntry = tab.add("Elevator Speed", 0.0).getEntry();
     topLimitSwitchEntry = tab.add("Top Limit Switch", false).getEntry();
     bottomLimitSwitchEntry = tab.add("Bottom Limit Switch", false).getEntry();
+    homeLimitSwitchEntry = tab.add("Home Limit Switch", false).getEntry();
 
     setElevatorHeighEntry = tab.add("Set Elevator Height", 0.0).getEntry();
   
@@ -113,7 +115,7 @@ public class Elevator extends SubsystemBase {
     //Stops the elevator if it hits the top or bottom limit switch.
     if(getTopLimitSwitch() && speed > 0) {
       speed = 0;
-    } else if(getBottomLimitSwitch() && speed < 0) {
+    } else if(getBottomLimitSwitch() || getHomeLimitSwitch() && speed < 0) {
       speed = 0;
     }
 
@@ -250,6 +252,7 @@ public class Elevator extends SubsystemBase {
     elevatorSpeedEntry.setDouble(Units.metersToInches(velocity));
     topLimitSwitchEntry.setBoolean(getTopLimitSwitch());
     bottomLimitSwitchEntry.setBoolean(getBottomLimitSwitch());
+    homeLimitSwitchEntry.setBoolean(getHomeLimitSwitch());
 
     // Apply hard limits. Stop the elevator if it hits the top or bottom limit switch.
     if(getTopLimitSwitch() && percentOutput > 0.01)

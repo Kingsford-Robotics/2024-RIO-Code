@@ -66,7 +66,6 @@ public class RobotContainer {
 
         s_LedDriver = new LedDriver();
 
-
         Limelight s_Limelight = new Limelight();
 
         autoAlignTurn = 0.0;

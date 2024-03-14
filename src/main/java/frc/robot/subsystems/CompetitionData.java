@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.RobotController;
@@ -28,11 +30,15 @@ public class CompetitionData extends SubsystemBase {
   private Swerve m_Swerve;
 
   private ShuffleboardTab tab;
+
+  //private UsbCamera chainCamera;
   
   public CompetitionData(RobotContainer robotContainer, Elevator elevator, Swerve swerve) {
     this.m_RobotContainer = robotContainer;
     this.m_Elevator = elevator;
     this.m_Swerve = swerve;
+
+    CameraServer.startAutomaticCapture(0);
     
     tab = Shuffleboard.getTab("Competition");
     
@@ -42,7 +48,6 @@ public class CompetitionData extends SubsystemBase {
     batteryVoltage = tab.add("Battery Voltage", 0.0).getEntry();
     heading = tab.add("Heading", 0.0).getEntry();
   }
-
 
   @Override
   public void periodic() {

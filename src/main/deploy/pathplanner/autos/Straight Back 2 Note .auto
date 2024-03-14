@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.86,
-      "y": 6.57
+      "x": 1.3016833306393887,
+      "y": 5.522617590689727
     },
-    "rotation": -120.0
+    "rotation": 180.0
   },
   "command": {
     "type": "sequential",
@@ -40,13 +40,13 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 0.75
+                        "waitTime": 1.0
                       }
                     },
                     {
-                      "type": "path",
+                      "type": "named",
                       "data": {
-                        "pathName": "Left to Left"
+                        "name": "trackNote"
                       }
                     }
                   ]
@@ -59,12 +59,6 @@
           "type": "named",
           "data": {
             "name": "stopIntakeShooter"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.15
           }
         },
         {

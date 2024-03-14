@@ -75,7 +75,7 @@ public class SpeakerScore extends SequentialCommandGroup {
                 
                 //TODO: Consider changing logic to match low intake score.
                 new SequentialCommandGroup(
-                    new WaitUntilCommand(() -> pivot.angleErrorDegrees() < 2.0 && elevator.reachedSetpoint() && LimelightHelpers.getTX("limelight") < 2.0 && LimelightHelpers.getTV("limelight") && distance < Units.feetToMeters(11) && shooter.getShooterRPM() > 2500.0),
+                    new WaitUntilCommand(() -> pivot.angleErrorDegrees() < 1.5 && elevator.reachedSetpoint() && LimelightHelpers.getTX("limelight") < 1.5 && LimelightHelpers.getTV("limelight") && distance < Units.feetToMeters(11) && shooter.getShooterRPM() > 3000.0),
                     new InstantCommand(() -> intake.setSpeed(1.0), intake),
                     new WaitUntilCommand(() -> false)
                 )
@@ -107,6 +107,6 @@ public class SpeakerScore extends SequentialCommandGroup {
             return angles[angles.length - 1];
         }*/
         
-        return MathUtil.clamp(-0.43544 * distance * distance + 9.29602 * distance - 10.2466, 15, 90);
+        return MathUtil.clamp(-0.43544 * distance * distance + 9.29602 * distance - 11.2466, 15, 90);
     }
 }
