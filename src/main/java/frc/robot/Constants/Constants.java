@@ -7,7 +7,6 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import frc.lib.util.COTSTalonFXSwerveConstants;
 import frc.lib.util.SwerveModuleConstants;
@@ -130,6 +129,7 @@ public final class Constants {
         public static final int elevatorMotorID = 9;
         public static final int topLimitSwitchID = 0;
         public static final int bottomLimitSwitchID = 1;
+        public static final int homeLimitSwitchID = 2;
         public static final int linearActuatorID = 0;
 
         //Elevator Travel Constants
@@ -182,11 +182,11 @@ public final class Constants {
         public static final Rotation2d pivotAngleOffset = Rotation2d.fromDegrees(130);
 
         //PID Values
-        public static final double pivotKP = 7.0;
+        public static final double pivotKP = 8.0;
         public static final double pivotKI = 0.0;
         public static final double pivotKD = 0.0;
 
-        public static final double pivotKG = 0.19;
+        public static final double pivotKG = 0.23;
         public static final double pivotKV = 3.41;
         public static final double pivotKA = 0.01;
         public static final double pivotKS = 0.0;

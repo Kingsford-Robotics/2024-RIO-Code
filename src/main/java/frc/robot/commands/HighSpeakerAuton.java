@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
@@ -22,8 +23,6 @@ import frc.robot.subsystems.Shooter;
 public class HighSpeakerAuton extends SequentialCommandGroup {
   /** Creates a new SpeakerScore. */
     public HighSpeakerAuton(Elevator elevator, Intake intake, Pivot pivot, Shooter shooter) {
-
-        //TODO: Add logic to adjust angle based on distance from target.
         addCommands(
             //Stop elevator and pivot motions.
             new SequentialCommandGroup(
@@ -100,6 +99,6 @@ public class HighSpeakerAuton extends SequentialCommandGroup {
             return angles[angles.length - 1];
         }*/
         
-        return Math.max(-0.43544 * distance * distance + 9.29602 * distance - 12.2466, 15);
+        return MathUtil.clamp(-0.43544 * distance * distance + 9.29602 * distance - 10.2466, 15, 90);
     }
 }

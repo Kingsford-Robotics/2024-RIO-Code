@@ -77,7 +77,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "RightToCenterShoot"
+                        "pathName": "Toward Note to Center"
                       }
                     },
                     {
@@ -99,53 +99,9 @@
           }
         },
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "lowSpeakerScore"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stopIntakeShooter"
-          }
-        },
-        {
-          "type": "race",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "intake"
-                }
-              },
-              {
-                "type": "sequential",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "path",
-                      "data": {
-                        "pathName": "CenterToLeftNote"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "trackNote"
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stopIntakeShooter"
+            "pathName": "Toward Center to Shoot"
           }
         },
         {

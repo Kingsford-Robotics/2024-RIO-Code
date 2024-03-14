@@ -41,6 +41,7 @@ public class Elevator extends SubsystemBase {
 
   private DigitalInput topLimitSwitch;
   private DigitalInput bottomLimitSwitch;
+  private DigitalInput homeLimitSwitch;
 
   private MotionMagicVoltage elevatorMotionMagicVoltage;
 
@@ -66,6 +67,7 @@ public class Elevator extends SubsystemBase {
     elevatorMotor = new TalonFX(ElevatorConstants.elevatorMotorID);
     topLimitSwitch = new DigitalInput(ElevatorConstants.topLimitSwitchID);
     bottomLimitSwitch = new DigitalInput(ElevatorConstants.bottomLimitSwitchID);
+    homeLimitSwitch = new DigitalInput(ElevatorConstants.homeLimitSwitchID);
 
     TalonFXConfiguration talonFXConfigs = new TalonFXConfiguration();
     
@@ -204,6 +206,10 @@ public class Elevator extends SubsystemBase {
     return bottomLimitSwitch.get();
   }
 
+  public boolean getHomeLimitSwitch() {
+    return homeLimitSwitch.get();
+  }
+
   /**
    * @return the height of the elevator in meters
    */
@@ -245,27 +251,23 @@ public class Elevator extends SubsystemBase {
     topLimitSwitchEntry.setBoolean(getTopLimitSwitch());
     bottomLimitSwitchEntry.setBoolean(getBottomLimitSwitch());
 
-    /*double setHeight = Units.inchesToMeters(setElevatorHeighEntry.getDouble(0.0));
-
-    if(setHeight != position){
-      position = setHeight;
-      elevatorMotor.setControl(elevatorMotionMagicVoltage.withPosition(position));
-    }*/
-
     // Apply hard limits. Stop the elevator if it hits the top or bottom limit switch.
     if(getTopLimitSwitch() && percentOutput > 0.01)
     {
       setSpeed(0.0);
       resetPosition(ElevatorConstants.elevatorMaxTravel);
-      //setHeight(getHeight() - Units.inchesToMeters(0.05));
     }
 
     else if(getBottomLimitSwitch() && percentOutput < -0.01)
     {  
       setSpeed(0.0);  
       resetPosition(0.0);
+    }
 
-      //setHeight(getHeight() + Units.inchesToMeters(0.05));
+    //TODO: Check if this is the correct way to handle the home limit switch.
+    else if(getHomeLimitSwitch() && percentOutput < -0.01)
+    {
+      setSpeed(0.0);
     }
   }
 }

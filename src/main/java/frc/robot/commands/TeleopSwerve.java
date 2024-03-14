@@ -24,12 +24,13 @@ public class TeleopSwerve extends Command {
 
     private DoubleSupplier autoAngle;
     private DoubleSupplier autoStrafe;
+    private DoubleSupplier autoDrive;
 
     private SlewRateLimiter translationLimiter;
     private SlewRateLimiter strafeLimiter;
     private SlewRateLimiter rotationLimiter;
 
-    public TeleopSwerve(Swerve s_Swerve, DoubleSupplier translationSup, DoubleSupplier strafeSup, DoubleSupplier rotationSup, BooleanSupplier robotCentricSup, BooleanSupplier intakeCentric, BooleanSupplier slowModeSup, DoubleSupplier autoAngle, DoubleSupplier autoStrafe) {
+    public TeleopSwerve(Swerve s_Swerve, DoubleSupplier translationSup, DoubleSupplier strafeSup, DoubleSupplier rotationSup, BooleanSupplier robotCentricSup, BooleanSupplier intakeCentric, BooleanSupplier slowModeSup, DoubleSupplier autoAngle, DoubleSupplier autoStrafe, DoubleSupplier autoDrive) {
         this.s_Swerve = s_Swerve;
         addRequirements(s_Swerve);
 
@@ -42,6 +43,7 @@ public class TeleopSwerve extends Command {
 
         this.autoAngle = autoAngle;
         this.autoStrafe = autoStrafe;
+        this.autoDrive = autoDrive;
 
         //Instantiates slew rate limiters using translation and turn ramp times.
         translationLimiter = new SlewRateLimiter(1/OIConstants.translateRampTime);
@@ -58,6 +60,7 @@ public class TeleopSwerve extends Command {
 
         rotationVal += autoAngle.getAsDouble();
         strafeVal += autoStrafe.getAsDouble();
+        translationVal += autoDrive.getAsDouble();
         
         /* Slow mode */
         if(slowModeSup.getAsBoolean()) {

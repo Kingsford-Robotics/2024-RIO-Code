@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
@@ -24,8 +25,6 @@ public class SpeakerScore extends SequentialCommandGroup {
 
   private double distance;
     public SpeakerScore(Elevator elevator, Intake intake, Pivot pivot, Shooter shooter, RobotContainer container) {
-
-        //TODO: Add logic to adjust angle based on distance from target.
         addCommands(
             //Stop elevator and pivot motions.
             new SequentialCommandGroup(
@@ -74,8 +73,9 @@ public class SpeakerScore extends SequentialCommandGroup {
 
                 }, pivot),
                 
+                //TODO: Consider changing logic to match low intake score.
                 new SequentialCommandGroup(
-                    new WaitUntilCommand(() -> pivot.angleErrorDegrees() < 2.0 && elevator.reachedSetpoint() && LimelightHelpers.getTX("limelight") < 2.0 && LimelightHelpers.getTV("limelight") && distance < Units.feetToMeters(10) && shooter.getShooterRPM() > 2500.0),
+                    new WaitUntilCommand(() -> pivot.angleErrorDegrees() < 2.0 && elevator.reachedSetpoint() && LimelightHelpers.getTX("limelight") < 2.0 && LimelightHelpers.getTV("limelight") && distance < Units.feetToMeters(11) && shooter.getShooterRPM() > 2500.0),
                     new InstantCommand(() -> intake.setSpeed(1.0), intake),
                     new WaitUntilCommand(() -> false)
                 )
@@ -107,6 +107,6 @@ public class SpeakerScore extends SequentialCommandGroup {
             return angles[angles.length - 1];
         }*/
         
-        return Math.max(-0.43544 * distance * distance + 9.29602 * distance - 12.2466, 15);
+        return MathUtil.clamp(-0.43544 * distance * distance + 9.29602 * distance - 10.2466, 15, 90);
     }
 }

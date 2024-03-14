@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.*;
@@ -51,6 +50,7 @@ public class RobotContainer {
 
     private double autoAlignTurn;       //Supplies a value to control the angle to a setpoint while driving.
     private double autoAlignStrafe;     //Supplies a value to control the side-to-side position while driving.
+    private double autoDrive;
     private boolean intakeCentric = false;
 
     private final SendableChooser<Command> autoChooser;
@@ -71,6 +71,7 @@ public class RobotContainer {
 
         autoAlignTurn = 0.0;
         autoAlignStrafe = 0.0;
+        autoDrive = 0.0;
 
          s_Swerve.setDefaultCommand(
             new TeleopSwerve(
@@ -82,7 +83,8 @@ public class RobotContainer {
                 () -> intakeCentric,
                 () -> OIConstants.slowSpeed.getAsBoolean(),
                 () -> autoAlignTurn,
-                () -> autoAlignStrafe
+                () -> autoAlignStrafe,
+                () -> autoDrive
             )
         );
         
@@ -110,8 +112,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("highSpeakerScore", new HighSpeakerAuton(s_Elevator, s_Intake, s_Pivot, s_Shooter));
         NamedCommands.registerCommand("lowSpeakerScore", new LowSpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, s_Swerve));
         NamedCommands.registerCommand("ampScore", new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter, RobotContainer.this));
-        NamedCommands.registerCommand("intake", new DeployIntake(s_Elevator, s_Pivot, s_Intake, RobotContainer.this, s_LedDriver));
-        NamedCommands.registerCommand("exitHome", new PowerExitHome(s_Elevator, s_Pivot));
+        NamedCommands.registerCommand("intake", new AutoDeployIntake(s_Elevator, s_Pivot, s_Intake));
         NamedCommands.registerCommand("home", new GoHome(s_Elevator, s_Pivot));
         NamedCommands.registerCommand("stopIntakeShooter", 
             new ParallelCommandGroup(
@@ -119,6 +120,7 @@ public class RobotContainer {
                 //new InstantCommand(() -> s_Shooter.setShooterPercent(0.0), s_Shooter)
             )
         );
+        NamedCommands.registerCommand("trackNote", new AutoTrackNote(s_Swerve).withTimeout(1.5));
 
         autoChooser = AutoBuilder.buildAutoChooser();
         Shuffleboard.getTab("Competition").add(autoChooser);
@@ -197,9 +199,15 @@ public class RobotContainer {
         new Trigger(() -> s_Intake.getBeamBreak()).onTrue(
             new SequentialCommandGroup(
                 new InstantCommand( () -> s_LedDriver.setColor(LedColor.StrobeWhite), s_LedDriver),
-                new WaitCommand(1),
-                new InstantCommand(() -> s_LedDriver.setColor(LedColor.Black), s_LedDriver)
+                new WaitCommand(2),
+                new InstantCommand(() -> s_LedDriver.setColor(LedColor.Blue), s_LedDriver)
             )
+        );
+
+        new Trigger(() -> s_Elevator.getHomeLimitSwitch()).whileTrue(
+            new InstantCommand(() -> s_LedDriver.setColor(LedColor.Green), s_LedDriver)
+        ).onFalse(
+            new InstantCommand(() -> s_LedDriver.setColor(LedColor.Blue))
         );
 
         OIConstants.deployIntake.onFalse(
@@ -253,6 +261,10 @@ public class RobotContainer {
     
     public void setAutoAlignStrafe(double value) {
         autoAlignStrafe = value;
+    }
+
+    public void setAutoDrive(double value){
+        autoDrive = value;
     }
 
     public void setIntakeCentric(boolean value) {

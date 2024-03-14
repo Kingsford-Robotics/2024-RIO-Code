@@ -9,11 +9,8 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
-import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
-import frc.robot.LedColor;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
@@ -44,9 +41,7 @@ public class DeployIntake extends SequentialCommandGroup {
             new WaitUntilCommand(() -> elevator.getHeight() < Units.inchesToMeters(1.0)),
             new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(-1.75)), pivot),
             new InstantCommand(() -> intake.setSpeed(0.8), intake),
-            new WaitUntilCommand(() -> !intake.getBeamBreak()),
-
-            new InstantCommand(() -> ledDriver.setColor(LedColor.StrobeWhite), ledDriver)
+            new WaitUntilCommand(() -> !intake.getBeamBreak())
           ),
           new TrackNote(container)
       )
