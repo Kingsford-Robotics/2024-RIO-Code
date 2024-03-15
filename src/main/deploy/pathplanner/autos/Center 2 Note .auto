@@ -2,8 +2,8 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.25,
-      "y": 5.55
+      "x": 1.3016833306393887,
+      "y": 5.522617590689727
     },
     "rotation": 180.0
   },
@@ -11,12 +11,6 @@
     "type": "sequential",
     "data": {
       "commands": [
-        {
-          "type": "named",
-          "data": {
-            "name": "exitHome"
-          }
-        },
         {
           "type": "named",
           "data": {
@@ -46,13 +40,13 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 0.5
+                        "waitTime": 2.0
                       }
                     },
                     {
-                      "type": "path",
+                      "type": "named",
                       "data": {
-                        "pathName": "CenterBackup"
+                        "name": "trackNote"
                       }
                     }
                   ]
@@ -65,55 +59,6 @@
           "type": "named",
           "data": {
             "name": "stopIntakeShooter"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.15
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "lowSpeakerScore"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stopIntakeShooter"
-          }
-        },
-        {
-          "type": "race",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "intake"
-                }
-              },
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "CenterToRight 3 Note"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stopIntakeShooter"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.35
           }
         },
         {

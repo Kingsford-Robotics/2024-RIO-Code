@@ -113,9 +113,9 @@ public class Elevator extends SubsystemBase {
 
   public void setSpeed(double speed) {
     //Stops the elevator if it hits the top or bottom limit switch.
-    if(getTopLimitSwitch() && speed > 0) {
+    if(getTopLimitSwitch() && speed > 0.01) {
       speed = 0;
-    } else if(getBottomLimitSwitch() || getHomeLimitSwitch() && speed < 0) {
+    } else if((getBottomLimitSwitch() || getHomeLimitSwitch()) && speed < -0.01) {
       speed = 0;
     }
 

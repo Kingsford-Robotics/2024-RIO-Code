@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.2,
-      "y": 4.85
+      "x": 1.2270533631976355,
+      "y": 5.522617590689727
     },
-    "rotation": 155.67553573120463
+    "rotation": -178.36342295838335
   },
   "command": {
     "type": "sequential",
@@ -34,50 +34,13 @@
                 }
               },
               {
-                "type": "named",
-                "data": {
-                  "name": "trackNote"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stopIntakeShooter"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "lowSpeakerScore"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stopIntakeShooter"
-          }
-        },
-        {
-          "type": "race",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "intake"
-                }
-              },
-              {
                 "type": "sequential",
                 "data": {
                   "commands": [
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "RightToCenterShoot"
+                        "pathName": "CenterToRightAlign"
                       }
                     },
                     {
@@ -127,7 +90,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "CenterToLeftNote"
+                        "pathName": "RightToCenterAlign"
                       }
                     },
                     {
@@ -152,6 +115,62 @@
           "type": "named",
           "data": {
             "name": "lowSpeakerScore"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopIntakeShooter"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "intake"
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "CenterToLeftAlign"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "trackNote"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopIntakeShooter"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "lowSpeakerScore"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "NearToMiddleFirst"
           }
         }
       ]

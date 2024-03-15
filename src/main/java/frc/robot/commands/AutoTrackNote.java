@@ -8,6 +8,7 @@ package frc.robot.commands;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Swerve;
 
@@ -19,6 +20,7 @@ public class AutoTrackNote extends Command {
   private PIDController strafeController;
 
   private PhotonCamera photonCamera;
+  private Timer timer;
 
   double strafefeedforward;
   double strafeKP;
@@ -27,6 +29,7 @@ public class AutoTrackNote extends Command {
 
   public AutoTrackNote(Swerve swerve) {
     this.swerve = swerve;
+    timer = new Timer();
 
     addRequirements(swerve);
   }
@@ -51,6 +54,7 @@ public class AutoTrackNote extends Command {
     var result = photonCamera.getLatestResult();
 
     if (result.hasTargets()) {
+      timer.reset();
       var target = result.getBestTarget();
       var xOffset = target.getYaw();
       var targetArea = target.getArea();
@@ -66,6 +70,7 @@ public class AutoTrackNote extends Command {
       }
     }
     else{
+      timer.start();
       swerve.drive(new Translation2d(-2.0, 0.0), 0.0, false, true);
     }
   }
@@ -74,11 +79,13 @@ public class AutoTrackNote extends Command {
   @Override
   public void end(boolean interrupted) {
     swerve.drive(new Translation2d(0.0, 0.0), 0.0, false, true);
+    timer.stop();
+    timer.reset();
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return timer.hasElapsed(1.0);
   }
 }

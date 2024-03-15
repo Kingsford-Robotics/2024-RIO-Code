@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.25,
-      "y": 5.55
+      "x": 0.9018609220513105,
+      "y": 6.5607800821170095
     },
-    "rotation": 180.0
+    "rotation": -122.29264104179987
   },
   "command": {
     "type": "sequential",
@@ -14,7 +14,51 @@
         {
           "type": "named",
           "data": {
-            "name": "exitHome"
+            "name": "lowSpeakerScore"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopIntakeShooter"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "intake"
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "LeftToLeftAlign"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "trackNote"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopIntakeShooter"
           }
         },
         {
@@ -44,15 +88,15 @@
                 "data": {
                   "commands": [
                     {
-                      "type": "wait",
+                      "type": "path",
                       "data": {
-                        "waitTime": 0.5
+                        "pathName": "LeftToMidfield1"
                       }
                     },
                     {
-                      "type": "path",
+                      "type": "named",
                       "data": {
-                        "pathName": "CenterBackup"
+                        "name": "trackNote"
                       }
                     }
                   ]
@@ -68,9 +112,9 @@
           }
         },
         {
-          "type": "wait",
+          "type": "path",
           "data": {
-            "waitTime": 0.15
+            "pathName": "Midfield1ToLeftShoot"
           }
         },
         {
@@ -86,46 +130,9 @@
           }
         },
         {
-          "type": "race",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "intake"
-                }
-              },
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "CenterToLeft"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stopIntakeShooter"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.35
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "lowSpeakerScore"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stopIntakeShooter"
+            "pathName": "LeftToMidfield2"
           }
         }
       ]

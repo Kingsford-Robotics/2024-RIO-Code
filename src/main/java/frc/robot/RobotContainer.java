@@ -119,7 +119,7 @@ public class RobotContainer {
                 //new InstantCommand(() -> s_Shooter.setShooterPercent(0.0), s_Shooter)
             )
         );
-        NamedCommands.registerCommand("trackNote", new AutoTrackNote(s_Swerve).withTimeout(1.5));
+        NamedCommands.registerCommand("trackNote", new AutoTrackNote(s_Swerve).withTimeout(2.0));
 
         autoChooser = AutoBuilder.buildAutoChooser();
         Shuffleboard.getTab("Competition").add(autoChooser);
@@ -187,7 +187,7 @@ public class RobotContainer {
             m_deployIntake.finallyDo(
                 (interrupted) -> {
                     new SequentialCommandGroup(
-                        new WaitCommand(0.15),
+                        new WaitCommand(0.25),
                         new InstantCommand(() -> s_Intake.setSpeed(0.0)),
                         new GoHome(s_Elevator, s_Pivot)
                     ).schedule();
