@@ -109,7 +109,7 @@ public class RobotContainer {
         configureButtonBindings();
 
         NamedCommands.registerCommand("highSpeakerScore", new HighSpeakerAuton(s_Elevator, s_Intake, s_Pivot, s_Shooter));
-        NamedCommands.registerCommand("lowSpeakerScore", new LowSpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, s_Swerve));
+        NamedCommands.registerCommand("lowSpeakerScore", new LowSpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, s_Swerve).withTimeout(4));
         NamedCommands.registerCommand("ampScore", new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter, RobotContainer.this));
         NamedCommands.registerCommand("intake", new AutoDeployIntake(s_Elevator, s_Pivot, s_Intake));
         NamedCommands.registerCommand("home", new GoHome(s_Elevator, s_Pivot));

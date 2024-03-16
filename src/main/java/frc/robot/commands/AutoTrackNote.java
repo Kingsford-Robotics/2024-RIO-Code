@@ -63,15 +63,15 @@ public class AutoTrackNote extends Command {
         double output = strafeController.calculate(xOffset);
         output = MathUtil.clamp(output, -0.75, 0.75);
 
-        swerve.drive(new Translation2d(-2.0, -output), 0.0, false, true);
+        swerve.drive(new Translation2d(-1.5, -output), 0.0, false, true);
       }
       else{
-        swerve.drive(new Translation2d(-2.0, 0.0), 0.0, false, true);
+        swerve.drive(new Translation2d(-1.5, 0.0), 0.0, false, true);
       }
     }
     else{
       timer.start();
-      swerve.drive(new Translation2d(-2.0, 0.0), 0.0, false, true);
+      swerve.drive(new Translation2d(-1.5, 0.0), 0.0, false, true);
     }
   }
 

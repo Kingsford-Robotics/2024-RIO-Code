@@ -17,7 +17,6 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -115,7 +114,7 @@ public class Elevator extends SubsystemBase {
     //Stops the elevator if it hits the top or bottom limit switch.
     if(getTopLimitSwitch() && speed > 0.01) {
       speed = 0;
-    } else if((getBottomLimitSwitch() || getHomeLimitSwitch()) && speed < -0.01) {
+    } else if(getBottomLimitSwitch() && speed < -0.01) {
       speed = 0;
     }
 
@@ -265,12 +264,6 @@ public class Elevator extends SubsystemBase {
     {  
       setSpeed(0.0);  
       resetPosition(0.0);
-    }
-
-    //TODO: Check if this is the correct way to handle the home limit switch.
-    else if(getHomeLimitSwitch() && percentOutput < -0.01)
-    {
-      setSpeed(0.0);
     }
   }
 }
