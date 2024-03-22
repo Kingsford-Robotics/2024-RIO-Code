@@ -22,6 +22,9 @@ public class AutoTrackNote extends Command {
   private PhotonCamera photonCamera;
   private Timer timer;
 
+  private final double maxSpeed = 0.75;
+  private final double trackingSpeed = 1.5;
+
   double strafefeedforward;
   double strafeKP;
   double strafeKI;
@@ -61,17 +64,17 @@ public class AutoTrackNote extends Command {
 
       if(targetArea > 0.1){
         double output = strafeController.calculate(xOffset);
-        output = MathUtil.clamp(output, -0.75, 0.75);
+        output = MathUtil.clamp(output, -maxSpeed, maxSpeed);
 
-        swerve.drive(new Translation2d(-1.5, -output), 0.0, false, true);
+        swerve.drive(new Translation2d(-trackingSpeed, -output), 0.0, false, true);
       }
       else{
-        swerve.drive(new Translation2d(-1.5, 0.0), 0.0, false, true);
+        swerve.drive(new Translation2d(-trackingSpeed, 0.0), 0.0, false, true);
       }
     }
     else{
       timer.start();
-      swerve.drive(new Translation2d(-1.5, 0.0), 0.0, false, true);
+      swerve.drive(new Translation2d(-trackingSpeed, 0.0), 0.0, false, true);
     }
   }
 

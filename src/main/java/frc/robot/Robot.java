@@ -81,7 +81,8 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
 
-    //m_robotContainer.reset().schedule();;
+    m_robotContainer.s_Pivot.setSpeed(0.0);
+    m_robotContainer.s_Elevator.setSpeed(0.0);
   }
 
   /** This function is called periodically during operator control. */

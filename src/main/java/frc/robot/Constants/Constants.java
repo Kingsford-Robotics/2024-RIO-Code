@@ -15,11 +15,11 @@ public final class Constants {
     public static final class Swerve {
         public static final int pigeonID = 35;
 
-        public static final COTSTalonFXSwerveConstants chosenModule = COTSTalonFXSwerveConstants.SDS.MK4i.Falcon500(COTSTalonFXSwerveConstants.SDS.MK4i.driveRatios.L2);
+        public static final COTSTalonFXSwerveConstants chosenModule = COTSTalonFXSwerveConstants.SDS.MK4i.Falcon500(COTSTalonFXSwerveConstants.SDS.MK4i.driveRatios.L1);
 
         /* Drivetrain Constants */
-        public static final double trackWidth = Units.inchesToMeters(20.75);
-        public static final double wheelBase = Units.inchesToMeters(27.25);
+        public static final double trackWidth = Units.inchesToMeters(20.5);
+        public static final double wheelBase = Units.inchesToMeters(27);
         public static final double wheelCircumference = chosenModule.wheelCircumference;
 
         /* Swerve Kinematics 
@@ -69,8 +69,8 @@ public final class Constants {
 
         /* Drive Motor Characterization Values From SYSID */
         public static final double driveKS = 0.32;
-        public static final double driveKV = 1.51;
-        public static final double driveKA = 0.27;
+        public static final double driveKV = 2.88; //Old Value: 1.51
+        public static final double driveKA = 0.26; //Old Value: 0.27
 
         /* Swerve Profiling Values */
         /** Meters per Second */
@@ -138,7 +138,7 @@ public final class Constants {
         public static final double errorThreshold = Units.inchesToMeters(0.15); //0.15 tolerance for positions.
 
         //Sensor to Mechanism Ratio
-        private static final double gearRatio = 28.0;
+        private static final double gearRatio = 27.0;
         private static final double sprocketDiameter = Units.inchesToMeters(1.77);
         public static final double sensorToMechRatio = gearRatio / (sprocketDiameter * Math.PI);
 
@@ -152,9 +152,9 @@ public final class Constants {
         public static final double kG = 0.24;
 
         //Motion Magic Values
-        public static final double cruiseVelocity = Units.inchesToMeters(12);   //12 inches per second
-        public static final double acceleration = Units.inchesToMeters(40);     //40 inches per second squared
-        public static final double jerk = Units.inchesToMeters(60);             //60 inches per second cubed
+        public static final double cruiseVelocity = Units.inchesToMeters(15);   //12 inches per second
+        public static final double acceleration = Units.inchesToMeters(50);     //40 inches per second squared
+        public static final double jerk = Units.inchesToMeters(75);             //60 inches per second cubed
 
         //Current Limiting
         public static final int currentLimit = 40;
@@ -183,10 +183,10 @@ public final class Constants {
 
         //PID Values
         public static final double pivotKP = 8.0;
-        public static final double pivotKI = 0.0;
+        public static final double pivotKI = 0.5;
         public static final double pivotKD = 0.0;
 
-        public static final double pivotKG = 0.23;
+        public static final double pivotKG = 0.25;
         public static final double pivotKV = 3.41;
         public static final double pivotKA = 0.01;
         public static final double pivotKS = 0.0;

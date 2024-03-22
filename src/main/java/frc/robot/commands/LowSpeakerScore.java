@@ -24,8 +24,6 @@ import frc.robot.subsystems.Swerve;
 public class LowSpeakerScore extends SequentialCommandGroup {
   /** Creates a new SpeakerScore. */
     public LowSpeakerScore(Elevator elevator, Intake intake, Pivot pivot, Shooter shooter, Swerve swerve) {
-
-        //TODO: Add logic to adjust angle based on distance from target.
         addCommands(
             //Stop elevator and pivot motions.
             new ParallelCommandGroup(
@@ -103,7 +101,7 @@ public class LowSpeakerScore extends SequentialCommandGroup {
                 }, pivot),
                 
                 new SequentialCommandGroup(
-                    new WaitUntilCommand(() -> pivot.angleErrorDegrees() < 2.0 && elevator.reachedSetpoint() && LimelightHelpers.getTX("limelight") < 2.0 && shooter.getShooterRPM() > 2500.0).withTimeout(0.75),
+                    new WaitUntilCommand(() -> pivot.angleErrorDegrees() < 2.0 && elevator.reachedSetpoint() && LimelightHelpers.getTX("limelight") < 2.0 && shooter.getShooterRPM() > 2500.0).withTimeout(1.0),
                     new InstantCommand(() -> intake.setSpeed(1.0), intake),
                     new WaitCommand(0.25)
                 )

@@ -14,7 +14,6 @@ import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Pivot;
 
 public class GoHome extends SequentialCommandGroup {
-  /** Creates a new GoHome. */
   public GoHome(Elevator elevator, Pivot pivot) {
     addCommands(
 

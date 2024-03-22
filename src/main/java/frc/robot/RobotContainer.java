@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -28,9 +29,9 @@ import frc.robot.subsystems.*;
  */
 public class RobotContainer {
     /* Subsystems */
-    private final Elevator s_Elevator;
+    public final Elevator s_Elevator;
     private final Intake s_Intake;
-    private final Pivot s_Pivot;
+    public final Pivot s_Pivot;
     private final Shooter s_Shooter;
     private final Swerve s_Swerve;
     private final CompetitionData s_CompetitionData;
@@ -39,7 +40,9 @@ public class RobotContainer {
     public enum targetMode {
         kSpeaker,
         kAmp,
-        kTrap
+        kMidfield,
+        kNear,
+        kPodium
     }
 
     public targetMode m_TargetMode = targetMode.kSpeaker;
@@ -88,7 +91,7 @@ public class RobotContainer {
         );
         
         m_AmpScore = new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter, RobotContainer.this);
-        m_deployIntake = new DeployIntake(s_Elevator, s_Pivot, s_Intake, RobotContainer.this, s_LedDriver);
+        m_deployIntake = new DeployIntake(s_Elevator, s_Pivot, s_Intake);
         m_SpeakerScore = new SpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, RobotContainer.this);
 
        s_Intake.setDefaultCommand(
@@ -109,9 +112,9 @@ public class RobotContainer {
         configureButtonBindings();
 
         NamedCommands.registerCommand("highSpeakerScore", new HighSpeakerAuton(s_Elevator, s_Intake, s_Pivot, s_Shooter));
-        NamedCommands.registerCommand("lowSpeakerScore", new LowSpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, s_Swerve).withTimeout(4));
+        NamedCommands.registerCommand("lowSpeakerScore", new LowSpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, s_Swerve).withTimeout(3));
         NamedCommands.registerCommand("ampScore", new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter, RobotContainer.this));
-        NamedCommands.registerCommand("intake", new AutoDeployIntake(s_Elevator, s_Pivot, s_Intake));
+        NamedCommands.registerCommand("intake", new DeployIntake(s_Elevator, s_Pivot, s_Intake));
         NamedCommands.registerCommand("home", new GoHome(s_Elevator, s_Pivot));
         NamedCommands.registerCommand("stopIntakeShooter", 
             new ParallelCommandGroup(
@@ -141,7 +144,14 @@ public class RobotContainer {
         OIConstants.speakerTarget.onTrue(new InstantCommand(() -> m_TargetMode = targetMode.kSpeaker));
 
         //B Button
-        OIConstants.trapTarget.onTrue(new InstantCommand(() -> m_TargetMode = targetMode.kTrap));
+        OIConstants.trapTarget.onTrue(new InstantCommand(() -> m_TargetMode = targetMode.kMidfield));
+
+        //POV Up Button
+        OIConstants.podiumManualShot.onTrue(new InstantCommand(() -> m_TargetMode = targetMode.kPodium));
+
+        //POV Down Button
+        OIConstants.nearManualShot.onTrue(new InstantCommand(() -> m_TargetMode = targetMode.kNear));
+
 
         //X Button
         OIConstants.reverseIntake.whileTrue(new RunCommand(() -> s_Intake.setSpeed(-0.25), s_Intake)).
@@ -184,10 +194,13 @@ public class RobotContainer {
 
         //Drive Left Trigger
         OIConstants.deployIntake.whileTrue(
-            m_deployIntake.finallyDo(
+            new ParallelRaceGroup(
+                m_deployIntake,
+                new TrackNote(RobotContainer.this)
+            ).finallyDo(
                 (interrupted) -> {
                     new SequentialCommandGroup(
-                        new WaitCommand(0.25),
+                        new WaitCommand(0.3),
                         new InstantCommand(() -> s_Intake.setSpeed(0.0)),
                         new GoHome(s_Elevator, s_Pivot)
                     ).schedule();
@@ -216,8 +229,20 @@ public class RobotContainer {
         //Drive Right Trigger
         OIConstants.shoot.whileTrue(
             new ConditionalCommand(
-                m_SpeakerScore, 
-                m_AmpScore, 
+                m_SpeakerScore,
+                    new ConditionalCommand(
+                        m_AmpScore,
+                        new ConditionalCommand(
+                            new MidfieldShot(s_Elevator, s_Intake, s_Pivot, s_Shooter),
+                                new ConditionalCommand(
+                                    new PodiumSpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter),
+                                    new NearSpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter),
+                                    () -> m_TargetMode == targetMode.kPodium
+                                ),
+                            () -> m_TargetMode == targetMode.kMidfield
+                        ),
+                        () -> m_TargetMode == targetMode.kAmp
+                    ),
                 () -> m_TargetMode == targetMode.kSpeaker
             )
         ).onFalse(
@@ -268,12 +293,5 @@ public class RobotContainer {
 
     public void setIntakeCentric(boolean value) {
         intakeCentric = value;
-    }
-
-    public SequentialCommandGroup reset(){
-        return new SequentialCommandGroup(
-            new InstantCommand(() -> s_Pivot.setPivotAngle(s_Pivot.getCANcoder()), s_Pivot),
-            new InstantCommand(() -> s_Elevator.setHeight(s_Elevator.getHeight()), s_Elevator)
-        );
     }
 }

@@ -10,6 +10,7 @@ import java.util.function.DoubleSupplier;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 
 
@@ -33,7 +34,6 @@ public class TeleopSwerve extends Command {
     public TeleopSwerve(Swerve s_Swerve, DoubleSupplier translationSup, DoubleSupplier strafeSup, DoubleSupplier rotationSup, BooleanSupplier robotCentricSup, BooleanSupplier intakeCentric, BooleanSupplier slowModeSup, DoubleSupplier autoAngle, DoubleSupplier autoStrafe, DoubleSupplier autoDrive) {
         this.s_Swerve = s_Swerve;
         addRequirements(s_Swerve);
-
         this.translationSup = translationSup;
         this.strafeSup = strafeSup;
         this.rotationSup = rotationSup;
@@ -53,9 +53,18 @@ public class TeleopSwerve extends Command {
 
     @Override
     public void execute() {
+        var alliance = DriverStation.getAlliance();
+
+        double translation = translationSup.getAsDouble();
+        double strafe = strafeSup.getAsDouble();
+
+        if(alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red){
+            translation = -translation;
+            strafe = -strafe;
+        }
         /* Slew rate limits the inputs and squares them to make the controls more sensitive at lower speeds. */
-        double translationVal = translationLimiter.calculate(Math.copySign(Math.pow(MathUtil.applyDeadband(translationSup.getAsDouble(), OIConstants.stickDeadband) ,2), MathUtil.applyDeadband(translationSup.getAsDouble(), OIConstants.stickDeadband)));
-        double strafeVal = strafeLimiter.calculate(Math.copySign(Math.pow(MathUtil.applyDeadband(strafeSup.getAsDouble(), OIConstants.stickDeadband) ,2), MathUtil.applyDeadband(strafeSup.getAsDouble(), OIConstants.stickDeadband)));
+        double translationVal = translationLimiter.calculate(Math.copySign(Math.pow(MathUtil.applyDeadband(translation, OIConstants.stickDeadband) ,2), MathUtil.applyDeadband(translation, OIConstants.stickDeadband)));
+        double strafeVal = strafeLimiter.calculate(Math.copySign(Math.pow(MathUtil.applyDeadband(strafe, OIConstants.stickDeadband) ,2), MathUtil.applyDeadband(strafe, OIConstants.stickDeadband)));
         double rotationVal = rotationLimiter.calculate(Math.copySign(Math.pow(MathUtil.applyDeadband(rotationSup.getAsDouble(), OIConstants.stickDeadband) ,2), MathUtil.applyDeadband(rotationSup.getAsDouble(), OIConstants.stickDeadband)));
 
         rotationVal += autoAngle.getAsDouble();

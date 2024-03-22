@@ -40,14 +40,12 @@ public class SpeakerScore extends SequentialCommandGroup {
                     new SequentialCommandGroup(
                         new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(10)), pivot),
                         new WaitUntilCommand(() -> pivot.getCANcoder().getDegrees() > 8.0),
-                        new InstantCommand(() ->elevator.setHeight(Units.inchesToMeters(11.50)), elevator),
-                        new WaitUntilCommand(() -> elevator.getHeight() > Units.inchesToMeters(11))
+                        new InstantCommand(() ->elevator.setHeight(Units.inchesToMeters(11.50)), elevator)
                     ),
 
                     //Coming from in home
                     new SequentialCommandGroup(
-                        new InstantCommand(() ->elevator.setHeight(Units.inchesToMeters(11.50)), elevator),
-                        new WaitUntilCommand(() -> elevator.getHeight() > Units.inchesToMeters(11))
+                        new InstantCommand(() ->elevator.setHeight(Units.inchesToMeters(11.50)), elevator)
                     ),
                     () -> elevator.getHeight() < Units.inchesToMeters(9.75)
                 ),
@@ -74,7 +72,7 @@ public class SpeakerScore extends SequentialCommandGroup {
                 }, pivot),
                 
                 new SequentialCommandGroup(
-                    new WaitUntilCommand(() -> pivot.angleErrorDegrees() < 1.5 && elevator.reachedSetpoint() && LimelightHelpers.getTX("limelight") < 1.5 && LimelightHelpers.getTV("limelight") && distance < Units.feetToMeters(11) && shooter.getShooterRPM() > 3000.0).withTimeout(2.5),
+                    new WaitUntilCommand(() -> pivot.angleErrorDegrees() < 1.5 && elevator.reachedSetpoint() && LimelightHelpers.getTX("limelight") < 1.5 && LimelightHelpers.getTV("limelight") && distance < Units.feetToMeters(11) && shooter.getShooterRPM() > 3000.0).withTimeout(2),
                     new InstantCommand(() -> intake.setSpeed(1.0), intake),
                     new WaitUntilCommand(() -> false)
                 )

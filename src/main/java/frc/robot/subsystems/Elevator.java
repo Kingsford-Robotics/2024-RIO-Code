@@ -257,7 +257,7 @@ public class Elevator extends SubsystemBase {
     if(getTopLimitSwitch() && percentOutput > 0.01)
     {
       setSpeed(0.0);
-      resetPosition(ElevatorConstants.elevatorMaxTravel);
+      //resetPosition(ElevatorConstants.elevatorMaxTravel);
     }
 
     else if(getBottomLimitSwitch() && percentOutput < -0.01)

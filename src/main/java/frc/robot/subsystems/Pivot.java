@@ -17,6 +17,7 @@ import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -73,6 +74,8 @@ public class Pivot extends SubsystemBase {
     pidController = new ProfiledPIDController(PivotConstants.pivotKP, PivotConstants.pivotKI, PivotConstants.pivotKD, new Constraints(PivotConstants.pivotVelocity, PivotConstants.pivotAcceleration));
 
     pidController.setTolerance(0);
+
+    pidController.setIZone(Units.degreesToRadians(3.5)); //Applies I only when the error is within 3.5 degrees.
     
     pivotLeftMotor.restoreFactoryDefaults();
     pivotRightMotor.restoreFactoryDefaults();
@@ -102,7 +105,7 @@ public class Pivot extends SubsystemBase {
   }
 
   public boolean reachedSetpoint(){
-    return Math.abs(getCANcoder().minus(angleSetpoint).getDegrees()) < 2.0;
+    return Math.abs(getCANcoder().minus(angleSetpoint).getDegrees()) < 1.5;
   }
 
   public double angleErrorDegrees(){
@@ -190,8 +193,8 @@ public class Pivot extends SubsystemBase {
     if(!isManualRunning){
       output = pivotFeedforward.calculate(pidController.getSetpoint().position, pidController.getSetpoint().velocity);
       
-      //Add PID controller output if the error is greater than 1.0 degrees.
-      if(Math.abs(angleSetpoint.minus(getCANcoder()).getDegrees()) > 0.5){
+      //Add PID controller output if the error is greater than 0.25 degrees.
+      if(Math.abs(angleSetpoint.minus(getCANcoder()).getDegrees()) > 0.25){
         output += pidController.calculate(getCANcoder().getRadians());
       }
       

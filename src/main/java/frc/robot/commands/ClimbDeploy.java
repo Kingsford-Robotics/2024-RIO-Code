@@ -13,9 +13,6 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Pivot;
 
-// NOTE:  Consider using this command inline, rather than writing a subclass.  For more
-// information, see:
-// https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class ClimbDeploy extends SequentialCommandGroup {
   /** Creates a new ClimbDeploy. */
   public ClimbDeploy(Pivot pivot, Elevator elevator) {
@@ -47,7 +44,7 @@ public class ClimbDeploy extends SequentialCommandGroup {
         )
       ),
 
-      new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(95)), pivot),
+      new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(104)), pivot),
       new WaitUntilCommand(pivot::reachedSetpoint)
     );
   }

@@ -5,7 +5,6 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.RobotController;
@@ -52,7 +51,31 @@ public class CompetitionData extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    operatorMode.setString(m_RobotContainer.m_TargetMode == targetMode.kSpeaker? "Speaker": "Amp");
+
+    String targetString;
+
+    switch (m_RobotContainer.m_TargetMode) {
+      case kSpeaker:
+        targetString = "Speaker";
+        break;
+      case kAmp:
+        targetString = "Amp";
+        break;
+      case kMidfield:
+        targetString = "Midfield";
+        break;
+      case kNear:
+        targetString = "Near";
+        break;
+      case kPodium:
+        targetString = "Podium";
+        break;
+      default:
+        targetString = "Unknown";
+        break;
+    }
+
+    operatorMode.setString(targetString);
     elevatorHeight.setDouble(Units.metersToInches(m_Elevator.getHeight()));  
     matchTime.setDouble(Timer.getMatchTime());
     batteryVoltage.setDouble(RobotController.getBatteryVoltage());
