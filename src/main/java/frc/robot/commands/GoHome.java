@@ -37,7 +37,8 @@ public class GoHome extends SequentialCommandGroup {
       new WaitUntilCommand(() -> elevator.getHeight() > Units.inchesToMeters(11)),
       new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(-2.0)), pivot),
       new WaitUntilCommand(() -> pivot.getCANcoder().getDegrees() < -1.5),
-      new InstantCommand(() -> elevator.setHeight(Units.inchesToMeters(10.5)), elevator)
+      new InstantCommand(() -> elevator.setHeight(Units.inchesToMeters(10.5)), elevator),
+      new InstantCommand(() -> pivot.setSpeed(0.0), pivot)
     );
   }
 }

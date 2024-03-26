@@ -24,13 +24,13 @@ public class DeployIntake extends SequentialCommandGroup {
 
           new ConditionalCommand(
             new SequentialCommandGroup(
-              new InstantCommand(() -> elevator.setHeight(Units.inchesToMeters(11.0)), elevator),
-              new WaitUntilCommand(() -> elevator.getHeight() > Units.inchesToMeters(10.5)),
-              new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(10.0)), pivot)
+              new InstantCommand(() -> elevator.setHeight(Units.inchesToMeters(12.25)), elevator),
+              new WaitUntilCommand(() -> elevator.getHeight() > Units.inchesToMeters(11.0)),
+              new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(12.0)), pivot)
             ),
               new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(10.0)), pivot)
             , 
-            () -> elevator.getHeight() > Units.inchesToMeters(9.75)),
+            () -> elevator.getHeight() > Units.inchesToMeters(9.5)),
           new WaitUntilCommand(() -> pivot.getCANcoder().getDegrees() > 8.0),
           new InstantCommand(() -> elevator.setHeight(Units.inchesToMeters(0.0)), elevator),
           new WaitUntilCommand(() -> elevator.getHeight() < Units.inchesToMeters(1.0)),

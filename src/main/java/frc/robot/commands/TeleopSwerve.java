@@ -57,10 +57,12 @@ public class TeleopSwerve extends Command {
 
         double translation = translationSup.getAsDouble();
         double strafe = strafeSup.getAsDouble();
+        double autoStrafeVal = autoStrafe.getAsDouble();
 
         if(alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red){
             translation = -translation;
             strafe = -strafe;
+            autoStrafeVal = -autoStrafeVal;
         }
         /* Slew rate limits the inputs and squares them to make the controls more sensitive at lower speeds. */
         double translationVal = translationLimiter.calculate(Math.copySign(Math.pow(MathUtil.applyDeadband(translation, OIConstants.stickDeadband) ,2), MathUtil.applyDeadband(translation, OIConstants.stickDeadband)));
@@ -68,7 +70,7 @@ public class TeleopSwerve extends Command {
         double rotationVal = rotationLimiter.calculate(Math.copySign(Math.pow(MathUtil.applyDeadband(rotationSup.getAsDouble(), OIConstants.stickDeadband) ,2), MathUtil.applyDeadband(rotationSup.getAsDouble(), OIConstants.stickDeadband)));
 
         rotationVal += autoAngle.getAsDouble();
-        strafeVal += autoStrafe.getAsDouble();
+        strafeVal += autoStrafeVal;
         translationVal += autoDrive.getAsDouble();
         
         /* Slow mode */
@@ -84,7 +86,7 @@ public class TeleopSwerve extends Command {
             rotationVal *= OIConstants.highRotationSpeed;
         }
 
-        if(intakeCentric.getAsBoolean()){
+        if(intakeCentric.getAsBoolean() && alliance.get() == DriverStation.Alliance.Blue){
             translationVal = -translationVal;
             strafeVal = -strafeVal;
         }
