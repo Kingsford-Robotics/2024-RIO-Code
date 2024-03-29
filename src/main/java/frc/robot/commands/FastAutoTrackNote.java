@@ -24,8 +24,7 @@ public class FastAutoTrackNote extends Command {
 
   private final double maxSpeed = 0.75;
   private final double trackingSpeed = 3.0;
-
-  double strafefeedforward;
+  
   double strafeKP;
   double strafeKI;
   double strafeKD;
@@ -62,7 +61,7 @@ public class FastAutoTrackNote extends Command {
       var xOffset = target.getYaw();
       var targetArea = target.getArea();
 
-      if(targetArea > 0.1){
+      if(targetArea > 0.05){
         double output = strafeController.calculate(xOffset);
         output = MathUtil.clamp(output, -maxSpeed, maxSpeed);
 

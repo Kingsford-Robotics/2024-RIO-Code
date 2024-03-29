@@ -62,7 +62,7 @@ public class AutoTrackNote extends Command {
       var xOffset = target.getYaw();
       var targetArea = target.getArea();
 
-      if(targetArea > 0.1){
+      if(targetArea > 0.05){
         double output = strafeController.calculate(xOffset);
         output = MathUtil.clamp(output, -maxSpeed, maxSpeed);
 
