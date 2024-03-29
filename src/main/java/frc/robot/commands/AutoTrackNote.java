@@ -23,7 +23,7 @@ public class AutoTrackNote extends Command {
   private Timer timer;
 
   private final double maxSpeed = 0.75;
-  private final double trackingSpeed = 1.5;
+  private final double trackingSpeed = 1.25;
 
   double strafefeedforward;
   double strafeKP;

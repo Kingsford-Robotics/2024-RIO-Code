@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.RobotController;
@@ -13,7 +14,6 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
-import frc.robot.RobotContainer.targetMode;
 
 public class CompetitionData extends SubsystemBase {
   /** Creates a new CompetitionData. */
@@ -30,14 +30,17 @@ public class CompetitionData extends SubsystemBase {
 
   private ShuffleboardTab tab;
 
-  //private UsbCamera chainCamera;
+  private UsbCamera chainCamera;
   
   public CompetitionData(RobotContainer robotContainer, Elevator elevator, Swerve swerve) {
     this.m_RobotContainer = robotContainer;
     this.m_Elevator = elevator;
     this.m_Swerve = swerve;
 
-    CameraServer.startAutomaticCapture(0);
+    chainCamera = new UsbCamera("Chain Camera", 0);
+    chainCamera.setResolution(160, 120);
+    chainCamera.setFPS(15);
+    CameraServer.startAutomaticCapture(chainCamera);
     
     tab = Shuffleboard.getTab("Competition");
     

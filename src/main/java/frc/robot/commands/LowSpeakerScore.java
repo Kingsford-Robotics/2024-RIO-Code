@@ -40,8 +40,8 @@ public class LowSpeakerScore extends SequentialCommandGroup {
                 new SequentialCommandGroup(
                     new ConditionalCommand(
                         new SequentialCommandGroup(
-                            new InstantCommand(() -> elevator.setHeight(Units.inchesToMeters(12.9   )), elevator),
-                            new WaitUntilCommand(() -> elevator.getHeight() > Units.inchesToMeters(12.7)),
+                            new InstantCommand(() -> elevator.setHeight(Units.inchesToMeters(12.80)), elevator),
+                            new WaitUntilCommand(() -> elevator.getHeight() > Units.inchesToMeters(12.6)),
                             new InstantCommand(() -> 
                                 {
                                     // Calculate the desired angle based on the distance from the Limelight
@@ -103,7 +103,7 @@ public class LowSpeakerScore extends SequentialCommandGroup {
                 new SequentialCommandGroup(
                     new WaitUntilCommand(() -> pivot.angleErrorDegrees() < 2.0 && elevator.reachedSetpoint() && LimelightHelpers.getTX("limelight") < 2.0 && shooter.getShooterRPM() > 2500.0).withTimeout(1.25),
                     new InstantCommand(() -> intake.setSpeed(1.0), intake),
-                    new WaitCommand(0.25)
+                    new WaitCommand(0.35)
                 )
             )
         );

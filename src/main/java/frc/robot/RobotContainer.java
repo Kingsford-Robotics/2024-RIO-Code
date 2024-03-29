@@ -112,7 +112,7 @@ public class RobotContainer {
         configureButtonBindings();
 
         NamedCommands.registerCommand("highSpeakerScore", new HighSpeakerAuton(s_Elevator, s_Intake, s_Pivot, s_Shooter));
-        NamedCommands.registerCommand("lowSpeakerScore", new LowSpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, s_Swerve).withTimeout(3));
+        NamedCommands.registerCommand("lowSpeakerScore", new LowSpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, s_Swerve).withTimeout(4));
         NamedCommands.registerCommand("ampScore", new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter, RobotContainer.this));
         NamedCommands.registerCommand("intake", new DeployIntake(s_Elevator, s_Pivot, s_Intake));
         NamedCommands.registerCommand("home", new GoHome(s_Elevator, s_Pivot));
@@ -122,7 +122,7 @@ public class RobotContainer {
                 //new InstantCommand(() -> s_Shooter.setShooterPercent(0.0), s_Shooter)
             )
         );
-        NamedCommands.registerCommand("trackNote", new AutoTrackNote(s_Swerve).withTimeout(2.0));
+        NamedCommands.registerCommand("trackNote", new AutoTrackNote(s_Swerve).withTimeout(2.5));
         NamedCommands.registerCommand("fastTrackNote", new FastAutoTrackNote(s_Swerve).withTimeout(1.75));
         NamedCommands.registerCommand("lowerArm", new LowerArm(s_Elevator, s_Intake, s_Pivot));
         autoChooser = AutoBuilder.buildAutoChooser();
