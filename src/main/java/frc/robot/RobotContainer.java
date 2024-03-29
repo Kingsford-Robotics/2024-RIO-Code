@@ -123,7 +123,8 @@ public class RobotContainer {
             )
         );
         NamedCommands.registerCommand("trackNote", new AutoTrackNote(s_Swerve).withTimeout(2.0));
-
+        NamedCommands.registerCommand("fastTrackNote", new FastAutoTrackNote(s_Swerve).withTimeout(1.75));
+        NamedCommands.registerCommand("lowerArm", new LowerArm(s_Elevator, s_Intake, s_Pivot));
         autoChooser = AutoBuilder.buildAutoChooser();
         Shuffleboard.getTab("Competition").add(autoChooser);
     }

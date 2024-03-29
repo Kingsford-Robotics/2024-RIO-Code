@@ -40,8 +40,8 @@ public class LowSpeakerScore extends SequentialCommandGroup {
                 new SequentialCommandGroup(
                     new ConditionalCommand(
                         new SequentialCommandGroup(
-                            new InstantCommand(() -> elevator.setHeight(Units.inchesToMeters(11.0)), elevator),
-                            new WaitUntilCommand(() -> elevator.getHeight() > Units.inchesToMeters(10.5)),
+                            new InstantCommand(() -> elevator.setHeight(Units.inchesToMeters(12.9   )), elevator),
+                            new WaitUntilCommand(() -> elevator.getHeight() > Units.inchesToMeters(12.7)),
                             new InstantCommand(() -> 
                                 {
                                     // Calculate the desired angle based on the distance from the Limelight
@@ -101,7 +101,7 @@ public class LowSpeakerScore extends SequentialCommandGroup {
                 }, pivot),
                 
                 new SequentialCommandGroup(
-                    new WaitUntilCommand(() -> pivot.angleErrorDegrees() < 2.0 && elevator.reachedSetpoint() && LimelightHelpers.getTX("limelight") < 2.0 && shooter.getShooterRPM() > 2500.0).withTimeout(1.0),
+                    new WaitUntilCommand(() -> pivot.angleErrorDegrees() < 2.0 && elevator.reachedSetpoint() && LimelightHelpers.getTX("limelight") < 2.0 && shooter.getShooterRPM() > 2500.0).withTimeout(1.25),
                     new InstantCommand(() -> intake.setSpeed(1.0), intake),
                     new WaitCommand(0.25)
                 )
@@ -133,6 +133,6 @@ public class LowSpeakerScore extends SequentialCommandGroup {
             return angles[angles.length - 1];
         }*/
         
-        return Math.max(2.35357 + 4.38036 * distance - 0.116071 * distance * distance, 16);
+        return Math.max(1.7 + 4.8974 * distance - 0.17316 * distance * distance, 16);
     }
 }

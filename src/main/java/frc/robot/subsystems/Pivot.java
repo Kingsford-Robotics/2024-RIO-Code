@@ -35,7 +35,7 @@ public class Pivot extends SubsystemBase {
   private GenericEntry targetAngle;
   private GenericEntry pivotSpeedEntry;
 
-  //private GenericEntry angleEntry;
+  private GenericEntry angleEntry;
 
   private CANSparkMax pivotLeftMotor;
   private CANSparkMax pivotRightMotor;
@@ -54,7 +54,7 @@ public class Pivot extends SubsystemBase {
     pivotSpeedEntry = tab.add("Pivot Speed", 0.0).getEntry();
     targetAngle = tab.add("Target Angle", 0.0).getEntry();
 
-    //angleEntry = tab.add("Set Angle", 0.0).getEntry();
+    angleEntry = tab.add("Set Angle", 0.0).getEntry();
     
     pivotLeftMotor = new CANSparkMax(PivotConstants.pivotLeftMotorID, MotorType.kBrushless);
     pivotRightMotor = new CANSparkMax(PivotConstants.pivotRightMotorID, MotorType.kBrushless);

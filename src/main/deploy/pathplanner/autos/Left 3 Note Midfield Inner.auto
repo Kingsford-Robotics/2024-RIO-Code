@@ -2,15 +2,34 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.8818897637795275,
-      "y": 4.533770522086499
+      "x": 0.9018609220513105,
+      "y": 6.5607800821170095
     },
-    "rotation": 122.0
+    "rotation": -122.29264104179987
   },
   "command": {
     "type": "sequential",
     "data": {
       "commands": [
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "LeftToLeftShoot"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "lowerArm"
+                }
+              }
+            ]
+          }
+        },
         {
           "type": "named",
           "data": {
@@ -40,13 +59,13 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "RightToRightAlign"
+                        "pathName": "LeftToLeftAlign"
                       }
                     },
                     {
                       "type": "named",
                       "data": {
-                        "name": "trackNote"
+                        "name": "fastTrackNote"
                       }
                     }
                   ]
@@ -62,12 +81,6 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "RightToCenterShoot"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "lowSpeakerScore"
@@ -96,7 +109,7 @@
                     {
                       "type": "path",
                       "data": {
-                        "pathName": "RightToMidfield5"
+                        "pathName": "LeftToMidfield2"
                       }
                     },
                     {
@@ -120,7 +133,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Midfield5ToRightShoot"
+            "pathName": "Midfield2ToLeftShoot"
           }
         },
         {
@@ -136,9 +149,35 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "RightToMidfield4"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "intake"
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "LeftToMidfield1"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "fastTrackNote"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
           }
         }
       ]

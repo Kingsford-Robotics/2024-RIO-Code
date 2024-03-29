@@ -62,6 +62,12 @@
           }
         },
         {
+          "type": "path",
+          "data": {
+            "pathName": "RightToCenterShoot"
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "lowSpeakerScore"
@@ -96,7 +102,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "trackNote"
+                        "name": "fastTrackNote"
                       }
                     }
                   ]
@@ -146,7 +152,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "trackNote"
+                        "name": "fastTrackNote"
                       }
                     }
                   ]
@@ -168,9 +174,41 @@
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "NearToMiddleFirst"
+            "name": "stopIntakeShooter"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "intake"
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "LeftToMidfield1"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "fastTrackNote"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
           }
         }
       ]
