@@ -6,19 +6,13 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
-import frc.robot.LimelightHelpers;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Pivot;
-import frc.robot.subsystems.Shooter;
 
 public class LowerArm extends SequentialCommandGroup {
   /** Creates a new SpeakerScore. */

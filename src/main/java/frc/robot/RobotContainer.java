@@ -66,16 +66,28 @@ public class RobotContainer {
         s_Shooter = new Shooter();
         s_Swerve = new Swerve();
         s_CompetitionData = new CompetitionData(this, s_Elevator, s_Swerve);
-
         s_LedDriver = new LedDriver();
-
-        Limelight s_Limelight = new Limelight();
+        
+        NamedCommands.registerCommand("lowSpeakerScore", new LowSpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, s_Swerve).withTimeout(5));
+        NamedCommands.registerCommand("intake", new DeployIntake(s_Elevator, s_Pivot, s_Intake));
+        NamedCommands.registerCommand("home", new GoHome(s_Elevator, s_Pivot));
+        NamedCommands.registerCommand("stopIntakeShooter", new InstantCommand(() -> s_Intake.setSpeed(0.0), s_Intake));
+        NamedCommands.registerCommand("trackNote", new AutoTrackNote(s_Swerve).withTimeout(2.5));
+        NamedCommands.registerCommand("fastTrackNote", new FastAutoTrackNote(s_Swerve).withTimeout(1.75));
+        NamedCommands.registerCommand("lowerArm", new LowerArm(s_Elevator, s_Intake, s_Pivot));
+        
+        autoChooser = AutoBuilder.buildAutoChooser();
+        Shuffleboard.getTab("Competition").add(autoChooser);
 
         autoAlignTurn = 0.0;
         autoAlignStrafe = 0.0;
         autoDrive = 0.0;
 
-         s_Swerve.setDefaultCommand(
+        m_AmpScore = new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter, RobotContainer.this);
+        m_deployIntake = new DeployIntake(s_Elevator, s_Pivot, s_Intake);
+        m_SpeakerScore = new SpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, RobotContainer.this);
+
+        s_Swerve.setDefaultCommand(
             new TeleopSwerve(
                 s_Swerve, 
                 () -> -OIConstants.translationSupplier.get(),
@@ -90,16 +102,12 @@ public class RobotContainer {
             )
         );
         
-        m_AmpScore = new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter, RobotContainer.this);
-        m_deployIntake = new DeployIntake(s_Elevator, s_Pivot, s_Intake);
-        m_SpeakerScore = new SpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, RobotContainer.this);
-
-       s_Intake.setDefaultCommand(
+        s_Intake.setDefaultCommand(
             new RunCommand(
                 () -> s_Intake.setSpeed(OIConstants.intakeSpeed.getAsDouble()), 
                 s_Intake
             )
-       );
+        );
 
         s_Shooter.setDefaultCommand(
             new RunCommand(
@@ -110,31 +118,8 @@ public class RobotContainer {
 
         // Configure the button bindings
         configureButtonBindings();
-
-        NamedCommands.registerCommand("highSpeakerScore", new HighSpeakerAuton(s_Elevator, s_Intake, s_Pivot, s_Shooter));
-        NamedCommands.registerCommand("lowSpeakerScore", new LowSpeakerScore(s_Elevator, s_Intake, s_Pivot, s_Shooter, s_Swerve).withTimeout(4));
-        NamedCommands.registerCommand("ampScore", new AmpScore(s_Pivot, s_Elevator, s_Intake, s_Shooter, RobotContainer.this));
-        NamedCommands.registerCommand("intake", new DeployIntake(s_Elevator, s_Pivot, s_Intake));
-        NamedCommands.registerCommand("home", new GoHome(s_Elevator, s_Pivot));
-        NamedCommands.registerCommand("stopIntakeShooter", 
-            new ParallelCommandGroup(
-                new InstantCommand(() -> s_Intake.setSpeed(0.0), s_Intake)//,
-                //new InstantCommand(() -> s_Shooter.setShooterPercent(0.0), s_Shooter)
-            )
-        );
-        NamedCommands.registerCommand("trackNote", new AutoTrackNote(s_Swerve).withTimeout(2.5));
-        NamedCommands.registerCommand("fastTrackNote", new FastAutoTrackNote(s_Swerve).withTimeout(1.75));
-        NamedCommands.registerCommand("lowerArm", new LowerArm(s_Elevator, s_Intake, s_Pivot));
-        autoChooser = AutoBuilder.buildAutoChooser();
-        Shuffleboard.getTab("Competition").add(autoChooser);
     }
 
-    /**
-     * Use this method to define your button->command mappings. Buttons can be created by
-     * instantiating a {@link GenericHID} or one of its subclasses ({@link
-     * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-     * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
-     */
     private void configureButtonBindings() {
         /*Controller Mappings*/
         
@@ -153,7 +138,6 @@ public class RobotContainer {
         //POV Down Button
         OIConstants.nearManualShot.onTrue(new InstantCommand(() -> m_TargetMode = targetMode.kNear));
 
-
         //X Button
         OIConstants.reverseIntake.whileTrue(new RunCommand(() -> s_Intake.setSpeed(-0.25), s_Intake)).
             onFalse(new InstantCommand(() -> s_Intake.setSpeed(0.0), s_Intake));
@@ -163,6 +147,11 @@ public class RobotContainer {
             new ParallelCommandGroup(
                 s_Pivot.manualControl(() -> -OIConstants.pivotSpeed.getAsDouble() * 0.2),
                 s_Elevator.manualControl(() -> -OIConstants.elevatorSpeed.getAsDouble() * 0.4)
+            )
+        ).onFalse(
+            new SequentialCommandGroup(
+                new InstantCommand(() -> s_Elevator.setHeight(s_Elevator.getHeight()), s_Elevator),
+                new InstantCommand(() -> s_Pivot.setPivotAngle(s_Pivot.getCANcoder()), s_Pivot)
             )
         );
 

@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.LimelightHelpers;
 import frc.robot.RobotContainer;
@@ -29,7 +30,8 @@ public class SpeakerScore extends SequentialCommandGroup {
             new SequentialCommandGroup(
                 new InstantCommand(() -> elevator.setHeight(elevator.getHeight()), elevator),
                 new InstantCommand(() -> pivot.setPivotAngle(pivot.getCANcoder()), pivot),
-                new InstantCommand(() -> LimelightHelpers.setPipelineIndex("limelight", 0))
+                new InstantCommand(() -> LimelightHelpers.setPipelineIndex("limelight", 0)),
+                new WaitCommand(0.1)
             ),  
 
             new InstantCommand(() -> shooter.setShooterPercent(1.0), shooter),
@@ -40,12 +42,14 @@ public class SpeakerScore extends SequentialCommandGroup {
                     new SequentialCommandGroup(
                         new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(10)), pivot),
                         new WaitUntilCommand(() -> pivot.getCANcoder().getDegrees() > 8.0),
-                        new InstantCommand(() ->elevator.setHeight(Units.inchesToMeters(11.50)), elevator)
+                        new InstantCommand(() ->elevator.setHeight(Units.inchesToMeters(11.50)), elevator),
+                        new WaitCommand(0.1)
                     ),
 
                     //Coming from in home
                     new SequentialCommandGroup(
-                        new InstantCommand(() ->elevator.setHeight(Units.inchesToMeters(11.50)), elevator)
+                        new InstantCommand(() ->elevator.setHeight(Units.inchesToMeters(11.50)), elevator),
+                        new WaitCommand(0.1)
                     ),
                     () -> elevator.getHeight() < Units.inchesToMeters(9.75)
                 ),

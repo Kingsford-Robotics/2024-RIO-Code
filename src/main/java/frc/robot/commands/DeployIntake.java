@@ -9,6 +9,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Intake;
@@ -19,7 +20,8 @@ public class DeployIntake extends SequentialCommandGroup {
     addCommands( 
       new SequentialCommandGroup(
             new InstantCommand(() -> elevator.setHeight(elevator.getHeight()), elevator),
-            new InstantCommand(() -> pivot.setPivotAngle(pivot.getCANcoder()), pivot)
+            new InstantCommand(() -> pivot.setPivotAngle(pivot.getCANcoder()), pivot),
+            new WaitCommand(0.1)
           ), 
 
           new ConditionalCommand(
@@ -32,6 +34,7 @@ public class DeployIntake extends SequentialCommandGroup {
             , 
             () -> elevator.getHeight() > Units.inchesToMeters(9.5)),
           new WaitUntilCommand(() -> pivot.getCANcoder().getDegrees() > 8.0),
+          new WaitCommand(0.1),
           new InstantCommand(() -> elevator.setHeight(Units.inchesToMeters(0.0)), elevator),
           new WaitUntilCommand(() -> elevator.getHeight() < Units.inchesToMeters(1.0)),
           new InstantCommand(() -> pivot.setPivotAngle(Rotation2d.fromDegrees(-1.75)), pivot),
