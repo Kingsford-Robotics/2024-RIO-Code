@@ -4,68 +4,68 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.LimelightHelpers;
 import frc.robot.RobotContainer;
+import frc.robot.subsystems.Swerve;
 
-public class SpeakerAlign extends Command {
-  /** Creates a new SpeakerAlign. */
-  PIDController pidController;
-  RobotContainer container;
+public class TurnToAngle extends Command {
+  /** Creates a new TurnToAngle. */
 
-  ShuffleboardTab tab;
+  private PIDController pidController;
+  private RobotContainer container;
+  private Swerve swerve;
 
-  double thetafeedforward;
-  double thetaKP;
-  double thetaKI;
-  double thetaKD;
+  private double thetaKP;
+  private double thetaKI;
+  private double thetaKD;
 
-  public SpeakerAlign(RobotContainer robotContainer) {
-    container = robotContainer;
+  private Rotation2d setAngle;
+
+  public TurnToAngle(RobotContainer container, Rotation2d angle, Swerve swerve) {
+    this.container = container;
+    this.setAngle = angle;
+    this.swerve = swerve;
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    thetaKP = 0.008;
+    thetaKP = 0.35;
     thetaKI = 0.0;
-    thetaKD = 0.001;
-    thetafeedforward= 0.015;
+    thetaKD = 0.02;
     pidController = new PIDController(thetaKP, thetaKI, thetaKD);
-    pidController.setSetpoint(0.0);
+    pidController.setSetpoint(setAngle.getRadians());
+    pidController.enableContinuousInput(-Math.PI, Math.PI);
     pidController.setTolerance(0.0);
     pidController.reset();
-    LimelightHelpers.setPipelineIndex("limelight", 0);  //Sets to speaker pipeline.
-    LimelightHelpers.setLEDMode_ForceOn("limelight");   //Turns on the LEDs for better targeting.
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    var tx = LimelightHelpers.getTX("limelight");
-    double output = pidController.calculate(tx);
-    output = Math.max(Math.min(output, 0.4), -0.4);
+    Rotation2d theta = swerve.getHeading();
+    double output = pidController.calculate(theta.getRadians());
+    output = MathUtil.clamp(output, -0.35, 0.35);
 
-    if(Math.abs(output) < thetafeedforward){
+    /*if(Math.abs(output) < thetafeedforward){
       output += Math.copySign(thetafeedforward, output);
-    }
+    }*/
 
-    if(Math.abs(tx) > 0.5){
+    if(Math.abs(setAngle.minus(theta).getDegrees()) > 1.0){
       container.setAutoAlignTurn(output);
     }
 
     else{
       container.setAutoAlignTurn(0.0);
     }
-    
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    LimelightHelpers.setLEDMode_ForceOff("limelight");
     container.setAutoAlignTurn(0.0);
   }
 

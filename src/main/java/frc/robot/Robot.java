@@ -80,6 +80,9 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+
+    m_robotContainer.s_Pivot.setSpeed(0.0);
+    m_robotContainer.s_Elevator.setSpeed(0.0);
   }
 
   /** This function is called periodically during operator control. */

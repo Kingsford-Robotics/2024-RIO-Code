@@ -23,6 +23,7 @@ public class AutoSpeakerAlign extends Command {
   double thetaKI;
   double thetaKD;
 
+  //Auto speaker align needs to directly command the swerve subsystem to move the robot. Teleop adds a value to the teleop swerve command.
   public AutoSpeakerAlign(Swerve swerve) {
     this.swerve = swerve;
 
@@ -32,7 +33,7 @@ public class AutoSpeakerAlign extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    thetaKP = 0.008;
+    thetaKP = 0.015;
     thetaKI = 0.0;
     thetaKD = 0.001;
     thetafeedforward= 0.015;

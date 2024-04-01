@@ -4,58 +4,66 @@
 
 package frc.robot.commands;
 
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.LimelightHelpers;
 import frc.robot.RobotContainer;
+import org.photonvision.PhotonCamera;
 
-public class AmpAlign extends Command {
-  PIDController thetaController;
-  PIDController strafeController;
-  RobotContainer container;
+public class TrackNote extends Command {
+  /** Creates a new TrackNote. */
+  private RobotContainer container;
+  private PIDController strafeController;
 
-  double strafeFeedforward;
+  private PhotonCamera photonCamera;
+
+  double strafefeedforward;
   double strafeKP;
   double strafeKI;
   double strafeKD;
 
-  public AmpAlign(RobotContainer robotContainer) {
-    container = robotContainer;
+  public TrackNote(RobotContainer container) {
+    // Use addRequirements() here to declare subsystem dependencies.
+    this.container = container;
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    strafeFeedforward = 0.020;
-    strafeKP = 0.3;
+    strafeKP = 0.005;
     strafeKI = 0.0;
     strafeKD = 0.0;
-
     strafeController = new PIDController(strafeKP, strafeKI, strafeKD);
     strafeController.setSetpoint(0.0);
     strafeController.setTolerance(0.0);
     strafeController.reset();
 
-    LimelightHelpers.setPipelineIndex("limelight", 1);  //Sets to amp pipeline.
-    LimelightHelpers.setLEDMode_ForceOn("limelight");   //Turns on the LEDs for better targeting.
+    photonCamera = new PhotonCamera("PhotonVision");
+
+    container.setIntakeCentric(true);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double xOffset = LimelightHelpers.getCameraPose3d_TargetSpace("limelight").getX();
-    double strafeOutput = strafeController.calculate(xOffset);
-    strafeOutput = Math.max(Math.min(strafeOutput, 0.4), -0.4);
+    var result = photonCamera.getLatestResult();
 
-    if(Math.abs(strafeOutput) < strafeFeedforward){
-      strafeOutput += Math.copySign(strafeFeedforward, strafeOutput);
+    if (result.hasTargets()) {
+      var target = result.getBestTarget();
+      var xOffset = target.getYaw();
+      var targetArea = target.getArea();
+
+      if(targetArea > 0.05){
+        double output = strafeController.calculate(xOffset);
+        output = MathUtil.clamp(output, -0.4, 0.4);
+
+        container.setAutoAlignStrafe(output);
+      }
+      else{
+        container.setAutoAlignStrafe(0.0);
+      }
     }
-
-    if(Math.abs(strafeOutput) > Units.inchesToMeters(1.0)){
-      container.setAutoAlignStrafe(-strafeOutput);
-    }
-
     else{
       container.setAutoAlignStrafe(0.0);
     }
@@ -64,11 +72,8 @@ public class AmpAlign extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    LimelightHelpers.setLEDMode_ForceOff("limelight");
-    container.setAutoAlignTurn(0.0);
     container.setAutoAlignStrafe(0.0);
   }
-
 
   // Returns true when the command should end.
   @Override

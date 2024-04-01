@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.25,
-      "y": 6.5
+      "x": 1.2651860724115016,
+      "y": 5.507130871149041
     },
-    "rotation": -120.0
+    "rotation": 180.0
   },
   "command": {
     "type": "sequential",
@@ -34,9 +34,9 @@
                 }
               },
               {
-                "type": "path",
+                "type": "named",
                 "data": {
-                  "pathName": "LeftNote"
+                  "name": "trackNote"
                 }
               }
             ]
@@ -46,12 +46,6 @@
           "type": "named",
           "data": {
             "name": "stopIntakeShooter"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.15
           }
         },
         {
@@ -77,9 +71,22 @@
                 }
               },
               {
-                "type": "path",
+                "type": "sequential",
                 "data": {
-                  "pathName": "LeftToCenter"
+                  "commands": [
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "CenterToMidfield"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "fastTrackNote"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -92,15 +99,21 @@
           }
         },
         {
-          "type": "wait",
+          "type": "path",
           "data": {
-            "waitTime": 0.15
+            "pathName": "CenterMidfieldToShoot"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "lowSpeakerScore"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopIntakeShooter"
           }
         }
       ]

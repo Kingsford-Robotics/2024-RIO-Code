@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import java.util.function.DoubleSupplier;
 
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -33,6 +34,7 @@ public class Elevator extends SubsystemBase {
   GenericEntry elevatorSpeedEntry;
   GenericEntry topLimitSwitchEntry;
   GenericEntry bottomLimitSwitchEntry;
+  GenericEntry homeLimitSwitchEntry;
 
   GenericEntry setElevatorHeighEntry;
   
@@ -40,6 +42,7 @@ public class Elevator extends SubsystemBase {
 
   private DigitalInput topLimitSwitch;
   private DigitalInput bottomLimitSwitch;
+  private DigitalInput homeLimitSwitch;
 
   private MotionMagicVoltage elevatorMotionMagicVoltage;
 
@@ -50,6 +53,8 @@ public class Elevator extends SubsystemBase {
 
   private boolean topLimitPressed = false;
   private boolean bottomLimitPressed = false;
+
+  //private Servo linearActuator;
   
   public Elevator() {
     tab = Shuffleboard.getTab("Elevator");
@@ -57,17 +62,19 @@ public class Elevator extends SubsystemBase {
     elevatorSpeedEntry = tab.add("Elevator Speed", 0.0).getEntry();
     topLimitSwitchEntry = tab.add("Top Limit Switch", false).getEntry();
     bottomLimitSwitchEntry = tab.add("Bottom Limit Switch", false).getEntry();
+    homeLimitSwitchEntry = tab.add("Home Limit Switch", false).getEntry();
+    tab.add("Elevator Subsystem", this);
 
     setElevatorHeighEntry = tab.add("Set Elevator Height", 0.0).getEntry();
   
     elevatorMotor = new TalonFX(ElevatorConstants.elevatorMotorID);
     topLimitSwitch = new DigitalInput(ElevatorConstants.topLimitSwitchID);
     bottomLimitSwitch = new DigitalInput(ElevatorConstants.bottomLimitSwitchID);
+    homeLimitSwitch = new DigitalInput(ElevatorConstants.homeLimitSwitchID);
 
     TalonFXConfiguration talonFXConfigs = new TalonFXConfiguration();
     
     talonFXConfigs.Feedback.SensorToMechanismRatio = ElevatorConstants.sensorToMechRatio;
-    //talonFXConfigs.CurrentLimits.SupplyCurrentLimit = ElevatorConstants.currentLimit;
 
     Slot0Configs slot0Configs = talonFXConfigs.Slot0;
 
@@ -93,40 +100,54 @@ public class Elevator extends SubsystemBase {
     elevatorMotor.setInverted(false);
 
     elevatorMotorVelocity = elevatorMotor.getVelocity();
+    elevatorMotorVelocity.setUpdateFrequency(10);
     elevatorMotorHeight = elevatorMotor.getPosition();
+    elevatorMotorHeight.setUpdateFrequency(10);
 
-    resetPosition(Units.inchesToMeters(11.0)); //Adjust this to starting height in full home.
+    resetPosition(Units.inchesToMeters(12.6)); //Adjust this to starting height in full home.
     position = getHeight();
+
+    /*linearActuator = new Servo(ElevatorConstants.linearActuatorID);
+    linearActuator.setBoundsMicroseconds(2000, 1800, 1500, 1200, 1000);
+
+    linearActuator.setSpeed(-1);*/
   }
 
   public void setSpeed(double speed) {
     //Stops the elevator if it hits the top or bottom limit switch.
-    if(getTopLimitSwitch() && speed > 0) {
+    if(getTopLimitSwitch() && speed > 0.01) {
       speed = 0;
-    } else if(getBottomLimitSwitch() && speed < 0) {
+    } else if(getBottomLimitSwitch() && speed < -0.01) {
       speed = 0;
-    }
-
-    //Apply soft limits. Limit speed if within soft limit range.
-    if(getHeight() >= ElevatorConstants.elevatorMaxTravel - ElevatorConstants.softLimit && speed > 0) {
-      speed = Math.min(speed, 0.25);
-    } else if(getHeight() <= 0 + ElevatorConstants.softLimit && speed < 0) {
-      speed = Math.max(speed, -0.25);
     }
 
     elevatorMotor.set(speed);
   }
 
   public void setHeight(double height){
-     if(height >= 0 && height <= ElevatorConstants.elevatorMaxTravel) {
-                position = height;
-                elevatorMotor.setControl(elevatorMotionMagicVoltage.withPosition(position));
+    if(height >= 0.0 && height <= ElevatorConstants.elevatorMaxTravel) {
+      position = height;
+      var code = elevatorMotor.setControl(elevatorMotionMagicVoltage.withPosition(height));
+      if(code != StatusCode.OK){
+        System.out.println("Error setting elevator height: " + code);
+      }
+      else{
+        System.out.println("Successfully set height");
+      }
     } 
   }
 
   public boolean reachedSetpoint(){
     return Math.abs(position - getHeight()) < ElevatorConstants.errorThreshold;
   }
+
+  /*public void deployActuator(){
+    linearActuator.setSpeed(0.30);
+  }
+
+  public void retractActuator(){
+    linearActuator.setSpeed(-1.0);
+  }*/
 
   public Command manualControl(DoubleSupplier speed) {
     return new Command() {
@@ -163,17 +184,11 @@ public class Elevator extends SubsystemBase {
           isHoldingPosition = true;
         }
       }
-
-      @Override
-      public void end(boolean interrupted) {
-        position = getHeight();
-        elevatorMotor.setControl(elevatorMotionMagicVoltage.withPosition(position));
-      }
     };
   }
-  public void resetPosition(double position)
+  public void resetPosition(double height)
   {
-    elevatorMotor.setPosition(position);
+    elevatorMotor.setPosition(height);
   }
 
   public void stop() {
@@ -186,6 +201,10 @@ public class Elevator extends SubsystemBase {
 
   public boolean getBottomLimitSwitch() {
     return bottomLimitSwitch.get();
+  }
+
+  public boolean getHomeLimitSwitch() {
+    return homeLimitSwitch.get();
   }
 
   /**
@@ -219,40 +238,26 @@ public class Elevator extends SubsystemBase {
 
   @Override
   public void periodic() {
-    double velocity = getVelocity();
     double height = getHeight();
 
     double percentOutput = elevatorMotor.getDutyCycle().getValue();
 
     elevatorHeightEntry.setDouble(Units.metersToInches(height));
-    elevatorSpeedEntry.setDouble(Units.metersToInches(velocity));
     topLimitSwitchEntry.setBoolean(getTopLimitSwitch());
     bottomLimitSwitchEntry.setBoolean(getBottomLimitSwitch());
-
-    /*double setHeight = Units.inchesToMeters(setElevatorHeighEntry.getDouble(0.0));
-
-    if(setHeight != position){
-      position = setHeight;
-      elevatorMotor.setControl(elevatorMotionMagicVoltage.withPosition(position));
-    }*/
+    homeLimitSwitchEntry.setBoolean(getHomeLimitSwitch());
 
     // Apply hard limits. Stop the elevator if it hits the top or bottom limit switch.
     if(getTopLimitSwitch() && percentOutput > 0.01)
     {
-      topLimitPressed = true;
       setSpeed(0.0);
-      //TODO: Fix this when limit switch triggering if figured out.
-      //resetPosition(ElevatorConstants.elevatorMaxTravel);  
-      setHeight(getHeight() - Units.inchesToMeters(0.05));
+      //resetPosition(ElevatorConstants.elevatorMaxTravel);
     }
 
     else if(getBottomLimitSwitch() && percentOutput < -0.01)
-    {
-      bottomLimitPressed = true;  
+    {  
       setSpeed(0.0);  
-        resetPosition(0.0);
- 
-        setHeight(getHeight() + Units.inchesToMeters(0.05));
+      resetPosition(0.0);
     }
   }
 }

@@ -20,13 +20,13 @@ public class OIConstants {
 
     //Drive Speeds
     public static final double highTranslationSpeed = 1.0;
-    public static final double lowTranslationSpeed = 0.15;
+    public static final double lowTranslationSpeed = 0.2;
 
     public static final double highRotationSpeed = 1.0;
-    public static final double lowRotationSpeed = 0.15;
+    public static final double lowRotationSpeed = 0.2;
 
-    public static final double translateRampTime = 1.0;
-    public static final double turnRampTime = 1.0;
+    public static final double translateRampTime = 0.6;
+    public static final double turnRampTime = 0.6;
 
     /*Drive Joysticks Setup*/
     public static final Thrustmaster driveLeft = new Thrustmaster(0);
@@ -59,15 +59,19 @@ public class OIConstants {
     public static final JoystickButton trapTarget = new JoystickButton(coDriverController, XboxController.Button.kB.value);
 
     public static final JoystickButton manualActive = new JoystickButton(coDriverController, XboxController.Button.kLeftBumper.value);
-    public static final JoystickButton ampAlign = new JoystickButton(coDriverController, XboxController.Button.kRightBumper.value);
+    public static final JoystickButton cameraToggle = new JoystickButton(coDriverController, XboxController.Button.kRightBumper.value);
 
     public static final JoystickButton reverseIntake = new JoystickButton(coDriverController, XboxController.Button.kX.value);
 
     public static final JoystickButton climberDeploy = new JoystickButton(coDriverController, XboxController.Button.kStart.value);
     public static final JoystickButton climberRetract = new JoystickButton(coDriverController, XboxController.Button.kBack.value);
 
-    public static final POVButton snapFront = new POVButton(coDriverController, 0);
-    public static final POVButton snapBack = new POVButton(coDriverController, 180);
-    public static final POVButton snapRight = new POVButton(coDriverController, 90);
-    public static final POVButton snapLeft = new POVButton(coDriverController, 270);
+    //Down is 180, Right is 90, Up is 0, Left is 270
+    public static final POVButton podiumManualShot = new POVButton(coDriverController, 0);
+    public static final POVButton nearManualShot = new POVButton(coDriverController, 180);
+
+    public static final POVButton snapFront = driveLeft.getUpPovButton();
+    public static final POVButton snapBack = driveLeft.getDownPovButton();
+    public static final POVButton snapRight = driveLeft.getRightPovButton();
+    public static final POVButton snapLeft = driveLeft.getLeftPovButton();
 }

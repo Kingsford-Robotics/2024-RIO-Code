@@ -18,6 +18,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.GenericEntry;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -47,6 +48,9 @@ public class Swerve extends SubsystemBase {
     private GenericEntry backRightSpeed;
     private GenericEntry backRightOffset;
 
+    private GenericEntry xPosition;
+    private GenericEntry yPosition;
+
     //Odometry Output
     private Field2d field;
 
@@ -67,6 +71,9 @@ public class Swerve extends SubsystemBase {
         backRightAngle = tab.add("Back Right Angle", 0).getEntry();
         backRightSpeed = tab.add("Back Right Speed", 0).getEntry();
         backRightOffset = tab.add("Back Right Offset", 0).getEntry();
+
+        xPosition = tab.add("X Position", 0.0).getEntry();
+        yPosition = tab.add("Y Position", 0.0).getEntry();
 
         field = new Field2d();
         tab.add("Field", field);
@@ -94,7 +101,7 @@ public class Swerve extends SubsystemBase {
                     new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
                     new PIDConstants(5.0, 0.0, 0.0), // Rotation PID constants
                     4.5, // Max module speed, in m/s
-                    0.4, // Drive base radius in meters. Distance from robot center to furthest module.
+                    0.43, // Drive base radius in meters. Distance from robot center to furthest module.
                     new ReplanningConfig() // Default path replanning config. See the API for the options here
             ),
             () -> {
@@ -224,9 +231,9 @@ public class Swerve extends SubsystemBase {
         }
     }
 
-    public void updateOdometryFromVision(Pose2d pose, double timestamp){
+    /*public void updateOdometryFromVision(Pose2d pose, double timestamp){
         swervePoseEstimator.addVisionMeasurement(pose, timestamp);
-    }
+    }*/
 
     @Override
     public void periodic(){
@@ -250,5 +257,8 @@ public class Swerve extends SubsystemBase {
         backRightOffset.setDouble(Constants.Swerve.Mod3.angleOffset.getDegrees());
 
         field.setRobotPose(getPose());
+
+        xPosition.setDouble(Units.metersToFeet(swervePoseEstimator.getEstimatedPosition().getX()));
+        yPosition.setDouble(Units.metersToFeet(swervePoseEstimator.getEstimatedPosition().getY()));
     }
 }
